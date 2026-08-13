@@ -110,6 +110,86 @@ const bibleProducts = Object.freeze([
     estoque: null,
     destaque: false,
     maisVendido: true
+  },
+  {
+    id: "minha-primeira-biblia-meninos",
+    slug: "minha-primeira-biblia-meninos",
+    nome: "Minha Primeira Bíblia — Meninos",
+    categoria: "Bíblias Infantis",
+    categoriaSlug: "biblias-infantis",
+    imagem: "assets/products/minha-primeira-biblia-meninos.svg",
+    descricao: "Edição infantil para apresentar histórias bíblicas em momentos de leitura compartilhada em família.",
+    perfil: "Primeiro contato com a Bíblia",
+    editora: "Ciranda Cultural",
+    preco: null,
+    estoque: null,
+    destaque: false,
+    maisVendido: false,
+    infantil: true
+  },
+  {
+    id: "minha-primeira-biblia-meninas",
+    slug: "minha-primeira-biblia-meninas",
+    nome: "Minha Primeira Bíblia — Meninas",
+    categoria: "Bíblias Infantis",
+    categoriaSlug: "biblias-infantis",
+    imagem: "assets/products/minha-primeira-biblia-meninas.svg",
+    descricao: "Edição infantil para aproximar as crianças das histórias bíblicas com leitura acompanhada.",
+    perfil: "Primeiro contato com a Bíblia",
+    editora: "Ciranda Cultural",
+    preco: null,
+    estoque: null,
+    destaque: false,
+    maisVendido: false,
+    infantil: true
+  },
+  {
+    id: "minha-primeira-biblia-palavras-ilustradas",
+    slug: "minha-primeira-biblia-palavras-ilustradas",
+    nome: "Minha Primeira Bíblia de Palavras Ilustradas",
+    categoria: "Bíblias Infantis",
+    categoriaSlug: "biblias-infantis",
+    imagem: "assets/products/minha-primeira-biblia-palavras-ilustradas.svg",
+    descricao: "Palavras e referências visuais para apoiar o contato inicial das crianças com narrativas bíblicas.",
+    perfil: "Leitura visual em família",
+    editora: "Ciranda Cultural",
+    preco: null,
+    estoque: null,
+    destaque: false,
+    maisVendido: false,
+    infantil: true
+  },
+  {
+    id: "biblia-da-garotada",
+    slug: "biblia-da-garotada",
+    nome: "Bíblia da Garotada",
+    categoria: "Bíblias Infantis",
+    categoriaSlug: "biblias-infantis",
+    imagem: "assets/products/biblia-da-garotada.svg",
+    descricao: "Seleção de narrativas bíblicas apresentada para leitura infantil e momentos de aprendizado em família.",
+    perfil: "Crianças e leitura em família",
+    editora: "Todolivro",
+    preco: null,
+    estoque: null,
+    destaque: false,
+    maisVendido: false,
+    infantil: true
+  },
+  {
+    id: "minha-primeira-biblia-ilustrada",
+    slug: "minha-primeira-biblia-ilustrada",
+    nome: "Minha Primeira Bíblia Ilustrada",
+    categoria: "Bíblias Infantis",
+    categoriaSlug: "biblias-infantis",
+    imagem: "assets/products/minha-primeira-biblia-ilustrada.svg",
+    descricao: "Histórias bíblicas ilustradas para leitura acompanhada e formação dos primeiros vínculos com a fé.",
+    perfil: "Histórias bíblicas ilustradas",
+    editora: "Ciranda Cultural",
+    preco: null,
+    estoque: null,
+    destaque: false,
+    maisVendido: false,
+    infantil: true
   }
 ]);
 
@@ -155,6 +235,7 @@ const renderProducts = (selector, products) => {
 
 renderProducts("#featured-products", bibleProducts.filter((product) => product.destaque).slice(0, 4));
 renderProducts("#popular-products", bibleProducts.filter((product) => product.maisVendido).slice(0, 4));
+renderProducts("#children-products", bibleProducts.filter((product) => product.infantil).slice(0, 4));
 
 const catalogGrid = document.querySelector("#catalog-products");
 const resultCount = document.querySelector("#catalog-result-count");

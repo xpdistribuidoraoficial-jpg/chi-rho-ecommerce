@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="900" viewBox="0 0 800 900" role="img" aria-labelledby="title desc">
+  <title id="title">MINHA PRIMEIRA BÍBLIA • MENINAS</title>
+  <desc id="desc">Capa ilustrativa criada para o catálogo Chi Rho; não representa a capa comercial do produto</desc>
+  <defs>
+    <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#faedf4"/>
+      <stop offset="1" stop-color="#ffffff"/>
+    </linearGradient>
+    <linearGradient id="cover" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#b96391"/>
+      <stop offset="1" stop-color="#073b59"/>
+    </linearGradient>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="170%">
+      <feDropShadow dx="0" dy="24" stdDeviation="24" flood-color="#052e46" flood-opacity=".22"/>
+    </filter>
+  </defs>
+  <rect width="800" height="900" fill="url(#background)"/>
+  <circle cx="110" cy="125" r="92" fill="#ffffff" opacity=".72"/>
+  <circle cx="700" cy="760" r="145" fill="#b96391" opacity=".10"/>
+  <g fill="#b96391" opacity=".38">
+    <path d="M92 205l10 21 23 3-17 16 4 23-20-11-21 11 4-23-17-16 24-3z"/>
+    <path d="M680 150l8 16 18 3-13 12 3 18-16-8-16 8 3-18-13-12 18-3z"/>
+  </g>
+  <g filter="url(#shadow)">
+    <rect x="174" y="62" width="452" height="752" rx="28" fill="url(#cover)"/>
+    <rect x="174" y="62" width="34" height="752" rx="17" fill="#031d2b" opacity=".28"/>
+    <rect x="224" y="110" width="350" height="3" fill="#ffffff" opacity=".58"/>
+    <circle cx="400" cy="255" r="88" fill="#ffffff" opacity=".12"/>
+    <text x="400" y="278" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-size="72" font-weight="700" text-anchor="middle">♥</text>
+    <text x="400" y="420" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700" text-anchor="middle" letter-spacing="2">MINHA PRIMEIRA</text>
+    <text x="400" y="470" fill="#d9fffb" font-family="Arial, Helvetica, sans-serif" font-size="27" font-weight="700" text-anchor="middle" letter-spacing="1">BÍBLIA • MENINAS</text>
+    <text x="400" y="710" fill="#ffffff" opacity=".72" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700" text-anchor="middle" letter-spacing="3">CAPA ILUSTRATIVA</text>
+    <text x="400" y="747" fill="#ffffff" opacity=".62" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="600" text-anchor="middle" letter-spacing="3">SELEÇÃO CHI RHO</text>
+  </g>
+</svg>
