@@ -30,21 +30,34 @@ a{text-decoration:none;color:inherit} button,input{font:inherit}
 .all-cats{border-right:1px solid var(--line);padding-right:26px!important}
 .offer-link{margin-left:auto;color:var(--orange)!important}
 .hero{
-  background: linear-gradient(90deg,#f3fbfa 0%,#f7fbfb 44%,#fff 100%);
-  overflow: hidden;
-  padding: 34px 0 48px;
+  position: relative;
+  min-height: 560px;
+  background:
+    linear-gradient(
+      90deg,
+      rgba(243,251,250,.96) 0%,
+      rgba(243,251,250,.86) 35%,
+      rgba(243,251,250,.45) 58%,
+      rgba(243,251,250,.08) 100%
+    ),
+    url("assets/banner-home.png") center center / cover no-repeat;
+
+  display:flex;
+  align-items:center;
+  overflow:hidden;
 }
 
 .hero-grid{
-  display: grid;
-  grid-template-columns: minmax(360px, 520px) minmax(420px, 1fr);
-  gap: 42px;
-  min-height: 540px;
-  align-items: center;
+  display:block;
+  min-height:560px;
+  width:100%;
 }
 
 .hero-copy{
-  padding: 20px 0;
+  max-width:560px;
+  padding:85px 0;
+  position:relative;
+  z-index:2;
 }
 
 .eyebrow{
@@ -95,10 +108,7 @@ a{text-decoration:none;color:inherit} button,input{font:inherit}
 }
 
 .hero-media{
-  display:flex;
-  align-items:center;
-  justify-content:flex-end;
-  min-height:520px;
+  display:none;
 }
 
 .hero-media img{
@@ -147,27 +157,23 @@ a{text-decoration:none;color:inherit} button,input{font:inherit}
 .footer-brand{display:flex;align-items:center;gap:14px}.footer-brand img{width:64px;height:64px;border-radius:50%;object-fit:cover}
 .footer-brand div{display:flex;flex-direction:column}.footer-brand span,.footer div>span{font-size:12px;color:rgba(255,255,255,.65);line-height:1.55}
 .footer a{display:block;margin-top:8px;color:rgba(255,255,255,.75);font-size:13px}
-@media(max-width:1050px){
-  .topbar-grid{grid-template-columns:repeat(2,1fr)}
-  .header-actions{display:none}
-  .menu-toggle{display:block}
-  .header-row{grid-template-columns:auto 1fr auto}
-  .nav-row{display:none;flex-direction:column;align-items:stretch;padding:10px 0}
-  .nav-row.open{display:flex}
-  .nav a{padding:12px 4px}
-  .offer-link{margin-left:0}
-
-  .hero-grid{
-    grid-template-columns: 1fr 1fr;
-    gap: 28px;
-    min-height: auto;
+@media(max-width:700px){
+  .hero{
+    min-height:600px;
+    background:
+      linear-gradient(
+        180deg,
+        rgba(243,251,250,.98) 0%,
+        rgba(243,251,250,.92) 48%,
+        rgba(243,251,250,.35) 100%
+      ),
+      url("assets/banner-home.png") 68% center / cover no-repeat;
   }
 
-  .hero-copy{padding:36px 0}
-  .hero-media{
-    min-height: auto;
-    justify-content: center;
+  .hero-copy{
+    padding:55px 0 260px;
   }
+}
 
   .universe-grid{grid-template-columns:repeat(3,1fr)}
   .deals-grid{grid-template-columns:1fr}
