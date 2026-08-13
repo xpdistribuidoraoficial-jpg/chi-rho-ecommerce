@@ -1,4 +1,4 @@
-const bibleProducts = Object.freeze([
+const catalogProducts = Object.freeze([
   {
     id: "biblia-letra-gigante-harpa",
     slug: "biblia-letra-gigante-harpa",
@@ -190,6 +190,210 @@ const bibleProducts = Object.freeze([
     destaque: false,
     maisVendido: false,
     infantil: true
+  },
+  {
+    id: "ate-que-nada-mais-importe",
+    slug: "ate-que-nada-mais-importe",
+    nome: "Até que Nada Mais Importe",
+    categoria: "Livros Cristãos",
+    categoriaSlug: "livros-cristaos",
+    imagem: "assets/products/livro-ate-que-nada-mais-importe.svg",
+    descricao: "Uma reflexão sobre viver uma fé centrada em Deus, além das aparências e do desempenho religioso.",
+    perfil: "Vida cristã e propósito",
+    autor: "Luciano Subirá",
+    editora: "Hagnos",
+    preco: null,
+    estoque: null,
+    destaque: false,
+    maisVendido: false,
+    livroCristao: true
+  },
+  {
+    id: "cartas-de-um-diabo-a-seu-aprendiz",
+    slug: "cartas-de-um-diabo-a-seu-aprendiz",
+    nome: "Cartas de um Diabo a Seu Aprendiz",
+    categoria: "Livros Cristãos",
+    categoriaSlug: "livros-cristaos",
+    imagem: "assets/products/livro-cartas-de-um-diabo.svg",
+    descricao: "Clássico de C. S. Lewis que explora tentações, escolhas e a vida espiritual por meio de uma narrativa singular.",
+    perfil: "Clássico e reflexão",
+    autor: "C. S. Lewis",
+    editora: "Thomas Nelson Brasil",
+    preco: null,
+    estoque: null,
+    destaque: false,
+    maisVendido: false,
+    livroCristao: true
+  },
+  {
+    id: "cristianismo-puro-e-simples",
+    slug: "cristianismo-puro-e-simples",
+    nome: "Cristianismo Puro e Simples",
+    categoria: "Livros Cristãos",
+    categoriaSlug: "livros-cristaos",
+    imagem: "assets/products/livro-cristianismo-puro-e-simples.svg",
+    descricao: "Uma apresentação clara dos fundamentos da fé cristã, escrita por um dos autores mais influentes do gênero.",
+    perfil: "Fundamentos da fé",
+    autor: "C. S. Lewis",
+    editora: "Thomas Nelson Brasil",
+    preco: null,
+    estoque: null,
+    destaque: false,
+    maisVendido: false,
+    livroCristao: true
+  },
+  {
+    id: "uma-vida-com-propositos",
+    slug: "uma-vida-com-propositos",
+    nome: "Uma Vida com Propósitos",
+    categoria: "Livros Cristãos",
+    categoriaSlug: "livros-cristaos",
+    imagem: "assets/products/livro-uma-vida-com-propositos.svg",
+    descricao: "Leitura orientada à descoberta de propósito, vocação e práticas para uma vida cristã intencional.",
+    perfil: "Propósito e crescimento",
+    autor: "Rick Warren",
+    editora: "Vida",
+    preco: null,
+    estoque: null,
+    destaque: false,
+    maisVendido: false,
+    livroCristao: true
+  },
+  {
+    id: "manso-e-humilde",
+    slug: "manso-e-humilde",
+    nome: "Manso e Humilde",
+    categoria: "Livros Cristãos",
+    categoriaSlug: "livros-cristaos",
+    imagem: "assets/products/livro-manso-e-humilde.svg",
+    descricao: "Uma leitura sobre o coração de Cristo e o acolhimento oferecido a pessoas cansadas e sobrecarregadas.",
+    perfil: "Graça e vida espiritual",
+    autor: "Dane Ortlund",
+    editora: "Thomas Nelson Brasil",
+    preco: null,
+    estoque: null,
+    destaque: false,
+    maisVendido: false,
+    livroCristao: true
+  },
+  {
+    id: "o-deus-que-destroi-sonhos",
+    slug: "o-deus-que-destroi-sonhos",
+    nome: "O Deus que Destrói Sonhos",
+    categoria: "Livros Cristãos",
+    categoriaSlug: "livros-cristaos",
+    imagem: "assets/products/livro-o-deus-que-destroi-sonhos.svg",
+    descricao: "Reflexões sobre discipulado, expectativas pessoais e a transformação de planos diante da vontade de Deus.",
+    perfil: "Discipulado e transformação",
+    autor: "Rodrigo Bibo",
+    editora: "Thomas Nelson Brasil",
+    preco: null,
+    estoque: null,
+    destaque: false,
+    maisVendido: false,
+    livroCristao: true
+  },
+  {
+    id: "oi-deus-sou-eu-de-novo",
+    slug: "oi-deus-sou-eu-de-novo",
+    nome: "Oi Deus, Sou Eu de Novo",
+    categoria: "Livros Cristãos",
+    categoriaSlug: "livros-cristaos",
+    imagem: "assets/products/livro-oi-deus-sou-eu-de-novo.svg",
+    descricao: "Leituras para momentos diários de oração, reflexão e renovação da caminhada com Deus.",
+    perfil: "Devocional e oração",
+    autor: "Deive Leonardo",
+    editora: "Preach",
+    preco: null,
+    estoque: null,
+    destaque: false,
+    maisVendido: false,
+    livroCristao: true
+  },
+  {
+    id: "uma-mulher-segundo-o-coracao-de-deus",
+    slug: "uma-mulher-segundo-o-coracao-de-deus",
+    nome: "Uma Mulher Segundo o Coração de Deus",
+    categoria: "Livros Cristãos",
+    categoriaSlug: "livros-cristaos",
+    imagem: "assets/products/livro-uma-mulher-segundo-coracao-de-deus.svg",
+    descricao: "Orientações para mulheres que desejam cultivar fé, relacionamentos e prioridades fundamentadas em princípios cristãos.",
+    perfil: "Mulheres e vida cristã",
+    autor: "Elizabeth George",
+    editora: "Hagnos",
+    preco: null,
+    estoque: null,
+    destaque: false,
+    maisVendido: false,
+    livroCristao: true
+  },
+  {
+    id: "panorama-da-biblia",
+    slug: "panorama-da-biblia",
+    nome: "Panorama da Bíblia",
+    categoria: "Livros Cristãos",
+    categoriaSlug: "livros-cristaos",
+    imagem: "assets/products/livro-panorama-da-biblia.svg",
+    descricao: "Visão geral dos livros bíblicos com recursos que apoiam a compreensão, o estudo e a leitura das Escrituras.",
+    perfil: "Referência e estudo bíblico",
+    autor: "CPAD",
+    editora: "CPAD",
+    preco: null,
+    estoque: null,
+    destaque: false,
+    maisVendido: false,
+    livroCristao: true
+  },
+  {
+    id: "herois-da-fe",
+    slug: "herois-da-fe",
+    nome: "Heróis da Fé",
+    categoria: "Livros Cristãos",
+    categoriaSlug: "livros-cristaos",
+    imagem: "assets/products/livro-herois-da-fe.svg",
+    descricao: "Biografias de homens e mulheres que marcaram a história cristã por sua fé, serviço e perseverança.",
+    perfil: "Biografias e inspiração",
+    autor: "Orlando Boyer",
+    editora: "CPAD",
+    preco: null,
+    estoque: null,
+    destaque: false,
+    maisVendido: false,
+    livroCristao: true
+  },
+  {
+    id: "ego-transformado",
+    slug: "ego-transformado",
+    nome: "Ego Transformado",
+    categoria: "Livros Cristãos",
+    categoriaSlug: "livros-cristaos",
+    imagem: "assets/products/livro-ego-transformado.svg",
+    descricao: "Uma abordagem breve sobre identidade, humildade e liberdade a partir do evangelho.",
+    perfil: "Identidade e maturidade",
+    autor: "Timothy Keller",
+    editora: "Vida Nova",
+    preco: null,
+    estoque: null,
+    destaque: false,
+    maisVendido: false,
+    livroCristao: true
+  },
+  {
+    id: "uma-garota-segundo-o-coracao-de-deus",
+    slug: "uma-garota-segundo-o-coracao-de-deus",
+    nome: "Uma Garota Segundo o Coração de Deus",
+    categoria: "Livros Cristãos",
+    categoriaSlug: "livros-cristaos",
+    imagem: "assets/products/livro-uma-garota-segundo-coracao-de-deus.svg",
+    descricao: "Leitura para garotas que desejam crescer na fé e aplicar princípios cristãos em sua rotina e seus relacionamentos.",
+    perfil: "Garotas e crescimento cristão",
+    autor: "Elizabeth George",
+    editora: "CPAD",
+    preco: null,
+    estoque: null,
+    destaque: false,
+    maisVendido: false,
+    livroCristao: true
   }
 ]);
 
@@ -211,6 +415,9 @@ const getProductStatus = (product) => {
   return "Preço em breve";
 };
 
+const getProductMeta = (product) =>
+  [product.autor, product.editora].filter(Boolean).join(" • ");
+
 const createProductCard = (product) => `
   <article class="catalog-product-card" id="${product.slug}" data-category="${product.categoriaSlug}">
     <div class="catalog-product-image">
@@ -220,6 +427,7 @@ const createProductCard = (product) => `
     <div class="catalog-product-content">
       <small>${product.categoria}</small>
       <h3>${product.nome}</h3>
+      ${getProductMeta(product) ? `<span class="catalog-product-meta">${getProductMeta(product)}</span>` : ""}
       <p>${product.descricao}</p>
       <strong>${getProductStatus(product)}</strong>
       <button type="button" data-product-slug="${product.slug}">Ver produto</button>
@@ -233,19 +441,20 @@ const renderProducts = (selector, products) => {
   container.innerHTML = products.map(createProductCard).join("");
 };
 
-renderProducts("#featured-products", bibleProducts.filter((product) => product.destaque).slice(0, 4));
-renderProducts("#popular-products", bibleProducts.filter((product) => product.maisVendido).slice(0, 4));
-renderProducts("#children-products", bibleProducts.filter((product) => product.infantil).slice(0, 4));
+renderProducts("#featured-products", catalogProducts.filter((product) => product.destaque).slice(0, 4));
+renderProducts("#popular-products", catalogProducts.filter((product) => product.maisVendido).slice(0, 4));
+renderProducts("#children-products", catalogProducts.filter((product) => product.infantil).slice(0, 4));
 
 const catalogGrid = document.querySelector("#catalog-products");
 const resultCount = document.querySelector("#catalog-result-count");
+const catalogTitle = document.querySelector("#catalog-title");
 const filterButtons = [...document.querySelectorAll(".catalog-filter")];
 
 const setCatalogFilter = (filter = "todas", query = "") => {
   if (!catalogGrid) return;
 
   const normalizedQuery = query.trim().toLocaleLowerCase("pt-BR");
-  const filteredProducts = bibleProducts.filter((product) => {
+  const filteredProducts = catalogProducts.filter((product) => {
     const matchesCategory = filter === "todas" || product.categoriaSlug === filter;
     const searchText = [product.nome, product.categoria, product.descricao, product.perfil]
       .join(" ")
@@ -256,6 +465,20 @@ const setCatalogFilter = (filter = "todas", query = "") => {
   catalogGrid.innerHTML = filteredProducts.length
     ? filteredProducts.map(createProductCard).join("")
     : '<div class="catalog-empty"><strong>Nenhum item publicado nesta categoria.</strong><span>O catálogo está em expansão. Consulte novamente em breve.</span></div>';
+
+  if (catalogTitle) {
+    const filterTitles = {
+      todas: "Bíblias e livros cristãos",
+      biblias: "Bíblias",
+      "biblias-de-estudo": "Bíblias de Estudo",
+      "biblias-femininas": "Bíblias Femininas",
+      "biblias-masculinas": "Bíblias Masculinas",
+      "biblias-ministeriais": "Bíblias Ministeriais",
+      "biblias-infantis": "Bíblias Infantis",
+      "livros-cristaos": "Livros Cristãos"
+    };
+    catalogTitle.textContent = filterTitles[filter] || "Catálogo de Fé";
+  }
 
   if (resultCount) {
     const total = filteredProducts.length;
@@ -307,13 +530,14 @@ document.querySelectorAll(".search").forEach((form) => {
 const productDialogElement = document.querySelector("#product-dialog");
 
 const openProductDialog = (slug) => {
-  const product = bibleProducts.find((item) => item.slug === slug);
+  const product = catalogProducts.find((item) => item.slug === slug);
   if (!product || !productDialogElement) return;
 
   const image = productDialogElement.querySelector("#product-dialog-image");
   image.src = product.imagem;
   image.alt = `Imagem ilustrativa de ${product.nome}`;
-  productDialogElement.querySelector("#product-dialog-category").textContent = product.categoria;
+  productDialogElement.querySelector("#product-dialog-category").textContent =
+    [product.categoria, product.autor, product.editora].filter(Boolean).join(" • ");
   productDialogElement.querySelector("#product-dialog-title").textContent = product.nome;
   productDialogElement.querySelector("#product-dialog-description").textContent = product.descricao;
   productDialogElement.querySelector("#product-dialog-status").textContent = getProductStatus(product);
@@ -342,7 +566,7 @@ document.addEventListener("click", (event) => {
 
 if (window.location.hash.length > 1) {
   const productSlug = window.location.hash.slice(1);
-  if (bibleProducts.some((product) => product.slug === productSlug)) {
+  if (catalogProducts.some((product) => product.slug === productSlug)) {
     window.addEventListener("load", () => openProductDialog(productSlug), { once: true });
   }
 }

@@ -490,6 +490,7 @@ a{text-decoration:none;color:inherit} button,input{font:inherit}
 .catalog-product-content{flex:1;padding:19px;display:flex;flex-direction:column}
 .catalog-product-content small,.product-category-label{color:var(--teal-dark);font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase}
 .catalog-product-content h3{margin:8px 0;color:var(--navy);font-size:18px;line-height:1.3;letter-spacing:-.015em}
+.catalog-product-meta{display:block;margin:-1px 0 11px;color:#4c6875;font-size:12px;font-weight:700;line-height:1.45}
 .catalog-product-content p{margin:0 0 16px;color:var(--muted);font-size:13px;line-height:1.6}
 .catalog-product-content strong{margin-top:auto;color:var(--navy);font-size:14px}
 .catalog-product-content button{width:100%;min-height:42px;margin-top:14px;border:1px solid var(--teal);border-radius:9px;background:#fff;color:var(--teal-dark);font-size:14px;font-weight:800;cursor:pointer;transition:.2s ease}
