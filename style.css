@@ -29,21 +29,87 @@ a{text-decoration:none;color:inherit} button,input{font:inherit}
 .nav a:hover{color:var(--teal)}
 .all-cats{border-right:1px solid var(--line);padding-right:26px!important}
 .offer-link{margin-left:auto;color:var(--orange)!important}
-.hero{background:linear-gradient(90deg,#f3fbfa 0%,#f7fbfb 44%,#fff 100%);overflow:hidden}
-.hero-grid{display:grid;grid-template-columns:.9fr 1.1fr;min-height:520px;align-items:center}
-.hero-copy{padding:54px 20px 54px 0}
-.eyebrow{display:block;color:var(--teal);font-size:12px;font-weight:900;letter-spacing:.14em;margin-bottom:15px}
-.hero h1{margin:0;color:var(--navy);font-size:clamp(42px,5vw,66px);line-height:1.02;letter-spacing:-.04em}
-.hero h1 em{font-style:normal;color:var(--teal)}
-.hero p{font-size:18px;line-height:1.6;max-width:520px;margin:22px 0 0;color:#344f5d}
-.hero-actions{display:flex;gap:12px;margin-top:30px}
-.btn{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 22px;border-radius:8px;font-size:13px;font-weight:900;text-transform:uppercase;letter-spacing:.03em}
-.btn-primary{background:var(--navy);color:#fff}.btn-primary:hover{background:var(--teal-dark)}
-.btn-outline{border:1px solid var(--teal);color:var(--teal-dark);background:rgba(255,255,255,.7)}
-.btn-light{background:#fff;color:var(--navy)}
-.hero-benefits{display:flex;gap:22px;flex-wrap:wrap;margin-top:26px;color:#425e68;font-size:12px;font-weight:700}
-.hero-media{height:100%;min-height:520px}
-.hero-media img{width:100%;height:100%;object-fit:cover;object-position:center}
+.hero{
+  background: linear-gradient(90deg,#f3fbfa 0%,#f7fbfb 44%,#fff 100%);
+  overflow: hidden;
+  padding: 34px 0 48px;
+}
+
+.hero-grid{
+  display: grid;
+  grid-template-columns: minmax(360px, 520px) minmax(420px, 1fr);
+  gap: 42px;
+  min-height: 540px;
+  align-items: center;
+}
+
+.hero-copy{
+  padding: 20px 0;
+}
+
+.eyebrow{
+  display:block;
+  color:var(--teal);
+  font-size:12px;
+  font-weight:900;
+  letter-spacing:.14em;
+  margin-bottom:15px;
+}
+
+.hero h1{
+  margin:0;
+  color:var(--navy);
+  font-size:clamp(42px,5vw,66px);
+  line-height:1.02;
+  letter-spacing:-.04em;
+}
+
+.hero h1 em{
+  font-style:normal;
+  color:var(--teal);
+}
+
+.hero p{
+  font-size:18px;
+  line-height:1.6;
+  max-width:520px;
+  margin:22px 0 0;
+  color:#344f5d;
+}
+
+.hero-actions{
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+  margin-top:30px;
+}
+
+.hero-benefits{
+  display:flex;
+  gap:22px;
+  flex-wrap:wrap;
+  margin-top:26px;
+  color:#425e68;
+  font-size:12px;
+  font-weight:700;
+}
+
+.hero-media{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  min-height:520px;
+}
+
+.hero-media img{
+  width:100%;
+  max-width:680px;
+  height:auto;
+  display:block;
+  border-radius:22px;
+  box-shadow:0 18px 45px rgba(5,46,70,.12);
+  object-fit:cover;
+}
 .section{padding:72px 0}
 .section-heading{text-align:center;max-width:720px;margin:0 auto 34px}
 .section-heading>span,.products-title span,.b2b-copy>span{color:var(--teal);font-size:12px;font-weight:900;letter-spacing:.14em}
@@ -82,17 +148,81 @@ a{text-decoration:none;color:inherit} button,input{font:inherit}
 .footer-brand div{display:flex;flex-direction:column}.footer-brand span,.footer div>span{font-size:12px;color:rgba(255,255,255,.65);line-height:1.55}
 .footer a{display:block;margin-top:8px;color:rgba(255,255,255,.75);font-size:13px}
 @media(max-width:1050px){
-  .topbar-grid{grid-template-columns:repeat(2,1fr)}.header-actions{display:none}.menu-toggle{display:block}
-  .header-row{grid-template-columns:auto 1fr auto}.nav-row{display:none;flex-direction:column;align-items:stretch;padding:10px 0}
-  .nav-row.open{display:flex}.nav a{padding:12px 4px}.offer-link{margin-left:0}.hero-grid{grid-template-columns:1fr}
-  .hero-copy{padding:48px 0}.hero-media{min-height:390px}.universe-grid{grid-template-columns:repeat(3,1fr)}
-  .deals-grid{grid-template-columns:1fr}.deal-banner{min-height:280px}.b2b{grid-template-columns:1fr}.footer-grid{grid-template-columns:repeat(2,1fr)}
+  .topbar-grid{grid-template-columns:repeat(2,1fr)}
+  .header-actions{display:none}
+  .menu-toggle{display:block}
+  .header-row{grid-template-columns:auto 1fr auto}
+  .nav-row{display:none;flex-direction:column;align-items:stretch;padding:10px 0}
+  .nav-row.open{display:flex}
+  .nav a{padding:12px 4px}
+  .offer-link{margin-left:0}
+
+  .hero-grid{
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+    min-height: auto;
+  }
+
+  .hero-copy{padding:36px 0}
+  .hero-media{
+    min-height: auto;
+    justify-content: center;
+  }
+
+  .universe-grid{grid-template-columns:repeat(3,1fr)}
+  .deals-grid{grid-template-columns:1fr}
+  .deal-banner{min-height:280px}
+  .b2b{grid-template-columns:1fr}
+  .footer-grid{grid-template-columns:repeat(2,1fr)}
 }
 @media(max-width:700px){
-  .topbar-grid{grid-template-columns:1fr}.topbar-grid span:nth-child(n+2){display:none}
-  .header-row{grid-template-columns:auto auto;gap:12px;min-height:78px}.brand img{width:52px;height:52px}
-  .brand strong{font-size:19px}.brand small{display:none}.search{grid-column:1/-1;order:3;margin-bottom:12px}
-  .hero h1{font-size:44px}.hero-benefits{gap:10px}.hero-media{min-height:280px}
-  .universe-grid,.product-grid,.trust-strip,.footer-grid{grid-template-columns:1fr}
-  .section{padding:54px 0}.products-title{align-items:center}
+  .topbar-grid{grid-template-columns:1fr}
+  .topbar-grid span:nth-child(n+2){display:none}
+
+  .header-row{
+    grid-template-columns:auto auto;
+    gap:12px;
+    min-height:78px
+  }
+
+  .brand img{width:52px;height:52px}
+  .brand strong{font-size:19px}
+  .brand small{display:none}
+
+  .search{
+    grid-column:1/-1;
+    order:3;
+    margin-bottom:12px
+  }
+
+  .hero{
+    padding: 20px 0 36px;
+  }
+
+  .hero-grid{
+    grid-template-columns:1fr;
+    gap:22px;
+  }
+
+  .hero h1{font-size:44px}
+  .hero-benefits{gap:10px}
+  .hero-media{
+    min-height:auto;
+    justify-content:center;
+  }
+
+  .hero-media img{
+    max-width:100%;
+    border-radius:16px;
+  }
+
+  .universe-grid,
+  .product-grid,
+  .trust-strip,
+  .footer-grid{
+    grid-template-columns:1fr
+  }
+
+  .section{padding:54px 0}
+  .products-title{align-items:center}
 }
