@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Catálogo de Bíblias e livros cristãos Chi Rho para estudo, devoção, ministério e presente." />
-  <title>Catálogo de Fé | Chi Rho</title>
+  <meta name="description" content="Catálogo Infantil Chi Rho com brinquedos e Bíblias infantis selecionados para crianças e famílias." />
+  <title>Infantil | Chi Rho</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
 </head>
-<body class="catalog-page">
+<body class="catalog-page" data-default-category="infantil">
   <div class="topbar">
     <div class="container topbar-grid">
       <span>🚚 Entrega para todo o Brasil</span>
@@ -31,7 +31,7 @@
       </a>
 
       <form class="search">
-        <input type="search" name="q" placeholder="Buscar Bíblias, livros e categorias..." aria-label="Buscar no catálogo" />
+        <input type="search" name="q" placeholder="Buscar brinquedos e produtos infantis..." aria-label="Buscar no catálogo" />
         <button aria-label="Buscar">⌕</button>
       </form>
 
@@ -47,10 +47,10 @@
     <nav class="nav">
       <div class="container nav-row">
         <a href="index.html#universos" class="all-cats">☰ Todas as Categorias</a>
-        <a href="#catalogo" aria-current="page">Fé</a>
+        <a href="catalogo-biblias.html#catalogo">Fé</a>
         <a href="index.html#casa">Casa</a>
         <a href="index.html#mesa">Mesa & Banho</a>
-        <a href="catalogo-infantil.html#catalogo">Infantil</a>
+        <a href="#catalogo" aria-current="page">Infantil</a>
         <a href="catalogo-infantil.html?categoria=brinquedos-infantis#catalogo">Brinquedos</a>
         <a href="index.html#presentes">Presentes</a>
         <a href="index.html#ofertas" class="offer-link">Ofertas</a>
@@ -62,9 +62,9 @@
     <section class="catalog-hero">
       <div class="container catalog-hero-grid">
         <div>
-          <span>FÉ • BÍBLIAS E LIVROS</span>
-          <h1>Uma seleção para acompanhar cada jornada de fé.</h1>
-          <p>Bíblias e livros cristãos para leitura diária, estudo, ministério e presente, organizados para facilitar sua escolha.</p>
+          <span>INFANTIL • BRINQUEDOS E LEITURA</span>
+          <h1>Descobertas, histórias e brincadeiras para crescer.</h1>
+          <p>Brinquedos e Bíblias infantis reunidos em uma seleção para estimular imaginação, leitura e bons momentos em família.</p>
         </div>
         <div class="catalog-hero-note">
           <strong>Catálogo em expansão</strong>
@@ -77,20 +77,16 @@
       <div class="container">
         <div class="catalog-main-heading">
           <div>
-            <span>CATÁLOGO CHI RHO</span>
-            <h2 id="catalog-title">Bíblias e livros cristãos</h2>
-            <p id="catalog-result-count">25 produtos selecionados</p>
+            <span>CATÁLOGO INFANTIL CHI RHO</span>
+            <h2 id="catalog-title">Infantil</h2>
+            <p id="catalog-result-count">17 produtos selecionados</p>
           </div>
         </div>
 
-        <div class="catalog-filters" role="group" aria-label="Filtrar catálogo por categoria">
-          <button type="button" class="catalog-filter is-active" data-filter="todas">Todo o catálogo</button>
-          <button type="button" class="catalog-filter" data-filter="biblias-de-estudo">Bíblias de Estudo</button>
-          <button type="button" class="catalog-filter" data-filter="biblias-femininas">Bíblias Femininas</button>
-          <button type="button" class="catalog-filter" data-filter="biblias-masculinas">Bíblias Masculinas</button>
-          <button type="button" class="catalog-filter" data-filter="biblias-ministeriais">Bíblias Ministeriais</button>
+        <div class="catalog-filters" role="group" aria-label="Filtrar catálogo infantil por categoria">
+          <button type="button" class="catalog-filter is-active" data-filter="infantil">Todo o Infantil</button>
+          <button type="button" class="catalog-filter" data-filter="brinquedos-infantis">Brinquedos</button>
           <button type="button" class="catalog-filter" data-filter="biblias-infantis">Bíblias Infantis</button>
-          <button type="button" class="catalog-filter" data-filter="livros-cristaos">Livros Cristãos</button>
         </div>
 
         <div class="catalog-product-grid catalog-all-grid" id="catalog-products" aria-live="polite"></div>
@@ -100,8 +96,8 @@
     <section class="container catalog-support">
       <div>
         <span>PRECISA DE AJUDA?</span>
-        <h2>Escolha pelo propósito de uso.</h2>
-        <p>Para Bíblias, considere o tamanho da letra, a tradução e os recursos de estudo. Para livros, escolha conforme o tema, o autor e o momento da caminhada cristã.</p>
+        <h2>Escolha de acordo com cada momento.</h2>
+        <p>Para brinquedos, considere o tipo de brincadeira e os interesses da criança. Para Bíblias infantis, escolha o formato de leitura mais adequado para compartilhar em família.</p>
       </div>
       <a href="index.html#contato" class="btn btn-primary">Igrejas e lojistas →</a>
     </section>
@@ -118,7 +114,7 @@
           <p id="product-dialog-description"></p>
           <strong id="product-dialog-status">Preço em breve</strong>
           <small>Consulte disponibilidade antes de concluir sua escolha.</small>
-          <a href="catalogo-biblias.html#catalogo" class="btn btn-primary">Ver catálogo completo →</a>
+          <a href="#catalogo" class="btn btn-primary">Ver catálogo infantil →</a>
         </div>
       </div>
     </dialog>
@@ -142,9 +138,9 @@
       </div>
       <div>
         <strong>Categorias</strong>
-        <a href="#catalogo">Fé</a>
+        <a href="catalogo-biblias.html#catalogo">Fé</a>
+        <a href="#catalogo">Infantil</a>
         <a href="index.html#casa">Casa</a>
-        <a href="catalogo-infantil.html#catalogo">Infantil</a>
         <a href="catalogo-infantil.html?categoria=brinquedos-infantis#catalogo">Brinquedos</a>
       </div>
       <div>

@@ -394,6 +394,222 @@ const catalogProducts = Object.freeze([
     destaque: false,
     maisVendido: false,
     livroCristao: true
+  },
+  {
+    id: "brinquedo-caminhao-bombeiro-resgate",
+    slug: "brinquedo-caminhao-bombeiro-resgate",
+    nome: "Caminhão de Bombeiro Resgate",
+    categoria: "Brinquedos Infantis",
+    categoriaSlug: "brinquedos-infantis",
+    imagem: "assets/products/brinquedo-caminhao-bombeiro-resgate.webp",
+    descricao: "Caminhão de resgate com escada articulada para brincadeiras de ação, imaginação e faz de conta.",
+    perfil: "Ação e imaginação",
+    marca: "CS Imports",
+    preco: null,
+    estoque: null,
+    destaque: false,
+    maisVendido: false,
+    destaqueInfantil: true,
+    infantil: true,
+    brinquedo: true
+  },
+  {
+    id: "brinquedo-caminhao-bau-46cm",
+    slug: "brinquedo-caminhao-bau-46cm",
+    nome: "Caminhão Infantil Baú 46 cm",
+    categoria: "Brinquedos Infantis",
+    categoriaSlug: "brinquedos-infantis",
+    imagem: "assets/products/brinquedo-caminhao-bau-46cm.webp",
+    descricao: "Caminhão de grande porte com baú e portas que abrem para ampliar as possibilidades da brincadeira.",
+    perfil: "Transporte e faz de conta",
+    marca: "Diverplas",
+    preco: null,
+    estoque: null,
+    destaque: false,
+    maisVendido: false,
+    destaqueInfantil: true,
+    infantil: true,
+    brinquedo: true
+  },
+  {
+    id: "brinquedo-caminhao-boi-4-bois",
+    slug: "brinquedo-caminhao-boi-4-bois",
+    nome: "Caminhão Boiadeiro com 4 Bois",
+    categoria: "Brinquedos Infantis",
+    categoriaSlug: "brinquedos-infantis",
+    imagem: "assets/products/brinquedo-caminhao-boi-4-bois.webp",
+    descricao: "Miniatura de caminhão boiadeiro acompanhada de quatro animais para criar histórias e cenários rurais.",
+    perfil: "Fazenda e imaginação",
+    marca: "Diverplas",
+    preco: null,
+    estoque: null,
+    destaque: false,
+    maisVendido: false,
+    destaqueInfantil: true,
+    infantil: true,
+    brinquedo: true
+  },
+  {
+    id: "brinquedo-kit-caminhoes-basculantes",
+    slug: "brinquedo-kit-caminhoes-basculantes",
+    nome: "Kit com 3 Caminhões Basculantes",
+    categoria: "Brinquedos Infantis",
+    categoriaSlug: "brinquedos-infantis",
+    imagem: "assets/products/brinquedo-kit-caminhoes-basculantes.webp",
+    descricao: "Conjunto com três caminhões basculantes para construir percursos, obras e brincadeiras compartilhadas.",
+    perfil: "Construção e movimento",
+    marca: "Diverplas",
+    preco: null,
+    estoque: null,
+    destaque: false,
+    maisVendido: false,
+    destaqueInfantil: true,
+    infantil: true,
+    brinquedo: true
+  },
+  {
+    id: "brinquedo-blocos-104-pecas",
+    slug: "brinquedo-blocos-104-pecas",
+    nome: "Balde de Blocos de Montar com 104 Peças",
+    categoria: "Brinquedos Infantis",
+    categoriaSlug: "brinquedos-infantis",
+    imagem: "assets/products/brinquedo-blocos-104-pecas.webp",
+    descricao: "Blocos coloridos em balde para criar diferentes montagens e estimular criatividade e coordenação.",
+    perfil: "Montagem e criatividade",
+    marca: "Bloco Mania",
+    preco: null,
+    estoque: null,
+    destaque: false,
+    maisVendido: false,
+    destaqueInfantil: false,
+    infantil: true,
+    brinquedo: true
+  },
+  {
+    id: "brinquedo-caminhao-bombeiro-escada",
+    slug: "brinquedo-caminhao-bombeiro-escada",
+    nome: "Caminhão de Bombeiro com Escada Articulada",
+    categoria: "Brinquedos Infantis",
+    categoriaSlug: "brinquedos-infantis",
+    imagem: "assets/products/brinquedo-caminhao-bombeiro-escada.webp",
+    descricao: "Veículo de bombeiro com escada móvel para missões de resgate e brincadeiras cheias de imaginação.",
+    perfil: "Resgate e faz de conta",
+    marca: "Diverplas",
+    preco: null,
+    estoque: null,
+    destaque: false,
+    maisVendido: false,
+    destaqueInfantil: false,
+    infantil: true,
+    brinquedo: true
+  },
+  {
+    id: "brinquedo-trator-pa-carregadeira",
+    slug: "brinquedo-trator-pa-carregadeira",
+    nome: "Trator Miniatura Pá Carregadeira",
+    categoria: "Brinquedos Infantis",
+    categoriaSlug: "brinquedos-infantis",
+    imagem: "assets/products/brinquedo-trator-pa-carregadeira.webp",
+    descricao: "Trator articulado com pá carregadeira para criar obras, terrenos e novas aventuras.",
+    perfil: "Construção e movimento",
+    marca: "Diverplas",
+    preco: null,
+    estoque: null,
+    destaque: false,
+    maisVendido: false,
+    destaqueInfantil: false,
+    infantil: true,
+    brinquedo: true
+  },
+  {
+    id: "brinquedo-jeep-trilha",
+    slug: "brinquedo-jeep-trilha",
+    nome: "Caminhonete Jeep Trilha Off-Road",
+    categoria: "Brinquedos Infantis",
+    categoriaSlug: "brinquedos-infantis",
+    imagem: "assets/products/brinquedo-jeep-trilha.webp",
+    descricao: "Jeep de trilha com visual aventureiro para percursos off-road e brincadeiras de exploração.",
+    perfil: "Aventura e exploração",
+    marca: "Diverplas",
+    preco: null,
+    estoque: null,
+    destaque: false,
+    maisVendido: false,
+    destaqueInfantil: false,
+    infantil: true,
+    brinquedo: true
+  },
+  {
+    id: "brinquedo-trator-grande-articulado",
+    slug: "brinquedo-trator-grande-articulado",
+    nome: "Trator Grande Articulado com Pá",
+    categoria: "Brinquedos Infantis",
+    categoriaSlug: "brinquedos-infantis",
+    imagem: "assets/products/brinquedo-trator-grande-articulado.webp",
+    descricao: "Trator de grande porte com pá articulada e detalhes realistas para brincadeiras de campo e construção.",
+    perfil: "Campo e construção",
+    marca: "Diverplas",
+    preco: null,
+    estoque: null,
+    destaque: false,
+    maisVendido: false,
+    destaqueInfantil: false,
+    infantil: true,
+    brinquedo: true
+  },
+  {
+    id: "brinquedo-carreta-basculante-24cm",
+    slug: "brinquedo-carreta-basculante-24cm",
+    nome: "Carreta Basculante Articulada 24 cm",
+    categoria: "Brinquedos Infantis",
+    categoriaSlug: "brinquedos-infantis",
+    imagem: "assets/products/brinquedo-carreta-basculante-24cm.webp",
+    descricao: "Carreta articulada com caçamba basculante para transportar cargas durante a brincadeira.",
+    perfil: "Transporte e movimento",
+    marca: "Diverplas",
+    preco: null,
+    estoque: null,
+    destaque: false,
+    maisVendido: false,
+    destaqueInfantil: false,
+    infantil: true,
+    brinquedo: true
+  },
+  {
+    id: "brinquedo-onibus-speed-bus",
+    slug: "brinquedo-onibus-speed-bus",
+    nome: "Ônibus Speed Bus",
+    categoria: "Brinquedos Infantis",
+    categoriaSlug: "brinquedos-infantis",
+    imagem: "assets/products/brinquedo-onibus-speed-bus.webp",
+    descricao: "Ônibus com rodas livres e visual de viagem para criar trajetos, cidades e histórias.",
+    perfil: "Cidade e faz de conta",
+    marca: "Diverplas",
+    preco: null,
+    estoque: null,
+    destaque: false,
+    maisVendido: false,
+    destaqueInfantil: false,
+    infantil: true,
+    brinquedo: true
+  },
+  {
+    id: "brinquedo-kit-carretas-boiadeiro",
+    slug: "brinquedo-kit-carretas-boiadeiro",
+    nome: "Kit com 3 Carretas Boiadeiro e 12 Bois",
+    categoria: "Brinquedos Infantis",
+    categoriaSlug: "brinquedos-infantis",
+    imagem: "assets/products/brinquedo-kit-carretas-boiadeiro.webp",
+    descricao: "Conjunto de carretas boiadeiras com animais para brincadeiras em grupo e cenários de fazenda.",
+    perfil: "Fazenda e brincadeira compartilhada",
+    marca: "Diverplas",
+    preco: null,
+    estoque: null,
+    destaque: false,
+    maisVendido: false,
+    destaqueInfantil: false,
+    infantil: true,
+    brinquedo: true
   }
 ]);
 
@@ -416,12 +632,12 @@ const getProductStatus = (product) => {
 };
 
 const getProductMeta = (product) =>
-  [product.autor, product.editora].filter(Boolean).join(" • ");
+  [product.autor || product.marca, product.editora].filter(Boolean).join(" • ");
 
 const createProductCard = (product) => `
   <article class="catalog-product-card" id="${product.slug}" data-category="${product.categoriaSlug}">
     <div class="catalog-product-image">
-      <img src="${product.imagem}" alt="Imagem ilustrativa de ${product.nome}" loading="lazy" />
+      <img src="${product.imagem}" alt="${product.nome}" loading="lazy" />
       <span>${product.perfil}</span>
     </div>
     <div class="catalog-product-content">
@@ -444,6 +660,7 @@ const renderProducts = (selector, products) => {
 renderProducts("#featured-products", catalogProducts.filter((product) => product.destaque).slice(0, 4));
 renderProducts("#popular-products", catalogProducts.filter((product) => product.maisVendido).slice(0, 4));
 renderProducts("#children-products", catalogProducts.filter((product) => product.infantil).slice(0, 4));
+renderProducts("#toy-products", catalogProducts.filter((product) => product.destaqueInfantil).slice(0, 4));
 
 const catalogGrid = document.querySelector("#catalog-products");
 const resultCount = document.querySelector("#catalog-result-count");
@@ -455,8 +672,9 @@ const setCatalogFilter = (filter = "todas", query = "") => {
 
   const normalizedQuery = query.trim().toLocaleLowerCase("pt-BR");
   const filteredProducts = catalogProducts.filter((product) => {
-    const matchesCategory = filter === "todas" || product.categoriaSlug === filter;
-    const searchText = [product.nome, product.categoria, product.descricao, product.perfil]
+    const matchesCategory = filter === "todas"
+      || (filter === "infantil" ? product.infantil : product.categoriaSlug === filter);
+    const searchText = [product.nome, product.categoria, product.descricao, product.perfil, product.autor, product.editora, product.marca]
       .join(" ")
       .toLocaleLowerCase("pt-BR");
     return matchesCategory && (!normalizedQuery || searchText.includes(normalizedQuery));
@@ -475,6 +693,8 @@ const setCatalogFilter = (filter = "todas", query = "") => {
       "biblias-masculinas": "Bíblias Masculinas",
       "biblias-ministeriais": "Bíblias Ministeriais",
       "biblias-infantis": "Bíblias Infantis",
+      infantil: "Infantil",
+      "brinquedos-infantis": "Brinquedos Infantis",
       "livros-cristaos": "Livros Cristãos"
     };
     catalogTitle.textContent = filterTitles[filter] || "Catálogo de Fé";
@@ -493,7 +713,8 @@ const setCatalogFilter = (filter = "todas", query = "") => {
 };
 
 const catalogParams = new URLSearchParams(window.location.search);
-const requestedCategory = catalogParams.get("categoria") || "todas";
+const defaultCatalogCategory = document.body.dataset.defaultCategory || "todas";
+const requestedCategory = catalogParams.get("categoria") || defaultCatalogCategory;
 const requestedQuery = catalogParams.get("q") || "";
 
 if (catalogGrid) {
@@ -518,7 +739,7 @@ document.querySelectorAll(".search").forEach((form) => {
     if (!query) return;
 
     if (catalogGrid) {
-      setCatalogFilter("todas", query);
+      setCatalogFilter(defaultCatalogCategory, query);
       history.replaceState(null, "", `?q=${encodeURIComponent(query)}#catalogo`);
       document.querySelector("#catalogo")?.scrollIntoView({ behavior: "smooth" });
     } else {
@@ -534,10 +755,11 @@ const openProductDialog = (slug) => {
   if (!product || !productDialogElement) return;
 
   const image = productDialogElement.querySelector("#product-dialog-image");
+  productDialogElement.dataset.category = product.categoriaSlug;
   image.src = product.imagem;
-  image.alt = `Imagem ilustrativa de ${product.nome}`;
+  image.alt = product.nome;
   productDialogElement.querySelector("#product-dialog-category").textContent =
-    [product.categoria, product.autor, product.editora].filter(Boolean).join(" • ");
+    [product.categoria, product.autor || product.marca, product.editora].filter(Boolean).join(" • ");
   productDialogElement.querySelector("#product-dialog-title").textContent = product.nome;
   productDialogElement.querySelector("#product-dialog-description").textContent = product.descricao;
   productDialogElement.querySelector("#product-dialog-status").textContent = getProductStatus(product);
