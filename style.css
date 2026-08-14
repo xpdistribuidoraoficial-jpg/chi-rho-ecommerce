@@ -515,6 +515,15 @@ a{text-decoration:none;color:inherit} button,input{font:inherit}
 .catalog-hero-note{padding:28px;border:1px solid #d4e9e6;border-radius:18px;background:rgba(255,255,255,.8);box-shadow:var(--shadow)}
 .catalog-hero-note strong{color:var(--navy);font-size:18px}
 .catalog-hero-note p{margin:9px 0 0;color:var(--muted);font-size:14px;line-height:1.65}
+.catalog-hero-casa{min-height:470px;padding:0;display:grid;align-items:center;background:#f4f6f5 url("assets/banner-casa.webp") center center/cover no-repeat}
+.catalog-hero-casa::before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(250,252,252,.98) 0%,rgba(250,252,252,.94) 28%,rgba(250,252,252,.7) 43%,rgba(250,252,252,.12) 61%,rgba(250,252,252,0) 76%)}
+.catalog-hero-casa::after{display:none}
+.catalog-hero-casa .catalog-hero-grid{width:min(1180px,92%);min-height:470px;margin:0 auto;grid-template-columns:minmax(0,570px) 1fr;gap:0}
+.catalog-hero-casa-copy{padding:44px 0}
+.catalog-hero-casa .catalog-hero-note{max-width:480px;margin-top:24px;padding:18px 20px;background:rgba(255,255,255,.82);backdrop-filter:blur(5px);box-shadow:0 12px 32px rgba(5,46,70,.08)}
+.catalog-hero-casa .catalog-hero-note strong{font-size:16px}
+.catalog-hero-casa .catalog-hero-note p{font-size:13px}
+.catalog-hero-casa-mobile{display:none}
 .catalog-main{padding:78px 0}
 .catalog-main-heading{margin-bottom:24px}
 .catalog-filters{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:32px}
@@ -550,6 +559,8 @@ body:has(.product-dialog[open]){overflow:hidden}
   .catalog-product-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
   .catalog-hero-grid{grid-template-columns:1fr;gap:34px}
   .catalog-hero-note{max-width:620px}
+  .catalog-hero-casa{background-position:58% center}
+  .catalog-hero-casa .catalog-hero-grid{grid-template-columns:minmax(0,540px) 1fr}
 }
 
 @media(max-width:700px){
@@ -563,6 +574,12 @@ body:has(.product-dialog[open]){overflow:hidden}
   .catalog-hero{padding:54px 0}
   .catalog-hero h1{font-size:clamp(38px,11vw,48px)}
   .catalog-hero-grid>div:first-child>p{font-size:17px}
+  .catalog-hero-casa{min-height:auto;padding:0;background:#f7faf9}
+  .catalog-hero-casa::before{display:none}
+  .catalog-hero-casa .catalog-hero-grid{width:min(1180px,92%);min-height:auto;display:block;padding:46px 0 34px}
+  .catalog-hero-casa-copy{padding:0}
+  .catalog-hero-casa .catalog-hero-note{max-width:none;margin-top:22px;padding:16px 18px;background:#fff;backdrop-filter:none}
+  .catalog-hero-casa-mobile{display:block;width:100%;height:auto;aspect-ratio:1672/941;object-fit:cover}
   .catalog-support{margin-bottom:58px;padding:28px 24px;grid-template-columns:1fr}
   .catalog-support h2{font-size:30px}
   .catalog-support .btn{justify-self:stretch}
