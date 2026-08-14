@@ -493,6 +493,8 @@ a{text-decoration:none;color:inherit} button,input{font:inherit}
 .catalog-product-card:is([data-category="cozinha"],[data-category="utilidades-domesticas"]) .catalog-product-image img{object-fit:contain;padding:10px}
 .catalog-product-card[data-category^="biblias"] .catalog-product-image{background:#fff}
 .catalog-product-card[data-category^="biblias"] .catalog-product-image img{object-fit:contain;padding:10px}
+.catalog-product-card[data-category="livros-cristaos"] .catalog-product-image{background:#fff}
+.catalog-product-card[data-category="livros-cristaos"] .catalog-product-image img{object-fit:contain;padding:10px}
 .catalog-product-image>span{position:absolute;left:14px;right:14px;bottom:14px;min-height:38px;padding:9px 12px;border-radius:9px;display:flex;align-items:center;justify-content:center;background:rgba(5,46,70,.92);color:#fff;font-family:Inter,system-ui,sans-serif;font-size:12.5px;font-weight:700;line-height:1.3;letter-spacing:.005em;text-align:center;backdrop-filter:blur(4px)}
 .catalog-product-content{flex:1;padding:19px;display:flex;flex-direction:column}
 .catalog-product-content small,.product-category-label{color:var(--teal-dark);font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase}
@@ -547,6 +549,8 @@ a{text-decoration:none;color:inherit} button,input{font:inherit}
 .product-dialog:is([data-category="cozinha"],[data-category="utilidades-domesticas"]) .product-dialog-media img{object-fit:contain;padding:20px}
 .product-dialog[data-category^="biblias"] .product-dialog-media{background:#fff}
 .product-dialog[data-category^="biblias"] .product-dialog-media img{object-fit:contain;padding:20px}
+.product-dialog[data-category="livros-cristaos"] .product-dialog-media{background:#fff}
+.product-dialog[data-category="livros-cristaos"] .product-dialog-media img{object-fit:contain;padding:20px}
 .product-dialog-copy{padding:54px 46px;display:flex;flex-direction:column;justify-content:center}
 .product-dialog-copy h2{margin:10px 0 14px;color:var(--navy);font-size:32px;line-height:1.15}
 .product-dialog-copy p{margin:0;color:var(--muted);font-size:16px;line-height:1.7}
