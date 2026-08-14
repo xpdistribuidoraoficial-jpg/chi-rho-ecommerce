@@ -1,58 +1,76 @@
 const catalogProducts = Object.freeze([
   {
-    id: "biblia-letra-gigante-harpa",
-    slug: "biblia-letra-gigante-harpa",
-    nome: "Bíblia Sagrada Letra Gigante com Harpa",
-    categoria: "Bíblias",
-    categoriaSlug: "biblias",
-    imagem: "assets/products/biblia-letra-gigante-harpa.svg",
-    descricao: "Letra gigante e Harpa Cristã reunidas para leitura confortável, culto e devoção.",
-    perfil: "Entrada e alto giro",
-    preco: null,
-    estoque: null,
-    destaque: true,
-    maisVendido: false
-  },
-  {
-    id: "biblia-feminina",
-    slug: "biblia-feminina",
-    nome: "Bíblia Sagrada Feminina Letra Grande ou Gigante",
+    id: "biblia-naa-mulher-floral",
+    slug: "biblia-naa-mulher-floral",
+    nome: "Bíblia Sagrada NAA para Mulher — Capa Floral",
     categoria: "Bíblias Femininas",
     categoriaSlug: "biblias-femininas",
-    imagem: "assets/products/biblia-feminina.svg",
-    descricao: "Edição pensada para leitura diária, devoção pessoal e ocasiões de presente.",
-    perfil: "Presente e uso pessoal",
+    imagem: "assets/products/biblia-naa-mulher-floral.webp",
+    descricao: "Edição feminina na tradução Nova Almeida Atualizada, com letra regular e capa dura floral.",
+    perfil: "Feminina e presente",
+    editora: "SBB",
     preco: null,
     estoque: null,
     destaque: true,
     maisVendido: false
   },
   {
-    id: "biblia-masculina",
-    slug: "biblia-masculina",
-    nome: "Bíblia Sagrada Masculina Letra Gigante",
-    categoria: "Bíblias Masculinas",
-    categoriaSlug: "biblias-masculinas",
-    imagem: "assets/products/biblia-masculina.svg",
-    descricao: "Letra gigante e apresentação sóbria para leitura pessoal ou presente.",
-    perfil: "Uso pessoal e presente",
-    preco: null,
-    estoque: null,
-    destaque: true,
-    maisVendido: false
-  },
-  {
-    id: "biblia-nvi-slim",
-    slug: "biblia-nvi-slim",
-    nome: "Bíblia NVI Slim Luxo",
+    id: "biblia-letra-extragigante-indice-preta",
+    slug: "biblia-letra-extragigante-indice-preta",
+    nome: "Bíblia Sagrada Letra Extragigante com Índice",
     categoria: "Bíblias",
     categoriaSlug: "biblias",
-    imagem: "assets/products/biblia-nvi-slim.svg",
-    descricao: "Edição slim em tradução NVI, com visual contemporâneo e formato prático.",
-    perfil: "Jovem e moderna",
+    imagem: "assets/products/biblia-letra-extragigante-indice-preta.webp",
+    descricao: "Letra extragigante, índice lateral e capa preta para uma leitura mais confortável e prática.",
+    perfil: "Conforto de leitura",
+    editora: "SBB",
     preco: null,
     estoque: null,
     destaque: true,
+    maisVendido: true
+  },
+  {
+    id: "biblia-media-letra-gigante-harpa",
+    slug: "biblia-media-letra-gigante-harpa",
+    nome: "Bíblia Sagrada Média Letra Gigante com Harpa Cristã",
+    categoria: "Bíblias",
+    categoriaSlug: "biblias",
+    imagem: "assets/products/biblia-media-letra-gigante-harpa.webp",
+    descricao: "Formato médio com letra gigante e Harpa Cristã, indicado para culto, leitura diária e devoção.",
+    perfil: "Leitura e culto",
+    preco: null,
+    estoque: null,
+    destaque: true,
+    maisVendido: false
+  },
+  {
+    id: "biblia-letra-gigante-indice-couro-preta",
+    slug: "biblia-letra-gigante-indice-couro-preta",
+    nome: "Bíblia Sagrada Letra Gigante com Índice — Capa Preta",
+    categoria: "Bíblias",
+    categoriaSlug: "biblias",
+    imagem: "assets/products/biblia-letra-gigante-indice-couro-preta.webp",
+    descricao: "Edição de letra gigante com índice digital e acabamento preto para leitura e uso frequente.",
+    perfil: "Uso pessoal e presente",
+    editora: "SBB",
+    preco: null,
+    estoque: null,
+    destaque: true,
+    maisVendido: false
+  },
+  {
+    id: "biblia-ara-mulher-branca",
+    slug: "biblia-ara-mulher-branca",
+    nome: "Bíblia Sagrada ARA para Mulher — Letra Grande",
+    categoria: "Bíblias Femininas",
+    categoriaSlug: "biblias-femininas",
+    imagem: "assets/products/biblia-ara-mulher-branca.webp",
+    descricao: "Bíblia feminina na tradução Almeida Revista e Atualizada, com letra grande e capa branca.",
+    perfil: "Leitura feminina e presente",
+    editora: "SBB",
+    preco: null,
+    estoque: null,
+    destaque: false,
     maisVendido: false
   },
   {
@@ -61,55 +79,161 @@ const catalogProducts = Object.freeze([
     nome: "Bíblia de Estudo Pentecostal",
     categoria: "Bíblias de Estudo",
     categoriaSlug: "biblias-de-estudo",
-    imagem: "assets/products/biblia-estudo-pentecostal.svg",
-    descricao: "Conteúdo de estudo voltado à tradição pentecostal, liderança e ministério.",
+    imagem: "assets/products/biblia-estudo-pentecostal-real.webp",
+    descricao: "Conteúdo de estudo voltado à tradição pentecostal, liderança, ensino e vida ministerial.",
     perfil: "Estudo, liderança e ministério",
+    editora: "CPAD",
     preco: null,
     estoque: null,
     destaque: false,
     maisVendido: true
   },
   {
-    id: "biblia-pregador",
-    slug: "biblia-pregador",
-    nome: "Bíblia do Pregador ou Pregadora",
+    id: "biblia-aplicacao-pessoal-nvt",
+    slug: "biblia-aplicacao-pessoal-nvt",
+    nome: "Bíblia de Estudo Aplicação Pessoal NVT",
+    categoria: "Bíblias de Estudo",
+    categoriaSlug: "biblias-de-estudo",
+    imagem: "assets/products/biblia-aplicacao-pessoal-nvt.webp",
+    descricao: "Edição de estudo com recursos de aplicação pessoal e texto na Nova Versão Transformadora.",
+    perfil: "Vida cristã e aprofundamento",
+    preco: null,
+    estoque: null,
+    destaque: false,
+    maisVendido: true
+  },
+  {
+    id: "biblia-letra-gigante-indice-azul",
+    slug: "biblia-letra-gigante-indice-azul",
+    nome: "Bíblia Sagrada Letra Gigante com Índice — Azul",
+    categoria: "Bíblias",
+    categoriaSlug: "biblias",
+    imagem: "assets/products/biblia-letra-gigante-indice-azul.webp",
+    descricao: "Letra gigante, índice e acabamento azul em uma edição preparada para leitura confortável.",
+    perfil: "Alto giro e presente",
+    editora: "SBB",
+    preco: null,
+    estoque: null,
+    destaque: false,
+    maisVendido: true
+  },
+  {
+    id: "biblia-arc-harpa",
+    slug: "biblia-arc-harpa",
+    nome: "Bíblia Sagrada ARC com Harpa Cristã",
+    categoria: "Bíblias",
+    categoriaSlug: "biblias",
+    imagem: "assets/products/biblia-arc-harpa.webp",
+    descricao: "Texto na Almeida Revista e Corrigida acompanhado da Harpa Cristã para culto e devoção.",
+    perfil: "Culto e leitura diária",
+    preco: null,
+    estoque: null,
+    destaque: false,
+    maisVendido: false
+  },
+  {
+    id: "biblia-assembleia-de-deus-capa-luxo",
+    slug: "biblia-assembleia-de-deus-capa-luxo",
+    nome: "Bíblia Assembleia de Deus — Capa Luxo Preta",
+    categoria: "Bíblias",
+    categoriaSlug: "biblias",
+    imagem: "assets/products/biblia-assembleia-de-deus-capa-luxo.webp",
+    descricao: "Edição temática da Assembleia de Deus com acabamento preto e apresentação sóbria.",
+    perfil: "Identidade e presente",
+    editora: "CPAD",
+    preco: null,
+    estoque: null,
+    destaque: false,
+    maisVendido: false
+  },
+  {
+    id: "biblia-estudo-cronologica",
+    slug: "biblia-estudo-cronologica",
+    nome: "Bíblia de Estudo Cronológica — Aplicação Pessoal",
+    categoria: "Bíblias de Estudo",
+    categoriaSlug: "biblias-de-estudo",
+    imagem: "assets/products/biblia-estudo-cronologica.webp",
+    descricao: "Recursos cronológicos e notas de aplicação pessoal para acompanhar a sequência histórica das Escrituras.",
+    perfil: "Cronologia e estudo aprofundado",
+    editora: "CPAD",
+    preco: null,
+    estoque: null,
+    destaque: false,
+    maisVendido: false
+  },
+  {
+    id: "biblia-king-james-ultrafina-preta",
+    slug: "biblia-king-james-ultrafina-preta",
+    nome: "Bíblia King James 1611 Ultrafina — Preta",
+    categoria: "Bíblias",
+    categoriaSlug: "biblias",
+    imagem: "assets/products/biblia-king-james-ultrafina-preta.webp",
+    descricao: "Edição ultrafina da King James 1611, prática para transporte, leitura diária e presente.",
+    perfil: "Jovem, moderna e portátil",
+    editora: "BV Books",
+    preco: null,
+    estoque: null,
+    destaque: false,
+    maisVendido: true
+  },
+  {
+    id: "biblia-king-james-estudo-holman",
+    slug: "biblia-king-james-estudo-holman",
+    nome: "Bíblia King James de Estudo Holman",
+    categoria: "Bíblias de Estudo",
+    categoriaSlug: "biblias-de-estudo",
+    imagem: "assets/products/biblia-king-james-estudo-holman.webp",
+    descricao: "King James 1611 com recursos de estudo Holman para pesquisa, ensino e aprofundamento bíblico.",
+    perfil: "Premium e teologia",
+    editora: "BV Books",
+    preco: null,
+    estoque: null,
+    destaque: false,
+    maisVendido: true
+  },
+  {
+    id: "biblia-estudo-spurgeon",
+    slug: "biblia-estudo-spurgeon",
+    nome: "Bíblia de Estudo Spurgeon King James 1611",
+    categoria: "Bíblias de Estudo",
+    categoriaSlug: "biblias-de-estudo",
+    imagem: "assets/products/biblia-estudo-spurgeon.webp",
+    descricao: "Edição King James 1611 com recursos de Charles Spurgeon para estudo, sermões e reflexão.",
+    perfil: "Pregação e aprofundamento",
+    preco: null,
+    estoque: null,
+    destaque: false,
+    maisVendido: false
+  },
+  {
+    id: "biblia-pregador-pentecostal",
+    slug: "biblia-pregador-pentecostal",
+    nome: "Bíblia do Pregador Pentecostal com Índice",
     categoria: "Bíblias Ministeriais",
     categoriaSlug: "biblias-ministeriais",
-    imagem: "assets/products/biblia-pregador.svg",
-    descricao: "Apoio para preparação de mensagens, pregação e rotina ministerial.",
+    imagem: "assets/products/biblia-pregador-pentecostal.webp",
+    descricao: "Recursos voltados à preparação de mensagens, pregação e rotina ministerial em edição com índice.",
     perfil: "Pastores, pregadores e líderes",
+    editora: "SBB",
     preco: null,
     estoque: null,
     destaque: false,
     maisVendido: true
   },
   {
-    id: "biblia-naa-estudo",
-    slug: "biblia-naa-estudo",
-    nome: "Bíblia de Estudo NAA",
+    id: "biblia-estudo-defesa-da-fe",
+    slug: "biblia-estudo-defesa-da-fe",
+    nome: "Bíblia de Estudo em Defesa da Fé",
     categoria: "Bíblias de Estudo",
     categoriaSlug: "biblias-de-estudo",
-    imagem: "assets/products/biblia-naa-estudo.svg",
-    descricao: "Recursos de estudo aliados à clareza da tradução Nova Almeida Atualizada.",
-    perfil: "Estudo e aprofundamento",
+    imagem: "assets/products/biblia-estudo-defesa-da-fe.webp",
+    descricao: "Conteúdo de apologética cristã para estudo, ensino, liderança e defesa fundamentada da fé.",
+    perfil: "Apologética e formação",
+    editora: "CPAD",
     preco: null,
     estoque: null,
     destaque: false,
-    maisVendido: true
-  },
-  {
-    id: "biblia-king-james-estudo",
-    slug: "biblia-king-james-estudo",
-    nome: "Bíblia King James de Estudo",
-    categoria: "Bíblias de Estudo",
-    categoriaSlug: "biblias-de-estudo",
-    imagem: "assets/products/biblia-king-james-estudo.svg",
-    descricao: "Edição de estudo na tradução King James para leitura aprofundada.",
-    perfil: "Estudo e leitura aprofundada",
-    preco: null,
-    estoque: null,
-    destaque: false,
-    maisVendido: true
+    maisVendido: false
   },
   {
     id: "minha-primeira-biblia-meninos",
@@ -697,6 +821,15 @@ const catalogGrid = document.querySelector("#catalog-products");
 const resultCount = document.querySelector("#catalog-result-count");
 const catalogTitle = document.querySelector("#catalog-title");
 const filterButtons = [...document.querySelectorAll(".catalog-filter")];
+const faithCategorySlugs = new Set([
+  "biblias",
+  "biblias-de-estudo",
+  "biblias-femininas",
+  "biblias-masculinas",
+  "biblias-ministeriais",
+  "biblias-infantis",
+  "livros-cristaos"
+]);
 
 const setCatalogFilter = (filter = "todas", query = "") => {
   if (!catalogGrid) return;
@@ -705,7 +838,9 @@ const setCatalogFilter = (filter = "todas", query = "") => {
   const filteredProducts = catalogProducts.filter((product) => {
     const matchesCategory = filter === "todas"
       || (filter === "infantil" ? product.infantil : product.categoriaSlug === filter);
-    const matchesCatalog = matchesCategory || (filter === "casa" && product.casa);
+    const matchesCatalog = matchesCategory
+      || (filter === "casa" && product.casa)
+      || (filter === "fe" && faithCategorySlugs.has(product.categoriaSlug));
     const searchText = [product.nome, product.categoria, product.descricao, product.perfil, product.autor, product.editora, product.marca]
       .join(" ")
       .toLocaleLowerCase("pt-BR");
@@ -719,6 +854,7 @@ const setCatalogFilter = (filter = "todas", query = "") => {
   if (catalogTitle) {
     const filterTitles = {
       todas: "Bíblias e livros cristãos",
+      fe: "Bíblias e livros cristãos",
       biblias: "Bíblias",
       "biblias-de-estudo": "Bíblias de Estudo",
       "biblias-femininas": "Bíblias Femininas",
@@ -754,13 +890,13 @@ const requestedQuery = catalogParams.get("q") || "";
 
 if (catalogGrid) {
   const knownFilters = new Set(["todas", ...filterButtons.map((button) => button.dataset.filter)]);
-  setCatalogFilter(knownFilters.has(requestedCategory) ? requestedCategory : "todas", requestedQuery);
+  setCatalogFilter(knownFilters.has(requestedCategory) ? requestedCategory : defaultCatalogCategory, requestedQuery);
 }
 
 filterButtons.forEach((button) => {
   button.addEventListener("click", () => {
     setCatalogFilter(button.dataset.filter, requestedQuery);
-    history.replaceState(null, "", button.dataset.filter === "todas"
+    history.replaceState(null, "", button.dataset.filter === "todas" || button.dataset.filter === defaultCatalogCategory
       ? "#catalogo"
       : `?categoria=${encodeURIComponent(button.dataset.filter)}#catalogo`);
   });
