@@ -610,6 +610,37 @@ const catalogProducts = Object.freeze([
     destaqueInfantil: false,
     infantil: true,
     brinquedo: true
+  },
+  {
+    id: "casa-balanca-digital-cozinha-10kg",
+    slug: "casa-balanca-digital-cozinha-10kg",
+    nome: "Balança Digital de Cozinha 10 kg",
+    categoria: "Cozinha",
+    categoriaSlug: "cozinha",
+    imagem: "assets/products/casa-balanca-digital-cozinha-10kg.webp",
+    descricao: "Balança eletrônica branca com capacidade de até 10 kg, alta precisão e função tara para apoiar o preparo de receitas.",
+    perfil: "Precisão no preparo",
+    preco: null,
+    estoque: null,
+    destaque: false,
+    maisVendido: false,
+    casa: true
+  },
+  {
+    id: "casa-bomba-eletrica-garrafa-agua",
+    slug: "casa-bomba-eletrica-garrafa-agua",
+    nome: "Bomba Elétrica USB para Garrafão de Água",
+    categoria: "Utilidades Domésticas",
+    categoriaSlug: "utilidades-domesticas",
+    imagem: "assets/products/casa-bomba-eletrica-garrafa-agua.webp",
+    descricao: "Bomba elétrica universal com recarga USB para servir água diretamente do garrafão com praticidade no dia a dia.",
+    perfil: "Praticidade para o lar",
+    marca: "Lotus",
+    preco: null,
+    estoque: null,
+    destaque: false,
+    maisVendido: false,
+    casa: true
   }
 ]);
 
@@ -674,10 +705,11 @@ const setCatalogFilter = (filter = "todas", query = "") => {
   const filteredProducts = catalogProducts.filter((product) => {
     const matchesCategory = filter === "todas"
       || (filter === "infantil" ? product.infantil : product.categoriaSlug === filter);
+    const matchesCatalog = matchesCategory || (filter === "casa" && product.casa);
     const searchText = [product.nome, product.categoria, product.descricao, product.perfil, product.autor, product.editora, product.marca]
       .join(" ")
       .toLocaleLowerCase("pt-BR");
-    return matchesCategory && (!normalizedQuery || searchText.includes(normalizedQuery));
+    return matchesCatalog && (!normalizedQuery || searchText.includes(normalizedQuery));
   });
 
   catalogGrid.innerHTML = filteredProducts.length
@@ -695,6 +727,9 @@ const setCatalogFilter = (filter = "todas", query = "") => {
       "biblias-infantis": "Bíblias Infantis",
       infantil: "Infantil",
       "brinquedos-infantis": "Brinquedos Infantis",
+      casa: "Casa",
+      cozinha: "Cozinha",
+      "utilidades-domesticas": "Utilidades Domésticas",
       "livros-cristaos": "Livros Cristãos"
     };
     catalogTitle.textContent = filterTitles[filter] || "Catálogo de Fé";
