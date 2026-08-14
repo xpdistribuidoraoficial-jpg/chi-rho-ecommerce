@@ -520,7 +520,7 @@ a{text-decoration:none;color:inherit} button,input{font:inherit}
 .catalog-hero-casa::after{display:none}
 .catalog-hero-casa .catalog-hero-grid{width:min(1180px,92%);min-height:470px;margin:0 auto;grid-template-columns:minmax(0,570px) 1fr;gap:0}
 .catalog-hero-casa-copy{padding:44px 0}
-.catalog-hero-casa .catalog-hero-note{max-width:480px;margin-top:24px;padding:18px 20px;background:rgba(255,255,255,.82);backdrop-filter:blur(5px);box-shadow:0 12px 32px rgba(5,46,70,.08)}
+.catalog-hero-casa .catalog-hero-note{width:min(100%,400px);max-width:400px;margin:0;justify-self:end;padding:22px 24px;background:rgba(255,255,255,.9);backdrop-filter:blur(7px);box-shadow:0 12px 32px rgba(5,46,70,.1)}
 .catalog-hero-casa .catalog-hero-note strong{font-size:16px}
 .catalog-hero-casa .catalog-hero-note p{font-size:13px}
 .catalog-hero-casa-mobile{display:none}
@@ -578,7 +578,7 @@ body:has(.product-dialog[open]){overflow:hidden}
   .catalog-hero-casa::before{display:none}
   .catalog-hero-casa .catalog-hero-grid{width:min(1180px,92%);min-height:auto;display:block;padding:46px 0 34px}
   .catalog-hero-casa-copy{padding:0}
-  .catalog-hero-casa .catalog-hero-note{max-width:none;margin-top:22px;padding:16px 18px;background:#fff;backdrop-filter:none}
+  .catalog-hero-casa .catalog-hero-note{width:100%;max-width:none;margin-top:22px;padding:16px 18px;background:#fff;backdrop-filter:none}
   .catalog-hero-casa-mobile{display:block;width:100%;height:auto;aspect-ratio:1672/941;object-fit:cover}
   .catalog-support{margin-bottom:58px;padding:28px 24px;grid-template-columns:1fr}
   .catalog-support h2{font-size:30px}
