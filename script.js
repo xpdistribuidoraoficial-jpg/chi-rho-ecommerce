@@ -5,7 +5,7 @@ const catalogProducts = Object.freeze([
     nome: "Bíblia Sagrada NAA para Mulher — Capa Floral",
     categoria: "Bíblias Femininas",
     categoriaSlug: "biblias-femininas",
-    imagem: "assets/products/biblia-naa-mulher-floral.webp",
+    imagem: "assets/products/biblia-naa-mulher-floral-v2.webp",
     descricao: "Edição feminina na tradução Nova Almeida Atualizada, com letra regular e capa dura floral.",
     perfil: "Feminina e presente",
     editora: "SBB",
