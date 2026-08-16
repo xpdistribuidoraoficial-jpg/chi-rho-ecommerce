@@ -651,22 +651,6 @@ const catalogProducts = Object.freeze([
     livroCristao: true
   },
   {
-    id: "homens-dos-quais-o-mundo-nao-era-digno",
-    slug: "homens-dos-quais-o-mundo-nao-era-digno",
-    nome: "Homens dos Quais o Mundo Não Era Digno",
-    categoria: "Livros Cristãos",
-    categoriaSlug: "livros-cristaos",
-    imagem: "assets/products/livro-homens-mundo-nao-era-digno.webp",
-    descricao: "Livro de apoio para estudo adulto sobre exemplos de fé, perseverança e serviço cristão.",
-    perfil: "Biografias e estudo adulto",
-    ordemLivro: 11,
-    preco: null,
-    estoque: null,
-    destaque: false,
-    maisVendido: false,
-    livroCristao: true
-  },
-  {
     id: "teologia-sistematica-herman-bavinck",
     slug: "teologia-sistematica-herman-bavinck",
     nome: "Teologia Sistemática — Volumes 1 e 2",
