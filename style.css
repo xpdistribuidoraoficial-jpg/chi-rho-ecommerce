@@ -476,6 +476,7 @@ a{text-decoration:none;color:inherit} button,input{font:inherit}
 .faith-subcategories a:hover{background:#fff;color:var(--navy-dark);transform:translateY(-1px)}
 .catalog-section{padding:82px 0;background:#fff}
 .catalog-section-alt{background:#f4faf9}
+.catalog-section-books{background:linear-gradient(180deg,#f4faf9,#fff)}
 .catalog-section-toys{background:linear-gradient(180deg,#f6fbfa,#fff)}
 .catalog-heading{display:flex;align-items:end;justify-content:space-between;gap:36px;margin-bottom:30px}
 .catalog-heading>div>span,.catalog-main-heading span,.catalog-support span{color:var(--teal-dark)}
@@ -483,6 +484,7 @@ a{text-decoration:none;color:inherit} button,input{font:inherit}
 .catalog-heading p,.catalog-main-heading p{margin:0;color:var(--muted);font-size:16px}
 .catalog-heading-link{color:var(--teal-dark);font-size:14px;font-weight:800;white-space:nowrap}
 .catalog-product-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:20px}
+.featured-books-grid{grid-template-columns:repeat(5,minmax(0,1fr))}
 .catalog-product-card{min-width:0;overflow:hidden;border:1px solid #dbe8e9;border-radius:18px;background:#fff;box-shadow:0 10px 30px rgba(5,46,70,.055);display:flex;flex-direction:column;transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease}
 .catalog-product-card:hover{transform:translateY(-4px);border-color:#b9d9d6;box-shadow:0 18px 44px rgba(5,46,70,.11)}
 .catalog-product-image{position:relative;aspect-ratio:4/4.35;overflow:hidden;background:linear-gradient(145deg,#f2f8f7,#e5f0ef)}
@@ -496,6 +498,7 @@ a{text-decoration:none;color:inherit} button,input{font:inherit}
 .catalog-product-card[data-category="livros-cristaos"] .catalog-product-image{background:#fff}
 .catalog-product-card[data-category="livros-cristaos"] .catalog-product-image img{object-fit:contain;padding:10px}
 .catalog-product-image>span{position:absolute;left:14px;right:14px;bottom:14px;min-height:38px;padding:9px 12px;border-radius:9px;display:flex;align-items:center;justify-content:center;background:rgba(5,46,70,.92);color:#fff;font-family:Inter,system-ui,sans-serif;font-size:12.5px;font-weight:700;line-height:1.3;letter-spacing:.005em;text-align:center;backdrop-filter:blur(4px)}
+.catalog-product-badge{position:absolute;top:12px;right:12px;z-index:1;padding:7px 10px;border-radius:999px;background:#f28c28;color:#fff;font-size:11px;font-weight:800;line-height:1;letter-spacing:.035em;text-transform:uppercase;box-shadow:0 5px 14px rgba(102,52,4,.2)}
 .catalog-product-content{flex:1;padding:19px;display:flex;flex-direction:column}
 .catalog-product-content small,.product-category-label{color:var(--teal-dark);font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase}
 .catalog-product-content h3{margin:8px 0;color:var(--navy);font-size:18px;line-height:1.3;letter-spacing:-.015em}
