@@ -462,6 +462,7 @@ const catalogProducts = Object.freeze([
     perfil: "Referência e estudo bíblico",
     autor: "CPAD",
     editora: "CPAD",
+    ordemLivro: 6,
     preco: null,
     estoque: null,
     destaque: false,
@@ -479,6 +480,7 @@ const catalogProducts = Object.freeze([
     perfil: "Biografias e inspiração",
     autor: "Orlando Boyer",
     editora: "CPAD",
+    ordemLivro: 1,
     preco: null,
     estoque: null,
     destaque: false,
@@ -513,6 +515,358 @@ const catalogProducts = Object.freeze([
     perfil: "Garotas e crescimento cristão",
     autor: "Elizabeth George",
     editora: "CPAD",
+    ordemLivro: 3,
+    preco: null,
+    estoque: null,
+    destaque: false,
+    maisVendido: false,
+    livroCristao: true
+  },
+  {
+    id: "orando-a-palavra",
+    slug: "orando-a-palavra",
+    nome: "Orando a Palavra",
+    categoria: "Livros Cristãos",
+    categoriaSlug: "livros-cristaos",
+    imagem: "assets/products/livro-cristao-capa-em-atualizacao.svg",
+    descricao: "Uma seleção de ensinamentos sobre oração fundamentada nas Escrituras e na tradição cristã.",
+    perfil: "Oração e vida cristã",
+    autor: "C. H. Spurgeon, E. M. Bounds e R. A. Torrey",
+    editora: "CPAD",
+    ordemLivro: 2,
+    preco: null,
+    estoque: null,
+    destaque: false,
+    maisVendido: false,
+    livroCristao: true
+  },
+  {
+    id: "como-ter-o-coracao-de-maria-no-mundo-de-marta",
+    slug: "como-ter-o-coracao-de-maria-no-mundo-de-marta",
+    nome: "Como Ter o Coração de Maria no Mundo de Marta",
+    categoria: "Livros Cristãos",
+    categoriaSlug: "livros-cristaos",
+    imagem: "assets/products/livro-cristao-capa-em-atualizacao.svg",
+    descricao: "Reflexões para conciliar responsabilidades, comunhão com Deus e uma vida espiritual intencional.",
+    perfil: "Mulheres e vida cristã",
+    autor: "Joanna Weaver",
+    ordemLivro: 4,
+    preco: null,
+    estoque: null,
+    destaque: false,
+    maisVendido: false,
+    livroCristao: true
+  },
+  {
+    id: "historia-dos-hebreus",
+    slug: "historia-dos-hebreus",
+    nome: "História dos Hebreus — Obra Completa",
+    categoria: "Livros Cristãos",
+    categoriaSlug: "livros-cristaos",
+    imagem: "assets/products/livro-cristao-capa-em-atualizacao.svg",
+    descricao: "Obra histórica de referência para compreender o povo hebreu e o contexto do mundo bíblico.",
+    perfil: "História e referência",
+    autor: "Flávio Josefo",
+    ordemLivro: 5,
+    preco: null,
+    estoque: null,
+    destaque: false,
+    maisVendido: false,
+    livroCristao: true
+  },
+  {
+    id: "pequena-enciclopedia-biblica",
+    slug: "pequena-enciclopedia-biblica",
+    nome: "Pequena Enciclopédia Bíblica",
+    categoria: "Livros Cristãos",
+    categoriaSlug: "livros-cristaos",
+    imagem: "assets/products/livro-cristao-capa-em-atualizacao.svg",
+    descricao: "Recurso de consulta para termos, personagens, lugares e temas relacionados às Escrituras.",
+    perfil: "Referência bíblica",
+    autor: "Orlando Boyer",
+    editora: "CPAD",
+    ordemLivro: 7,
+    preco: null,
+    estoque: null,
+    destaque: false,
+    maisVendido: false,
+    livroCristao: true
+  },
+  {
+    id: "historia-eclesiastica",
+    slug: "historia-eclesiastica",
+    nome: "História Eclesiástica",
+    categoria: "Livros Cristãos",
+    categoriaSlug: "livros-cristaos",
+    imagem: "assets/products/livro-cristao-capa-em-atualizacao.svg",
+    descricao: "Registro clássico sobre os primeiros séculos do cristianismo e a formação histórica da Igreja.",
+    perfil: "História da Igreja",
+    autor: "Eusébio de Cesareia",
+    editora: "CPAD",
+    ordemLivro: 8,
+    preco: null,
+    estoque: null,
+    destaque: false,
+    maisVendido: false,
+    livroCristao: true
+  },
+  {
+    id: "declaracao-de-fe-atualizada",
+    slug: "declaracao-de-fe-atualizada",
+    nome: "Declaração de Fé — Atualizada",
+    categoria: "Livros Cristãos",
+    categoriaSlug: "livros-cristaos",
+    imagem: "assets/products/livro-cristao-capa-em-atualizacao.svg",
+    descricao: "Material de referência para estudo dos principais fundamentos doutrinários das Assembleias de Deus.",
+    perfil: "Doutrina e formação",
+    editora: "CPAD",
+    ordemLivro: 9,
+    preco: null,
+    estoque: null,
+    destaque: false,
+    maisVendido: false,
+    livroCristao: true
+  },
+  {
+    id: "cafe-com-as-mulheres-da-biblia",
+    slug: "cafe-com-as-mulheres-da-biblia",
+    nome: "Café com as Mulheres da Bíblia",
+    categoria: "Livros Cristãos",
+    categoriaSlug: "livros-cristaos",
+    imagem: "assets/products/livro-cristao-capa-em-atualizacao.svg",
+    descricao: "Leituras inspiradas em mulheres das Escrituras para reflexão, aprendizado e crescimento cristão.",
+    perfil: "Mulheres e inspiração",
+    autor: "Isabelle S. Alves",
+    editora: "CPAD",
+    ordemLivro: 10,
+    preco: null,
+    estoque: null,
+    destaque: false,
+    maisVendido: false,
+    livroCristao: true
+  },
+  {
+    id: "homens-dos-quais-o-mundo-nao-era-digno",
+    slug: "homens-dos-quais-o-mundo-nao-era-digno",
+    nome: "Homens dos Quais o Mundo Não Era Digno",
+    categoria: "Livros Cristãos",
+    categoriaSlug: "livros-cristaos",
+    imagem: "assets/products/livro-cristao-capa-em-atualizacao.svg",
+    descricao: "Livro de apoio para estudo adulto sobre exemplos de fé, perseverança e serviço cristão.",
+    perfil: "Biografias e estudo adulto",
+    ordemLivro: 11,
+    preco: null,
+    estoque: null,
+    destaque: false,
+    maisVendido: false,
+    livroCristao: true
+  },
+  {
+    id: "teologia-sistematica-herman-bavinck",
+    slug: "teologia-sistematica-herman-bavinck",
+    nome: "Teologia Sistemática — Volumes 1 e 2",
+    categoria: "Livros Cristãos",
+    categoriaSlug: "livros-cristaos",
+    imagem: "assets/products/livro-cristao-capa-em-atualizacao.svg",
+    descricao: "Coleção para estudo aprofundado de doutrinas cristãs, revelação e conhecimento de Deus.",
+    perfil: "Teologia sistemática",
+    autor: "Herman Bavinck",
+    editora: "Penkal",
+    ordemLivro: 12,
+    preco: null,
+    estoque: null,
+    destaque: false,
+    maisVendido: false,
+    livroCristao: true
+  },
+  {
+    id: "israel-gogue-e-o-anticristo",
+    slug: "israel-gogue-e-o-anticristo",
+    nome: "Israel, Gogue e o Anticristo",
+    categoria: "Livros Cristãos",
+    categoriaSlug: "livros-cristaos",
+    imagem: "assets/products/livro-cristao-capa-em-atualizacao.svg",
+    descricao: "Estudo de temas escatológicos relacionados a Israel, às profecias e aos acontecimentos finais.",
+    perfil: "Escatologia",
+    autor: "Abraão de Almeida",
+    editora: "CPAD",
+    ordemLivro: 13,
+    preco: null,
+    estoque: null,
+    destaque: false,
+    maisVendido: false,
+    livroCristao: true
+  },
+  {
+    id: "tempo-do-fim",
+    slug: "tempo-do-fim",
+    nome: "Tempo do Fim",
+    categoria: "Livros Cristãos",
+    categoriaSlug: "livros-cristaos",
+    imagem: "assets/products/livro-cristao-capa-em-atualizacao.svg",
+    descricao: "Uma introdução aos principais temas e interpretações relacionados à escatologia cristã.",
+    perfil: "Escatologia e estudo",
+    autor: "Juliano Fraga",
+    editora: "CPAD",
+    ordemLivro: 14,
+    preco: null,
+    estoque: null,
+    destaque: false,
+    maisVendido: false,
+    livroCristao: true
+  },
+  {
+    id: "cafe-com-o-espirito-santo",
+    slug: "cafe-com-o-espirito-santo",
+    nome: "Café com o Espírito Santo",
+    categoria: "Livros Cristãos",
+    categoriaSlug: "livros-cristaos",
+    imagem: "assets/products/livro-cristao-capa-em-atualizacao.svg",
+    descricao: "Leituras para devoção, comunhão com Deus e fortalecimento da caminhada espiritual.",
+    perfil: "Vida cristã e devoção",
+    autor: "Charles Spurgeon",
+    editora: "CPAD",
+    ordemLivro: 15,
+    preco: null,
+    estoque: null,
+    destaque: false,
+    maisVendido: false,
+    livroCristao: true
+  },
+  {
+    id: "comentario-biblico-beacon-antigo-testamento",
+    slug: "comentario-biblico-beacon-antigo-testamento",
+    nome: "Comentário Bíblico Beacon — Antigo Testamento, 5 volumes",
+    categoria: "Livros Cristãos",
+    categoriaSlug: "livros-cristaos",
+    imagem: "assets/products/livro-cristao-capa-em-atualizacao.svg",
+    descricao: "Coleção de comentários para estudo, ensino e preparação de mensagens sobre o Antigo Testamento.",
+    perfil: "Comentário bíblico",
+    editora: "CPAD",
+    ordemLivro: 16,
+    preco: null,
+    estoque: null,
+    destaque: false,
+    maisVendido: false,
+    livroCristao: true
+  },
+  {
+    id: "cute-jesus-and-disciples",
+    slug: "cute-jesus-and-disciples",
+    nome: "Cute Jesus & Disciples — Livro de Colorir",
+    categoria: "Livros Cristãos",
+    categoriaSlug: "livros-cristaos",
+    imagem: "assets/products/livro-cristao-capa-em-atualizacao.svg",
+    descricao: "Livro de atividades e colorir com temática cristã para momentos criativos em família.",
+    perfil: "Infantil e atividades",
+    ordemLivro: 17,
+    preco: null,
+    estoque: null,
+    destaque: false,
+    maisVendido: false,
+    livroCristao: true
+  },
+  {
+    id: "os-presentes-do-espirito-santo",
+    slug: "os-presentes-do-espirito-santo",
+    nome: "Os Presentes do Espírito Santo",
+    categoria: "Livros Cristãos",
+    categoriaSlug: "livros-cristaos",
+    imagem: "assets/products/livro-cristao-capa-em-atualizacao.svg",
+    descricao: "Reflexões sobre os dons espirituais e sua importância para a vida e o serviço cristão.",
+    perfil: "Espírito Santo e ministério",
+    autor: "Charles Spurgeon e R. A. Torrey",
+    editora: "Penkal",
+    ordemLivro: 18,
+    preco: null,
+    estoque: null,
+    destaque: false,
+    maisVendido: false,
+    livroCristao: true
+  },
+  {
+    id: "oracao-para-a-cura-emocional",
+    slug: "oracao-para-a-cura-emocional",
+    nome: "Oração para a Cura Emocional",
+    categoria: "Livros Cristãos",
+    categoriaSlug: "livros-cristaos",
+    imagem: "assets/products/livro-cristao-capa-em-atualizacao.svg",
+    descricao: "Uma leitura sobre oração, restauração interior e cuidado das emoções à luz da fé cristã.",
+    perfil: "Oração e cuidado emocional",
+    autor: "Charles Spurgeon",
+    editora: "Penkal",
+    ordemLivro: 19,
+    preco: null,
+    estoque: null,
+    destaque: false,
+    maisVendido: false,
+    livroCristao: true
+  },
+  {
+    id: "conselhos-de-paulo-para-uma-vida-em-cristo",
+    slug: "conselhos-de-paulo-para-uma-vida-em-cristo",
+    nome: "Conselhos de Paulo para uma Vida em Cristo",
+    categoria: "Livros Cristãos",
+    categoriaSlug: "livros-cristaos",
+    imagem: "assets/products/livro-cristao-capa-em-atualizacao.svg",
+    descricao: "Ensinamentos sobre maturidade, fé e práticas para uma vida cristã fundamentada nas cartas de Paulo.",
+    perfil: "Vida cristã e formação",
+    autor: "Charles Hodge",
+    editora: "CPAD",
+    ordemLivro: 20,
+    preco: null,
+    estoque: null,
+    destaque: false,
+    maisVendido: false,
+    livroCristao: true
+  },
+  {
+    id: "confissoes-santo-agostinho",
+    slug: "confissoes-santo-agostinho",
+    nome: "Confissões — Coleção volumes 1 e 2",
+    categoria: "Livros Cristãos",
+    categoriaSlug: "livros-cristaos",
+    imagem: "assets/products/livro-cristao-capa-em-atualizacao.svg",
+    descricao: "Clássico cristão sobre conversão, memória, graça e a busca por Deus.",
+    perfil: "Clássico cristão e teologia",
+    autor: "Santo Agostinho",
+    ordemLivro: 21,
+    preco: null,
+    estoque: null,
+    destaque: false,
+    maisVendido: false,
+    livroCristao: true
+  },
+  {
+    id: "comentario-exegetico-de-atos",
+    slug: "comentario-exegetico-de-atos",
+    nome: "Comentário Exegético de Atos — 4 volumes",
+    categoria: "Livros Cristãos",
+    categoriaSlug: "livros-cristaos",
+    imagem: "assets/products/livro-cristao-capa-em-atualizacao.svg",
+    descricao: "Coleção de exegese aprofundada para pesquisa, ensino e preparação ministerial no livro de Atos.",
+    perfil: "Exegese e ministério",
+    autor: "Craig S. Keener",
+    editora: "CPAD",
+    ordemLivro: 22,
+    preco: null,
+    estoque: null,
+    destaque: false,
+    maisVendido: false,
+    livroCristao: true
+  },
+  {
+    id: "teologia-sistematica-stanley-horton",
+    slug: "teologia-sistematica-stanley-horton",
+    nome: "Teologia Sistemática — Uma Perspectiva Pentecostal",
+    categoria: "Livros Cristãos",
+    categoriaSlug: "livros-cristaos",
+    imagem: "assets/products/livro-cristao-capa-em-atualizacao.svg",
+    descricao: "Obra de referência para o estudo organizado das doutrinas cristãs sob uma perspectiva pentecostal.",
+    perfil: "Teologia sistemática",
+    autor: "Stanley M. Horton",
+    editora: "CPAD",
+    ordemLivro: 23,
     preco: null,
     estoque: null,
     destaque: false,
@@ -768,6 +1122,20 @@ const catalogProducts = Object.freeze([
   }
 ]);
 
+const inactiveCatalogSlugs = new Set([
+  "ate-que-nada-mais-importe",
+  "cartas-de-um-diabo-a-seu-aprendiz",
+  "cristianismo-puro-e-simples",
+  "uma-vida-com-propositos",
+  "manso-e-humilde",
+  "o-deus-que-destroi-sonhos",
+  "oi-deus-sou-eu-de-novo",
+  "uma-mulher-segundo-o-coracao-de-deus",
+  "ego-transformado"
+]);
+
+const isProductActive = (product) => !inactiveCatalogSlugs.has(product.slug);
+
 const toggle = document.querySelector(".menu-toggle");
 const nav = document.querySelector(".nav-row");
 
@@ -836,6 +1204,7 @@ const setCatalogFilter = (filter = "todas", query = "") => {
 
   const normalizedQuery = query.trim().toLocaleLowerCase("pt-BR");
   const filteredProducts = catalogProducts.filter((product) => {
+    if (!isProductActive(product)) return false;
     const matchesCategory = filter === "todas"
       || (filter === "infantil" ? product.infantil : product.categoriaSlug === filter);
     const matchesCatalog = matchesCategory
@@ -845,7 +1214,7 @@ const setCatalogFilter = (filter = "todas", query = "") => {
       .join(" ")
       .toLocaleLowerCase("pt-BR");
     return matchesCatalog && (!normalizedQuery || searchText.includes(normalizedQuery));
-  });
+  }).sort((first, second) => (first.ordemLivro ?? 999) - (second.ordemLivro ?? 999));
 
   catalogGrid.innerHTML = filteredProducts.length
     ? filteredProducts.map(createProductCard).join("")
@@ -922,7 +1291,7 @@ document.querySelectorAll(".search").forEach((form) => {
 const productDialogElement = document.querySelector("#product-dialog");
 
 const openProductDialog = (slug) => {
-  const product = catalogProducts.find((item) => item.slug === slug);
+  const product = catalogProducts.find((item) => item.slug === slug && isProductActive(item));
   if (!product || !productDialogElement) return;
 
   const image = productDialogElement.querySelector("#product-dialog-image");
@@ -959,7 +1328,7 @@ document.addEventListener("click", (event) => {
 
 if (window.location.hash.length > 1) {
   const productSlug = window.location.hash.slice(1);
-  if (catalogProducts.some((product) => product.slug === productSlug)) {
+  if (catalogProducts.some((product) => product.slug === productSlug && isProductActive(product))) {
     window.addEventListener("load", () => openProductDialog(productSlug), { once: true });
   }
 }
