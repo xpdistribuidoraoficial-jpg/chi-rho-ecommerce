@@ -584,6 +584,17 @@ a{text-decoration:none;color:inherit} button,input{font:inherit}
 .product-dialog-shipping-field{height:42px;display:grid;grid-template-columns:minmax(0,1fr) auto;border:1px solid #c8ddda;border-radius:10px;overflow:hidden;background:#fff}
 .product-dialog-shipping-field input{min-width:0;padding:0 12px;border:0;outline:0;color:var(--navy);font:inherit}
 .product-dialog-shipping-field button{padding:0 14px;border:0;border-left:1px solid #d5e5e3;background:#edf7f5;color:var(--teal);font-weight:800}
+.shipping-status{margin:8px 0 0!important;color:var(--muted)!important;font-size:11px!important;line-height:1.45!important}
+.shipping-options{margin-top:8px;display:grid;gap:7px}
+.shipping-option{min-width:0;padding:10px 11px;border:1px solid #d3e4e2;border-radius:10px;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:9px;align-items:center;background:#fff;color:var(--navy)}
+.shipping-option>span{min-width:0;display:flex;flex-direction:column}
+.shipping-option strong{font-size:11px;line-height:1.35}
+.shipping-option small{margin-top:2px;color:var(--muted);font-size:10px}
+.shipping-option b{font-size:12px;white-space:nowrap}
+.shipping-option input{width:17px;height:17px;margin:0;accent-color:var(--teal)}
+.shipping-option:has(input){cursor:pointer}
+.shipping-option.is-selected{border-color:var(--teal);background:#eef9f7;box-shadow:0 0 0 1px var(--teal)}
+.product-dialog-shipping-results{max-height:168px;overflow:auto}
 .product-dialog-actions{margin-top:18px;display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .product-dialog-actions .btn{width:100%;min-height:46px;padding:0 14px;font-size:13px}
 .product-dialog-actions button:disabled,.product-dialog-purchase-fields button:disabled,.product-dialog-shipping-field input:disabled{cursor:not-allowed;opacity:.58}
@@ -615,10 +626,21 @@ body:has(.product-dialog[open]){overflow:hidden}
 .test-cart-empty{min-height:320px;display:grid;place-content:center;gap:7px;text-align:center}
 .test-cart-empty strong{color:var(--navy);font-size:19px}
 .test-cart-empty span{max-width:280px;color:var(--muted);font-size:13px;line-height:1.55}
-.test-cart-footer{padding:22px 24px 24px;border-top:1px solid var(--line);background:#f8fbfb}
-.test-cart-footer>div{margin-bottom:15px;display:flex;align-items:center;justify-content:space-between;color:var(--navy)}
-.test-cart-footer>div span{font-size:14px;font-weight:700}
-.test-cart-footer>div strong{font-size:23px}
+.test-cart-footer{max-height:58vh;padding:20px 24px 24px;border-top:1px solid var(--line);background:#f8fbfb;overflow:auto}
+.test-cart-shipping{margin-bottom:17px;padding-bottom:17px;border-bottom:1px solid var(--line)}
+.test-cart-shipping>label{display:block;margin-bottom:7px;color:var(--navy);font-size:12px;font-weight:800}
+.test-cart-shipping-field{height:42px;border:1px solid #c8ddda;border-radius:10px;display:grid;grid-template-columns:minmax(0,1fr) auto;overflow:hidden;background:#fff}
+.test-cart-shipping-field input{min-width:0;padding:0 12px;border:0;outline:0;color:var(--navy);background:#fff}
+.test-cart-shipping-field button{padding:0 15px;border:0;border-left:1px solid #d5e5e3;background:#edf7f5;color:var(--teal);font-size:12px;font-weight:800;cursor:pointer}
+.test-cart-shipping-field button:disabled,.test-cart-shipping-field input:disabled{cursor:not-allowed;opacity:.55}
+.test-cart-shipping-options{max-height:190px;overflow:auto}
+.test-cart-summary{margin-bottom:15px;display:grid;gap:8px}
+.test-cart-summary>div{display:flex;align-items:center;justify-content:space-between;color:var(--navy)}
+.test-cart-summary span{font-size:12px;font-weight:700}
+.test-cart-summary strong{font-size:13px}
+.test-cart-summary .test-cart-total{margin-top:4px;padding-top:10px;border-top:1px solid var(--line)}
+.test-cart-summary .test-cart-total span{font-size:14px}
+.test-cart-summary .test-cart-total strong{font-size:23px}
 .test-cart-footer .btn{width:100%}
 .test-cart-footer .btn:disabled{cursor:not-allowed;opacity:.58}
 .test-cart-footer small{display:block;margin-top:10px;color:var(--muted);font-size:10px;text-align:center;line-height:1.45}

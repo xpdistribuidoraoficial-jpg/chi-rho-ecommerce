@@ -1303,6 +1303,107 @@ const productDialogElement = document.querySelector("#product-dialog");
 const productDialogQuantity = productDialogElement?.querySelector("#product-dialog-quantity");
 const productDialogBookContent = productDialogElement?.querySelector("#product-dialog-book-content");
 const productDialogSimpleContent = productDialogElement?.querySelector("#product-dialog-simple-content");
+const productDialogPostcode = productDialogElement?.querySelector("#product-dialog-postcode");
+const productDialogShippingButton = productDialogElement?.querySelector(".product-dialog-shipping-field button");
+const productDialogShippingResults = document.createElement("div");
+const productDialogShippingStatus = document.createElement("p");
+
+productDialogShippingResults.className = "shipping-options product-dialog-shipping-results";
+productDialogShippingStatus.className = "shipping-status";
+productDialogShippingStatus.setAttribute("aria-live", "polite");
+productDialogPostcode?.setAttribute("data-postcode-input", "");
+productDialogElement?.querySelector(".product-dialog-shipping")?.append(
+  productDialogShippingStatus,
+  productDialogShippingResults
+);
+
+const onlyDigits = (value) => String(value || "").replace(/\D/g, "");
+
+const formatPostcode = (value) => {
+  const digits = onlyDigits(value).slice(0, 8);
+  return digits.length > 5 ? `${digits.slice(0, 5)}-${digits.slice(5)}` : digits;
+};
+
+const formatCurrency = (value) => Number(value).toLocaleString("pt-BR", {
+  style: "currency",
+  currency: "BRL"
+});
+
+const formatDeliveryTime = (value) => {
+  const deliveryTime = String(value || "").trim();
+  if (!deliveryTime) return "Prazo a confirmar";
+  if (/dia/i.test(deliveryTime)) return deliveryTime;
+  return `${deliveryTime} ${deliveryTime === "1" ? "dia útil" : "dias úteis"}`;
+};
+
+const requestShippingQuote = async (cep, itens) => {
+  const normalizedCep = onlyDigits(cep);
+  if (normalizedCep.length !== 8) throw new Error("Informe um CEP válido com 8 números.");
+
+  let response;
+  try {
+    response = await fetch("/api/frete", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ cep: normalizedCep, itens })
+    });
+  } catch {
+    throw new Error("Não foi possível conectar ao cálculo de frete. Tente novamente.");
+  }
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data.error || "Não foi possível calcular o frete.");
+  return data;
+};
+
+const renderShippingServices = (container, services, { selectable = false, onSelect } = {}) => {
+  container.replaceChildren();
+
+  services.forEach((service, index) => {
+    const option = document.createElement(selectable ? "label" : "article");
+    option.className = "shipping-option";
+
+    if (selectable) {
+      const input = document.createElement("input");
+      input.type = "radio";
+      input.name = "test-cart-shipping";
+      input.value = String(index);
+      input.addEventListener("change", () => onSelect?.(service, option));
+      option.appendChild(input);
+    }
+
+    const copy = document.createElement("span");
+    const title = document.createElement("strong");
+    const deadline = document.createElement("small");
+    const price = document.createElement("b");
+
+    title.textContent = [service.carrier, service.description].filter(Boolean).join(" • ");
+    deadline.textContent = formatDeliveryTime(service.deliveryTime);
+    price.textContent = formatCurrency(service.price);
+    copy.append(title, deadline);
+    option.append(copy, price);
+    container.appendChild(option);
+  });
+};
+
+const calculateProductShipping = async () => {
+  const slug = productDialogElement?.dataset.productSlug;
+  const quantity = Number(productDialogQuantity?.textContent) || 1;
+  if (!slug || !productDialogPostcode || !productDialogShippingButton) return;
+
+  productDialogShippingButton.disabled = true;
+  productDialogShippingStatus.textContent = "Consultando preços e prazos na Frenet…";
+  productDialogShippingResults.replaceChildren();
+
+  try {
+    const quote = await requestShippingQuote(productDialogPostcode.value, [{ slug, quantity }]);
+    productDialogShippingStatus.textContent = `${quote.services.length} ${quote.services.length === 1 ? "opção encontrada" : "opções encontradas"}.`;
+    renderShippingServices(productDialogShippingResults, quote.services);
+  } catch (error) {
+    productDialogShippingStatus.textContent = error.message;
+  } finally {
+    productDialogShippingButton.disabled = false;
+  }
+};
 
 const setProductDialogGallery = (product) => {
   const media = productDialogElement?.querySelector(".product-dialog-media");
@@ -1430,7 +1531,7 @@ const openProductDialog = (slug, { syncUrl = true } = {}) => {
   setProductDialogText(
     ".product-dialog-activation-note",
     canUseTestCart
-      ? "Carrinho de teste ativo. Pagamento e cálculo de frete ainda não estão disponíveis."
+      ? "Carrinho piloto e cálculo de frete pela Frenet ativos. O pagamento ainda não está disponível."
       : "A compra será liberada após o cadastro do preço, estoque, frete e checkout.",
     "Checkout em preparação."
   );
@@ -1443,10 +1544,13 @@ const openProductDialog = (slug, { syncUrl = true } = {}) => {
   if (addCartButton) addCartButton.disabled = !canUseTestCart;
   const buyNowButton = productDialogElement.querySelector("#product-dialog-buy-now");
   if (buyNowButton) buyNowButton.disabled = true;
-  const postcodeInput = productDialogElement.querySelector("#product-dialog-postcode");
-  if (postcodeInput) postcodeInput.disabled = true;
-  const shippingButton = productDialogElement.querySelector(".product-dialog-shipping-field button");
-  if (shippingButton) shippingButton.disabled = true;
+  if (productDialogPostcode) {
+    productDialogPostcode.disabled = !canUseTestCart;
+    productDialogPostcode.value = "";
+  }
+  if (productDialogShippingButton) productDialogShippingButton.disabled = !canUseTestCart;
+  productDialogShippingStatus.textContent = canUseTestCart ? "Informe o CEP para consultar a Frenet." : "";
+  productDialogShippingResults.replaceChildren();
 
   if (typeof productDialogElement.showModal === "function") {
     if (!productDialogElement.open) productDialogElement.showModal();
@@ -1487,10 +1591,24 @@ document.addEventListener("click", (event) => {
       ? Math.min(stockLimit, currentQuantity + 1)
       : Math.max(1, currentQuantity - 1);
     productDialogQuantity.textContent = String(nextQuantity);
+    productDialogShippingResults.replaceChildren();
+    productDialogShippingStatus.textContent = "Quantidade alterada. Calcule o frete novamente.";
+  }
+
+  const productShippingCalculate = event.target.closest(".product-dialog-shipping-field button");
+  if (productShippingCalculate && !productShippingCalculate.disabled) {
+    calculateProductShipping();
   }
 
   if (event.target === productDialogElement) {
     closeProductDialog();
+  }
+});
+
+productDialogPostcode?.addEventListener("keydown", (event) => {
+  if (event.key === "Enter" && !productDialogShippingButton?.disabled) {
+    event.preventDefault();
+    calculateProductShipping();
   }
 });
 
@@ -1528,13 +1646,83 @@ testCartDialog.innerHTML = `
     </header>
     <div class="test-cart-items" aria-live="polite"></div>
     <footer class="test-cart-footer">
-      <div><span>Subtotal</span><strong data-cart-subtotal>R$ 0,00</strong></div>
+      <section class="test-cart-shipping" aria-labelledby="test-cart-shipping-title">
+        <label id="test-cart-shipping-title" for="test-cart-postcode">Calcule o frete</label>
+        <div class="test-cart-shipping-field">
+          <input id="test-cart-postcode" data-postcode-input inputmode="numeric" autocomplete="postal-code" maxlength="9" placeholder="00000-000" />
+          <button type="button" data-cart-shipping-calculate>Calcular</button>
+        </div>
+        <p class="shipping-status" data-cart-shipping-status aria-live="polite">Informe o CEP de entrega.</p>
+        <div class="shipping-options test-cart-shipping-options"></div>
+      </section>
+      <div class="test-cart-summary">
+        <div><span>Produtos</span><strong data-cart-subtotal>R$ 0,00</strong></div>
+        <div><span>Frete</span><strong data-cart-shipping-price>Calcule pelo CEP</strong></div>
+        <div class="test-cart-total"><span>Total</span><strong data-cart-total>R$ 0,00</strong></div>
+      </div>
       <button class="btn btn-primary" type="button" disabled>Finalizar compra</button>
-      <small>Ambiente de teste: pagamento e frete ainda não estão disponíveis.</small>
+      <small>Frete calculado pela Frenet. Pagamento ainda indisponível neste ambiente piloto.</small>
     </footer>
   </div>
 `;
 document.body.appendChild(testCartDialog);
+
+let selectedCartShipping = null;
+let testCartSubtotal = 0;
+
+const renderCartTotals = () => {
+  const shippingPrice = selectedCartShipping?.price || 0;
+  testCartDialog.querySelector("[data-cart-subtotal]").textContent = formatCurrency(testCartSubtotal);
+  testCartDialog.querySelector("[data-cart-shipping-price]").textContent = selectedCartShipping
+    ? formatCurrency(shippingPrice)
+    : "Calcule pelo CEP";
+  testCartDialog.querySelector("[data-cart-total]").textContent = formatCurrency(testCartSubtotal + shippingPrice);
+};
+
+const resetCartShipping = (message = "Informe o CEP de entrega.") => {
+  selectedCartShipping = null;
+  testCartDialog.querySelector(".test-cart-shipping-options").replaceChildren();
+  testCartDialog.querySelector("[data-cart-shipping-status]").textContent = message;
+  renderCartTotals();
+};
+
+const calculateCartShipping = async () => {
+  const postcodeInput = testCartDialog.querySelector("#test-cart-postcode");
+  const calculateButton = testCartDialog.querySelector("[data-cart-shipping-calculate]");
+  const status = testCartDialog.querySelector("[data-cart-shipping-status]");
+  const options = testCartDialog.querySelector(".test-cart-shipping-options");
+  const itens = testCart.map((item) => ({ slug: item.slug, quantity: item.quantity }));
+
+  if (itens.length === 0) {
+    status.textContent = "Adicione um produto antes de calcular o frete.";
+    return;
+  }
+
+  selectedCartShipping = null;
+  renderCartTotals();
+  calculateButton.disabled = true;
+  status.textContent = "Consultando preços e prazos na Frenet…";
+  options.replaceChildren();
+
+  try {
+    const quote = await requestShippingQuote(postcodeInput.value, itens);
+    status.textContent = "Escolha uma modalidade de entrega:";
+    renderShippingServices(options, quote.services, {
+      selectable: true,
+      onSelect: (service, selectedOption) => {
+        selectedCartShipping = service;
+        options.querySelectorAll(".shipping-option").forEach((option) => {
+          option.classList.toggle("is-selected", option === selectedOption);
+        });
+        renderCartTotals();
+      }
+    });
+  } catch (error) {
+    status.textContent = error.message;
+  } finally {
+    calculateButton.disabled = false;
+  }
+};
 
 const saveTestCart = () => {
   try {
@@ -1567,6 +1755,7 @@ const updateTestCartQuantity = (slug, requestedQuantity) => {
   }
 
   saveTestCart();
+  resetCartShipping("Carrinho alterado. Calcule o frete novamente.");
   renderTestCart();
 };
 
@@ -1583,6 +1772,7 @@ const renderTestCart = () => {
   const validItems = testCart.map((item) => ({ ...item, product: getTestCartProduct(item.slug) }));
   const totalQuantity = validItems.reduce((total, item) => total + item.quantity, 0);
   const subtotal = validItems.reduce((total, item) => total + item.product.preco * item.quantity, 0);
+  testCartSubtotal = subtotal;
 
   document.querySelectorAll('a[href$="#carrinho"]').forEach((link) => {
     let count = link.querySelector(".test-cart-count");
@@ -1616,10 +1806,12 @@ const renderTestCart = () => {
     `).join("")
     : '<div class="test-cart-empty"><strong>Seu carrinho está vazio.</strong><span>Adicione um dos itens de Casa disponíveis para o teste.</span></div>';
 
-  testCartDialog.querySelector("[data-cart-subtotal]").textContent = subtotal.toLocaleString("pt-BR", {
-    style: "currency",
-    currency: "BRL"
-  });
+  const postcodeInput = testCartDialog.querySelector("#test-cart-postcode");
+  const calculateButton = testCartDialog.querySelector("[data-cart-shipping-calculate]");
+  postcodeInput.disabled = validItems.length === 0;
+  calculateButton.disabled = validItems.length === 0;
+  if (validItems.length === 0) resetCartShipping("Adicione um produto antes de calcular o frete.");
+  renderCartTotals();
 };
 
 const openTestCart = () => {
@@ -1662,7 +1854,31 @@ document.addEventListener("click", (event) => {
     updateTestCartQuantity(slug, nextQuantity);
   }
 
+  const calculateShippingButton = event.target.closest("[data-cart-shipping-calculate]");
+  if (calculateShippingButton && !calculateShippingButton.disabled) calculateCartShipping();
+
   if (event.target === testCartDialog) testCartDialog.close();
+});
+
+document.addEventListener("input", (event) => {
+  if (event.target.matches("[data-postcode-input]")) {
+    event.target.value = formatPostcode(event.target.value);
+    if (event.target.id === "test-cart-postcode" && selectedCartShipping) {
+      resetCartShipping("CEP alterado. Calcule o frete novamente.");
+    }
+    if (event.target.id === "product-dialog-postcode" && productDialogShippingResults.childElementCount) {
+      productDialogShippingResults.replaceChildren();
+      productDialogShippingStatus.textContent = "CEP alterado. Calcule o frete novamente.";
+    }
+  }
+});
+
+testCartDialog.querySelector("#test-cart-postcode")?.addEventListener("keydown", (event) => {
+  const calculateButton = testCartDialog.querySelector("[data-cart-shipping-calculate]");
+  if (event.key === "Enter" && !calculateButton.disabled) {
+    event.preventDefault();
+    calculateCartShipping();
+  }
 });
 
 renderTestCart();
