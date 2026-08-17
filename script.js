@@ -1336,8 +1336,8 @@ const openProductDialog = (slug, { syncUrl = true } = {}) => {
 
   const image = productDialogElement.querySelector("#product-dialog-image");
   const isChristianBook = product.categoriaSlug === "livros-cristaos";
-  const isChildrenBible = product.categoriaSlug === "biblias-infantis";
-  const usesFullDialog = isChristianBook || isChildrenBible;
+  const isBible = product.categoriaSlug.startsWith("biblias");
+  const usesFullDialog = isChristianBook || isBible;
   productDialogElement.dataset.category = product.categoriaSlug;
   image.src = product.imagem;
   image.alt = product.nome;
