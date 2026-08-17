@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Finalização segura do pedido na Chi Rho." />
+  <title>Finalizar pedido | Chi Rho</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="checkout-page">
+  <header class="checkout-header">
+    <div class="container checkout-header-row">
+      <a href="index.html#inicio" class="brand">
+        <img src="assets/logo-chi-rho.png" alt="Chi Rho" />
+        <div>
+          <strong>CHI RHO</strong>
+          <small>CASA • FAMÍLIA • FÉ</small>
+        </div>
+      </a>
+      <div class="checkout-secure">
+        <span aria-hidden="true">🛡</span>
+        <div>
+          <strong>Finalização protegida</strong>
+          <small>Seus dados não serão salvos nesta demonstração.</small>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="checkout-main">
+    <div class="container">
+      <nav class="checkout-steps" aria-label="Etapas da compra">
+        <span class="is-complete"><b>1</b>Carrinho</span>
+        <span class="is-active" aria-current="step"><b>2</b>Identificação e entrega</span>
+        <span><b>3</b>Pagamento</span>
+      </nav>
+
+      <div class="checkout-heading">
+        <div>
+          <span>FECHAMENTO DO PEDIDO</span>
+          <h1>Revise seus dados e a entrega.</h1>
+          <p>Preencha as informações abaixo para preparar seu pedido. A cobrança pelo Mercado Pago será ativada na próxima etapa.</p>
+        </div>
+        <a href="catalogo-casa.html#catalogo">← Continuar comprando</a>
+      </div>
+
+      <div class="checkout-pilot-note" role="status">
+        <span aria-hidden="true">ℹ</span>
+        <p><strong>Tela em modo piloto.</strong> Você pode testar o preenchimento, mas nenhum pedido ou pagamento será enviado agora.</p>
+      </div>
+
+      <div class="checkout-empty" data-checkout-empty hidden>
+        <strong>Seu carrinho ainda não está pronto para finalizar.</strong>
+        <p>Adicione um produto e selecione o frete antes de acessar o checkout.</p>
+        <a class="btn btn-primary" href="catalogo-casa.html#catalogo">Voltar ao catálogo</a>
+      </div>
+
+      <div class="checkout-layout" data-checkout-content hidden>
+        <form class="checkout-form" id="checkout-form">
+          <section class="checkout-card" aria-labelledby="checkout-contact-title">
+            <header class="checkout-card-heading">
+              <span>1</span>
+              <div>
+                <h2 id="checkout-contact-title">Seus dados</h2>
+                <p>Usaremos essas informações somente para identificar e atualizar o pedido.</p>
+              </div>
+            </header>
+            <div class="checkout-fields">
+              <label class="checkout-field checkout-field-wide">
+                <span>Nome completo</span>
+                <input name="name" autocomplete="name" minlength="3" required placeholder="Como devemos chamar você?" />
+              </label>
+              <label class="checkout-field">
+                <span>E-mail</span>
+                <input name="email" type="email" autocomplete="email" required placeholder="voce@exemplo.com" />
+              </label>
+              <label class="checkout-field">
+                <span>WhatsApp</span>
+                <input name="whatsapp" type="tel" inputmode="tel" autocomplete="tel" required placeholder="(00) 00000-0000" data-whatsapp-input />
+              </label>
+            </div>
+          </section>
+
+          <section class="checkout-card" aria-labelledby="checkout-address-title">
+            <header class="checkout-card-heading">
+              <span>2</span>
+              <div>
+                <h2 id="checkout-address-title">Endereço de entrega</h2>
+                <p>O CEP abaixo corresponde ao frete selecionado no carrinho.</p>
+              </div>
+            </header>
+            <div class="checkout-fields checkout-address-fields">
+              <label class="checkout-field">
+                <span>CEP</span>
+                <input name="postcode" inputmode="numeric" autocomplete="postal-code" readonly data-checkout-postcode />
+                <small>Para alterar, volte ao carrinho e refaça a cotação.</small>
+              </label>
+              <label class="checkout-field checkout-field-street">
+                <span>Rua ou avenida</span>
+                <input name="street" autocomplete="address-line1" required placeholder="Nome da rua" />
+              </label>
+              <label class="checkout-field checkout-field-number">
+                <span>Número</span>
+                <input name="number" autocomplete="address-line2" required placeholder="123" />
+              </label>
+              <label class="checkout-field checkout-field-complement">
+                <span>Complemento <small>(opcional)</small></span>
+                <input name="complement" autocomplete="address-line2" placeholder="Apto, bloco ou referência" />
+              </label>
+              <label class="checkout-field">
+                <span>Bairro</span>
+                <input name="district" required placeholder="Seu bairro" />
+              </label>
+              <label class="checkout-field checkout-field-city">
+                <span>Cidade</span>
+                <input name="city" autocomplete="address-level2" required placeholder="Sua cidade" />
+              </label>
+              <label class="checkout-field checkout-field-state">
+                <span>Estado</span>
+                <select name="state" autocomplete="address-level1" required>
+                  <option value="">UF</option>
+                  <option>AC</option><option>AL</option><option>AP</option><option>AM</option>
+                  <option>BA</option><option>CE</option><option>DF</option><option>ES</option>
+                  <option>GO</option><option>MA</option><option>MT</option><option>MS</option>
+                  <option>MG</option><option>PA</option><option>PB</option><option>PR</option>
+                  <option>PE</option><option>PI</option><option>RJ</option><option>RN</option>
+                  <option>RS</option><option>RO</option><option>RR</option><option>SC</option>
+                  <option>SP</option><option>SE</option><option>TO</option>
+                </select>
+              </label>
+            </div>
+          </section>
+
+          <section class="checkout-card" aria-labelledby="checkout-whatsapp-title">
+            <header class="checkout-card-heading">
+              <span>3</span>
+              <div>
+                <h2 id="checkout-whatsapp-title">Novidades pelo WhatsApp</h2>
+                <p>Esta escolha é opcional e não interfere na compra.</p>
+              </div>
+            </header>
+            <label class="checkout-consent">
+              <input type="checkbox" name="whatsappMarketing" />
+              <span>
+                <strong>Quero receber promoções e novidades da Chi Rho.</strong>
+                <small>Você poderá cancelar quando desejar. Não adicionaremos seu número automaticamente a grupos.</small>
+              </span>
+            </label>
+          </section>
+
+          <section class="checkout-card checkout-payment-preview" aria-labelledby="checkout-payment-title">
+            <header class="checkout-card-heading">
+              <span>4</span>
+              <div>
+                <h2 id="checkout-payment-title">Pagamento</h2>
+                <p>O Mercado Pago será conectado depois que esta tela for aprovada.</p>
+              </div>
+            </header>
+            <div class="checkout-payment-method">
+              <span aria-hidden="true">💳</span>
+              <div>
+                <strong>Mercado Pago</strong>
+                <small>Pix, cartões e boleto em ambiente seguro.</small>
+              </div>
+              <b>Em configuração</b>
+            </div>
+          </section>
+
+          <label class="checkout-confirmation">
+            <input type="checkbox" required />
+            <span>Confirmo que revisei os dados, o endereço, os produtos e o frete deste pedido.</span>
+          </label>
+
+          <button class="btn btn-primary checkout-submit" type="submit">Validar dados do pedido</button>
+          <p class="checkout-form-status" data-checkout-form-status aria-live="polite"></p>
+        </form>
+
+        <aside class="checkout-summary" aria-labelledby="checkout-summary-title">
+          <div class="checkout-summary-card">
+            <div class="checkout-summary-heading">
+              <div>
+                <span>SEU PEDIDO</span>
+                <h2 id="checkout-summary-title">Resumo da compra</h2>
+              </div>
+              <a href="catalogo-casa.html#carrinho">Editar</a>
+            </div>
+            <div class="checkout-summary-items" data-checkout-items></div>
+            <div class="checkout-delivery" data-checkout-delivery></div>
+            <dl class="checkout-totals">
+              <div><dt>Produtos</dt><dd data-checkout-subtotal>R$ 0,00</dd></div>
+              <div><dt>Frete</dt><dd data-checkout-shipping-price>R$ 0,00</dd></div>
+              <div class="checkout-total"><dt>Total</dt><dd data-checkout-total>R$ 0,00</dd></div>
+            </dl>
+            <p class="checkout-summary-safe"><span aria-hidden="true">🔒</span> O pagamento será processado pelo Mercado Pago na próxima etapa.</p>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </main>
+
+  <footer class="checkout-footer">
+    <div class="container">
+      <span>© Chi Rho • Casa, Família e Fé</span>
+      <a href="index.html#contato">Precisa de ajuda?</a>
+    </div>
+  </footer>
+
+  <script type="module" src="checkout.js"></script>
+</body>
+</html>

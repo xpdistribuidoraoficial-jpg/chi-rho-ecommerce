@@ -1617,6 +1617,7 @@ productDialogElement?.addEventListener("close", () => {
 });
 
 const TEST_CART_STORAGE_KEY = "chi-rho-test-cart-v1";
+const TEST_CART_SHIPPING_STORAGE_KEY = "chi-rho-test-shipping-v1";
 
 const loadTestCart = () => {
   try {
@@ -1630,6 +1631,24 @@ const loadTestCart = () => {
 };
 
 let testCart = loadTestCart();
+
+const loadTestCartShipping = () => {
+  try {
+    const storedShipping = JSON.parse(sessionStorage.getItem(TEST_CART_SHIPPING_STORAGE_KEY) || "null");
+    const service = storedShipping?.service;
+    if (
+      onlyDigits(storedShipping?.cep).length === 8
+      && typeof service?.carrier === "string"
+      && typeof service?.description === "string"
+      && Number.isFinite(service?.price)
+    ) {
+      return { cep: onlyDigits(storedShipping.cep), service };
+    }
+  } catch {
+    // Uma nova cotação será solicitada caso a sessão não esteja disponível.
+  }
+  return null;
+};
 
 const testCartDialog = document.createElement("dialog");
 testCartDialog.className = "test-cart-dialog";
@@ -1660,15 +1679,39 @@ testCartDialog.innerHTML = `
         <div><span>Frete</span><strong data-cart-shipping-price>Calcule pelo CEP</strong></div>
         <div class="test-cart-total"><span>Total</span><strong data-cart-total>R$ 0,00</strong></div>
       </div>
-      <button class="btn btn-primary" type="button" disabled>Finalizar compra</button>
-      <small>Frete calculado pela Frenet. Pagamento ainda indisponível neste ambiente piloto.</small>
+      <button class="btn btn-primary" type="button" data-cart-checkout disabled>Finalizar compra</button>
+      <small>Frete calculado pela Frenet. O pagamento será configurado na próxima etapa.</small>
     </footer>
   </div>
 `;
 document.body.appendChild(testCartDialog);
 
-let selectedCartShipping = null;
+const storedCartShipping = loadTestCartShipping();
+let selectedCartShipping = storedCartShipping?.service || null;
+let selectedCartPostcode = storedCartShipping?.cep || "";
 let testCartSubtotal = 0;
+
+const saveCartShipping = () => {
+  if (!selectedCartShipping || !selectedCartPostcode) return;
+  try {
+    sessionStorage.setItem(TEST_CART_SHIPPING_STORAGE_KEY, JSON.stringify({
+      cep: selectedCartPostcode,
+      service: selectedCartShipping
+    }));
+  } catch {
+    // O checkout permanece disponível durante a navegação atual.
+  }
+};
+
+const clearCartShipping = () => {
+  selectedCartShipping = null;
+  selectedCartPostcode = "";
+  try {
+    sessionStorage.removeItem(TEST_CART_SHIPPING_STORAGE_KEY);
+  } catch {
+    // A cotação continua sendo removida da memória desta página.
+  }
+};
 
 const renderCartTotals = () => {
   const shippingPrice = selectedCartShipping?.price || 0;
@@ -1677,10 +1720,12 @@ const renderCartTotals = () => {
     ? formatCurrency(shippingPrice)
     : "Calcule pelo CEP";
   testCartDialog.querySelector("[data-cart-total]").textContent = formatCurrency(testCartSubtotal + shippingPrice);
+  const checkoutButton = testCartDialog.querySelector("[data-cart-checkout]");
+  if (checkoutButton) checkoutButton.disabled = testCartSubtotal <= 0 || !selectedCartShipping;
 };
 
 const resetCartShipping = (message = "Informe o CEP de entrega.") => {
-  selectedCartShipping = null;
+  clearCartShipping();
   testCartDialog.querySelector(".test-cart-shipping-options").replaceChildren();
   testCartDialog.querySelector("[data-cart-shipping-status]").textContent = message;
   renderCartTotals();
@@ -1698,7 +1743,7 @@ const calculateCartShipping = async () => {
     return;
   }
 
-  selectedCartShipping = null;
+  clearCartShipping();
   renderCartTotals();
   calculateButton.disabled = true;
   status.textContent = "Consultando preços e prazos na Frenet…";
@@ -1711,6 +1756,8 @@ const calculateCartShipping = async () => {
       selectable: true,
       onSelect: (service, selectedOption) => {
         selectedCartShipping = service;
+        selectedCartPostcode = onlyDigits(postcodeInput.value);
+        saveCartShipping();
         options.querySelectorAll(".shipping-option").forEach((option) => {
           option.classList.toggle("is-selected", option === selectedOption);
         });
@@ -1808,9 +1855,14 @@ const renderTestCart = () => {
 
   const postcodeInput = testCartDialog.querySelector("#test-cart-postcode");
   const calculateButton = testCartDialog.querySelector("[data-cart-shipping-calculate]");
+  const shippingStatus = testCartDialog.querySelector("[data-cart-shipping-status]");
   postcodeInput.disabled = validItems.length === 0;
   calculateButton.disabled = validItems.length === 0;
   if (validItems.length === 0) resetCartShipping("Adicione um produto antes de calcular o frete.");
+  if (validItems.length > 0 && selectedCartShipping && selectedCartPostcode) {
+    postcodeInput.value = formatPostcode(selectedCartPostcode);
+    shippingStatus.textContent = `Frete selecionado: ${selectedCartShipping.carrier} • ${selectedCartShipping.description}.`;
+  }
   renderCartTotals();
 };
 
@@ -1856,6 +1908,9 @@ document.addEventListener("click", (event) => {
 
   const calculateShippingButton = event.target.closest("[data-cart-shipping-calculate]");
   if (calculateShippingButton && !calculateShippingButton.disabled) calculateCartShipping();
+
+  const checkoutButton = event.target.closest("[data-cart-checkout]");
+  if (checkoutButton && !checkoutButton.disabled) window.location.href = "checkout.html";
 
   if (event.target === testCartDialog) testCartDialog.close();
 });
