@@ -1089,7 +1089,7 @@ const catalogProducts = Object.freeze([
     imagem: "assets/products/casa-balanca-digital-cozinha-10kg.webp",
     descricao: "Balança eletrônica branca com capacidade de até 10 kg, alta precisão e função tara para apoiar o preparo de receitas.",
     perfil: "Precisão no preparo",
-    preco: null,
+    preco: 29.90,
     estoque: null,
     destaque: false,
     maisVendido: false,
@@ -1105,7 +1105,7 @@ const catalogProducts = Object.freeze([
     descricao: "Bomba elétrica universal com recarga USB para servir água diretamente do garrafão com praticidade no dia a dia.",
     perfil: "Praticidade para o lar",
     marca: "Lotus",
-    preco: null,
+    preco: 32.90,
     estoque: null,
     destaque: false,
     maisVendido: false,
@@ -1371,7 +1371,11 @@ const openProductDialog = (slug, { syncUrl = true } = {}) => {
     ? product.estoque > 0
       ? "Disponível para compra."
       : "Produto indisponível no momento."
-    : "Preço e disponibilidade ainda não cadastrados.";
+    : hasPrice
+      ? "Preço cadastrado. Disponibilidade ainda não informada."
+      : hasStock
+        ? "Disponibilidade cadastrada. Preço ainda não informado."
+        : "Preço e disponibilidade ainda não cadastrados.";
   setProductDialogText("#product-dialog-availability", availability, "Consulte disponibilidade.");
 
   if (productDialogQuantity) productDialogQuantity.textContent = "1";
