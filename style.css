@@ -558,6 +558,10 @@ a{text-decoration:none;color:inherit} button,input{font:inherit}
 .product-dialog-copy{padding:48px 46px;display:flex;flex-direction:column;justify-content:center}
 .product-dialog-copy h2{margin:10px 0 14px;color:var(--navy);font-size:32px;line-height:1.15}
 .product-dialog-copy p{margin:0;color:var(--muted);font-size:16px;line-height:1.7}
+#product-dialog-simple-content{display:flex;flex-direction:column;align-items:flex-start}
+#product-dialog-simple-content[hidden],#product-dialog-book-content[hidden]{display:none}
+#product-dialog-simple-content>strong{margin-top:22px;color:var(--navy);font-size:18px}
+#product-dialog-simple-content>small{margin:8px 0 28px;color:var(--muted);line-height:1.5}
 .product-dialog-details{margin:26px 0 0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px 20px}
 .product-dialog-details div{min-width:0;padding-bottom:13px;border-bottom:1px solid #dce9e8}
 .product-dialog-details dt{margin:0 0 4px;color:var(--muted);font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em}
