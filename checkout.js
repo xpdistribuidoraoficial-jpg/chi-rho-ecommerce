@@ -71,6 +71,47 @@ const loadShipping = () => {
   }
 };
 
+const fillAddressByPostcode = async (form, postcode) => {
+  const status = form.querySelector("[data-address-status]");
+  if (!status) return;
+
+  status.textContent = "Buscando endereço pelo CEP…";
+  status.className = "checkout-address-status is-loading";
+
+  try {
+    const response = await fetch(`/api/cep?cep=${encodeURIComponent(postcode)}`, {
+      headers: { Accept: "application/json" }
+    });
+    const address = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      throw new Error(address.error || "Não foi possível consultar o CEP.");
+    }
+
+    const fields = {
+      street: address.street,
+      district: address.district,
+      city: address.city,
+      state: address.state
+    };
+
+    Object.entries(fields).forEach(([name, value]) => {
+      if (value && !form.elements[name].value) {
+        form.elements[name].value = value;
+      }
+    });
+
+    const hasCompleteAddress = address.street && address.district && address.city && address.state;
+    status.textContent = hasCompleteAddress
+      ? "Endereço localizado. Complete o número e, se necessário, o complemento."
+      : "CEP localizado. Complete os campos de endereço que faltam.";
+    status.className = "checkout-address-status is-success";
+  } catch {
+    status.textContent = "Não foi possível preencher automaticamente. Complete o endereço manualmente."
+    status.className = "checkout-address-status is-error";
+  }
+};
+
 const cart = loadCart();
 const shipping = loadShipping();
 const emptyState = document.querySelector("[data-checkout-empty]");
@@ -118,6 +159,8 @@ if (cart.length === 0 || !shipping) {
   document.querySelector("[data-checkout-subtotal]").textContent = formatCurrency(subtotal);
   document.querySelector("[data-checkout-shipping-price]").textContent = formatCurrency(shipping.service.price);
   document.querySelector("[data-checkout-total]").textContent = formatCurrency(total);
+
+  fillAddressByPostcode(document.querySelector("#checkout-form"), shipping.cep);
 }
 
 document.querySelector("[data-whatsapp-input]")?.addEventListener("input", (event) => {
