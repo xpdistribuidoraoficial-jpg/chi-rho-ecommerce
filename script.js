@@ -1563,7 +1563,7 @@ const openProductDialog = (slug, { syncUrl = true } = {}) => {
 
 document.addEventListener("click", (event) => {
   const productButton = event.target.closest("[data-product-slug]");
-  if (productButton) {
+  if (productButton && productButton !== productDialogElement) {
     openProductDialog(productButton.dataset.productSlug);
   }
 
