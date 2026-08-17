@@ -1289,17 +1289,35 @@ document.querySelectorAll(".search").forEach((form) => {
 
 const productDialogElement = document.querySelector("#product-dialog");
 const productDialogQuantity = productDialogElement?.querySelector("#product-dialog-quantity");
+const productDialogBookContent = productDialogElement?.querySelector("#product-dialog-book-content");
+const productDialogSimpleContent = productDialogElement?.querySelector("#product-dialog-simple-content");
 
 const setProductDialogText = (selector, value, fallback) => {
   const element = productDialogElement?.querySelector(selector);
   if (element) element.textContent = value || fallback;
 };
 
-const openProductDialog = (slug) => {
+const setBookDialogUrl = (slug) => {
+  const url = new URL(window.location.href);
+  if (slug) {
+    url.searchParams.set("produto", slug);
+  } else {
+    url.searchParams.delete("produto");
+  }
+  history.replaceState(null, "", url);
+};
+
+const closeProductDialog = () => {
+  productDialogElement?.close();
+  if (new URLSearchParams(window.location.search).has("produto")) setBookDialogUrl(null);
+};
+
+const openProductDialog = (slug, { syncUrl = true } = {}) => {
   const product = catalogProducts.find((item) => item.slug === slug && isProductActive(item));
   if (!product || !productDialogElement) return;
 
   const image = productDialogElement.querySelector("#product-dialog-image");
+  const isChristianBook = product.categoriaSlug === "livros-cristaos";
   productDialogElement.dataset.category = product.categoriaSlug;
   image.src = product.imagem;
   image.alt = product.nome;
@@ -1308,14 +1326,22 @@ const openProductDialog = (slug) => {
   productDialogElement.querySelector("#product-dialog-title").textContent = product.nome;
   productDialogElement.querySelector("#product-dialog-description").textContent = product.descricao;
   productDialogElement.querySelector("#product-dialog-status").textContent = getProductStatus(product);
+  setProductDialogText("#product-dialog-simple-status", getProductStatus(product), "Preço em breve");
   setProductDialogText("#product-dialog-author", product.autor || product.marca, "Não informado");
   setProductDialogText("#product-dialog-publisher", product.editora, "Não informada");
   setProductDialogText("#product-dialog-detail-category", product.categoria, "Não informada");
   setProductDialogText("#product-dialog-profile", product.perfil, "Não informada");
 
+  if (productDialogBookContent && productDialogSimpleContent) {
+    productDialogBookContent.hidden = !isChristianBook;
+    productDialogSimpleContent.hidden = isChristianBook;
+  }
+
   const badge = productDialogElement.querySelector("#product-dialog-badge");
-  badge.hidden = !product.maisVendidoLivro;
-  badge.textContent = product.maisVendidoLivro ? "Mais vendido" : "";
+  if (badge) {
+    badge.hidden = !(isChristianBook && product.maisVendidoLivro);
+    badge.textContent = isChristianBook && product.maisVendidoLivro ? "Mais vendido" : "";
+  }
 
   const hasPrice = typeof product.preco === "number";
   const hasStock = typeof product.estoque === "number";
@@ -1329,10 +1355,12 @@ const openProductDialog = (slug) => {
   if (productDialogQuantity) productDialogQuantity.textContent = "1";
 
   if (typeof productDialogElement.showModal === "function") {
-    productDialogElement.showModal();
+    if (!productDialogElement.open) productDialogElement.showModal();
   } else {
     productDialogElement.setAttribute("open", "");
   }
+
+  if (isChristianBook && syncUrl) setBookDialogUrl(product.slug);
 };
 
 document.addEventListener("click", (event) => {
@@ -1342,7 +1370,7 @@ document.addEventListener("click", (event) => {
   }
 
   if (event.target.closest("[data-close-dialog]")) {
-    productDialogElement?.close();
+    closeProductDialog();
   }
 
   const quantityAction = event.target.closest("[data-quantity-action]");
@@ -1355,13 +1383,17 @@ document.addEventListener("click", (event) => {
   }
 
   if (event.target === productDialogElement) {
-    productDialogElement.close();
+    closeProductDialog();
   }
 });
 
-if (window.location.hash.length > 1) {
-  const productSlug = window.location.hash.slice(1);
-  if (catalogProducts.some((product) => product.slug === productSlug && isProductActive(product))) {
-    window.addEventListener("load", () => openProductDialog(productSlug), { once: true });
-  }
+productDialogElement?.addEventListener("close", () => {
+  if (new URLSearchParams(window.location.search).has("produto")) setBookDialogUrl(null);
+});
+
+const requestedProductSlug = new URLSearchParams(window.location.search).get("produto");
+const legacyProductSlug = window.location.hash.length > 1 ? window.location.hash.slice(1) : "";
+const initialProductSlug = requestedProductSlug || legacyProductSlug;
+if (initialProductSlug && catalogProducts.some((product) => product.slug === initialProductSlug && isProductActive(product))) {
+  window.addEventListener("load", () => openProductDialog(initialProductSlug, { syncUrl: false }), { once: true });
 }
