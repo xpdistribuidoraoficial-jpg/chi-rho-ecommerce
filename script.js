@@ -1337,7 +1337,7 @@ const openProductDialog = (slug, { syncUrl = true } = {}) => {
   const image = productDialogElement.querySelector("#product-dialog-image");
   const isChristianBook = product.categoriaSlug === "livros-cristaos";
   const isBible = product.categoriaSlug.startsWith("biblias");
-  const usesFullDialog = isChristianBook || isBible;
+  const usesFullDialog = isChristianBook || isBible || product.brinquedo || product.casa;
   productDialogElement.dataset.category = product.categoriaSlug;
   image.src = product.imagem;
   image.alt = product.nome;
@@ -1360,8 +1360,9 @@ const openProductDialog = (slug, { syncUrl = true } = {}) => {
 
   const badge = productDialogElement.querySelector("#product-dialog-badge");
   if (badge) {
-    badge.hidden = !(isChristianBook && product.maisVendidoLivro);
-    badge.textContent = isChristianBook && product.maisVendidoLivro ? "Mais vendido" : "";
+    const isBestSeller = product.maisVendidoLivro || product.maisVendido;
+    badge.hidden = !isBestSeller;
+    badge.textContent = isBestSeller ? "Mais vendido" : "";
   }
 
   const hasPrice = typeof product.preco === "number";
