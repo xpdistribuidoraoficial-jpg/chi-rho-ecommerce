@@ -1297,6 +1297,24 @@ const setProductDialogText = (selector, value, fallback) => {
   if (element) element.textContent = value || fallback;
 };
 
+const setProductDialogDetails = (product) => {
+  const details = [
+    product.autor ? { label: "Autor", value: product.autor } : null,
+    product.editora ? { label: "Editora", value: product.editora } : null,
+    product.marca ? { label: "Marca", value: product.marca } : null,
+    { label: "Categoria", value: product.categoria },
+    { label: "Indicação", value: product.perfil }
+  ].filter(Boolean).slice(0, 4);
+
+  productDialogElement?.querySelectorAll("[data-product-detail]").forEach((element, index) => {
+    const detail = details[index];
+    element.hidden = !detail;
+    if (!detail) return;
+    element.querySelector("[data-product-detail-label]").textContent = detail.label;
+    element.querySelector("[data-product-detail-value]").textContent = detail.value;
+  });
+};
+
 const setBookDialogUrl = (slug) => {
   const url = new URL(window.location.href);
   if (slug) {
@@ -1318,6 +1336,8 @@ const openProductDialog = (slug, { syncUrl = true } = {}) => {
 
   const image = productDialogElement.querySelector("#product-dialog-image");
   const isChristianBook = product.categoriaSlug === "livros-cristaos";
+  const isChildrenBible = product.categoriaSlug === "biblias-infantis";
+  const usesFullDialog = isChristianBook || isChildrenBible;
   productDialogElement.dataset.category = product.categoriaSlug;
   image.src = product.imagem;
   image.alt = product.nome;
@@ -1331,10 +1351,11 @@ const openProductDialog = (slug, { syncUrl = true } = {}) => {
   setProductDialogText("#product-dialog-publisher", product.editora, "Não informada");
   setProductDialogText("#product-dialog-detail-category", product.categoria, "Não informada");
   setProductDialogText("#product-dialog-profile", product.perfil, "Não informada");
+  setProductDialogDetails(product);
 
   if (productDialogBookContent && productDialogSimpleContent) {
-    productDialogBookContent.hidden = !isChristianBook;
-    productDialogSimpleContent.hidden = isChristianBook;
+    productDialogBookContent.hidden = !usesFullDialog;
+    productDialogSimpleContent.hidden = usesFullDialog;
   }
 
   const badge = productDialogElement.querySelector("#product-dialog-badge");
@@ -1360,7 +1381,7 @@ const openProductDialog = (slug, { syncUrl = true } = {}) => {
     productDialogElement.setAttribute("open", "");
   }
 
-  if (isChristianBook && syncUrl) setBookDialogUrl(product.slug);
+  if (usesFullDialog && syncUrl) setBookDialogUrl(product.slug);
 };
 
 document.addEventListener("click", (event) => {
