@@ -107,14 +107,55 @@
       <div class="product-dialog-grid">
         <div class="product-dialog-media">
           <img id="product-dialog-image" src="" alt="" />
+          <span class="product-dialog-badge" id="product-dialog-badge" hidden>Mais vendido</span>
         </div>
         <div class="product-dialog-copy">
           <span class="product-category-label" id="product-dialog-category"></span>
           <h2 id="product-dialog-title"></h2>
           <p id="product-dialog-description"></p>
-          <strong id="product-dialog-status">Preço em breve</strong>
-          <small>Consulte disponibilidade antes de concluir sua escolha.</small>
-          <a href="#catalogo" class="btn btn-primary">Ver catálogo infantil →</a>
+
+          <div id="product-dialog-simple-content">
+            <strong id="product-dialog-simple-status">Preço em breve</strong>
+            <small>Consulte disponibilidade antes de concluir sua escolha.</small>
+            <a href="#catalogo" class="btn btn-primary">Ver catálogo infantil →</a>
+          </div>
+
+          <div id="product-dialog-book-content" hidden>
+            <dl class="product-dialog-details" aria-label="Informações do produto">
+              <div data-product-detail><dt data-product-detail-label></dt><dd data-product-detail-value></dd></div>
+              <div data-product-detail><dt data-product-detail-label></dt><dd data-product-detail-value></dd></div>
+              <div data-product-detail><dt data-product-detail-label></dt><dd data-product-detail-value></dd></div>
+              <div data-product-detail><dt data-product-detail-label></dt><dd data-product-detail-value></dd></div>
+            </dl>
+
+            <section class="product-dialog-purchase" aria-label="Área de compra">
+              <span class="product-dialog-price-label">Preço</span>
+              <strong id="product-dialog-status">Preço em breve</strong>
+              <small id="product-dialog-availability">Preço e disponibilidade ainda não cadastrados.</small>
+              <div class="product-dialog-purchase-fields">
+                <div class="product-dialog-quantity">
+                  <span>Quantidade</span>
+                  <div>
+                    <button type="button" aria-label="Diminuir quantidade" data-quantity-action="decrease" disabled>−</button>
+                    <output id="product-dialog-quantity" aria-live="polite">1</output>
+                    <button type="button" aria-label="Aumentar quantidade" data-quantity-action="increase" disabled>+</button>
+                  </div>
+                </div>
+                <label class="product-dialog-shipping">
+                  <span>Calcular frete</span>
+                  <span class="product-dialog-shipping-field">
+                    <input id="product-dialog-postcode" type="text" inputmode="numeric" autocomplete="postal-code" placeholder="Digite o CEP" aria-label="CEP" disabled />
+                    <button type="button" disabled>Calcular</button>
+                  </span>
+                </label>
+              </div>
+              <div class="product-dialog-actions">
+                <button class="btn btn-secondary" id="product-dialog-add-cart" type="button" disabled>Adicionar ao carrinho</button>
+                <button class="btn btn-primary" id="product-dialog-buy-now" type="button" disabled>Comprar agora</button>
+              </div>
+              <p class="product-dialog-activation-note">A compra será liberada após o cadastro do preço, estoque, frete e checkout.</p>
+            </section>
+          </div>
         </div>
       </div>
     </dialog>
