@@ -1288,6 +1288,12 @@ document.querySelectorAll(".search").forEach((form) => {
 });
 
 const productDialogElement = document.querySelector("#product-dialog");
+const productDialogQuantity = productDialogElement?.querySelector("#product-dialog-quantity");
+
+const setProductDialogText = (selector, value, fallback) => {
+  const element = productDialogElement?.querySelector(selector);
+  if (element) element.textContent = value || fallback;
+};
 
 const openProductDialog = (slug) => {
   const product = catalogProducts.find((item) => item.slug === slug && isProductActive(item));
@@ -1302,6 +1308,25 @@ const openProductDialog = (slug) => {
   productDialogElement.querySelector("#product-dialog-title").textContent = product.nome;
   productDialogElement.querySelector("#product-dialog-description").textContent = product.descricao;
   productDialogElement.querySelector("#product-dialog-status").textContent = getProductStatus(product);
+  setProductDialogText("#product-dialog-author", product.autor || product.marca, "Não informado");
+  setProductDialogText("#product-dialog-publisher", product.editora, "Não informada");
+  setProductDialogText("#product-dialog-detail-category", product.categoria, "Não informada");
+  setProductDialogText("#product-dialog-profile", product.perfil, "Não informada");
+
+  const badge = productDialogElement.querySelector("#product-dialog-badge");
+  badge.hidden = !product.maisVendidoLivro;
+  badge.textContent = product.maisVendidoLivro ? "Mais vendido" : "";
+
+  const hasPrice = typeof product.preco === "number";
+  const hasStock = typeof product.estoque === "number";
+  const availability = hasPrice && hasStock
+    ? product.estoque > 0
+      ? "Disponível para compra."
+      : "Produto indisponível no momento."
+    : "Preço e disponibilidade ainda não cadastrados.";
+  setProductDialogText("#product-dialog-availability", availability, "Consulte disponibilidade.");
+
+  if (productDialogQuantity) productDialogQuantity.textContent = "1";
 
   if (typeof productDialogElement.showModal === "function") {
     productDialogElement.showModal();
@@ -1318,6 +1343,15 @@ document.addEventListener("click", (event) => {
 
   if (event.target.closest("[data-close-dialog]")) {
     productDialogElement?.close();
+  }
+
+  const quantityAction = event.target.closest("[data-quantity-action]");
+  if (quantityAction && productDialogQuantity && !quantityAction.disabled) {
+    const currentQuantity = Number(productDialogQuantity.textContent) || 1;
+    const nextQuantity = quantityAction.dataset.quantityAction === "increase"
+      ? currentQuantity + 1
+      : Math.max(1, currentQuantity - 1);
+    productDialogQuantity.textContent = String(nextQuantity);
   }
 
   if (event.target === productDialogElement) {
