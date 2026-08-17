@@ -1087,10 +1087,16 @@ const catalogProducts = Object.freeze([
     categoria: "Cozinha",
     categoriaSlug: "cozinha",
     imagem: "assets/products/casa-balanca-digital-cozinha-10kg.webp",
+    imagens: [
+      "assets/products/casa-balanca-digital-cozinha-10kg.webp",
+      "assets/products/casa-balanca-digital-cozinha-10kg-frente.webp",
+      "assets/products/casa-balanca-digital-cozinha-10kg-uso.webp"
+    ],
     descricao: "Balança eletrônica branca com capacidade de até 10 kg, alta precisão e função tara para apoiar o preparo de receitas.",
     perfil: "Precisão no preparo",
     preco: 29.90,
-    estoque: null,
+    estoque: 5,
+    testeCarrinho: true,
     destaque: false,
     maisVendido: false,
     casa: true
@@ -1102,11 +1108,17 @@ const catalogProducts = Object.freeze([
     categoria: "Utilidades Domésticas",
     categoriaSlug: "utilidades-domesticas",
     imagem: "assets/products/casa-bomba-eletrica-garrafa-agua.webp",
+    imagens: [
+      "assets/products/casa-bomba-eletrica-garrafa-agua.webp",
+      "assets/products/casa-bomba-eletrica-garrafa-agua-frente.webp",
+      "assets/products/casa-bomba-eletrica-garrafa-agua-detalhes.webp"
+    ],
     descricao: "Bomba elétrica universal com recarga USB para servir água diretamente do garrafão com praticidade no dia a dia.",
     perfil: "Praticidade para o lar",
     marca: "Lotus",
     preco: 32.90,
-    estoque: null,
+    estoque: 5,
+    testeCarrinho: true,
     destaque: false,
     maisVendido: false,
     casa: true
@@ -1292,6 +1304,43 @@ const productDialogQuantity = productDialogElement?.querySelector("#product-dial
 const productDialogBookContent = productDialogElement?.querySelector("#product-dialog-book-content");
 const productDialogSimpleContent = productDialogElement?.querySelector("#product-dialog-simple-content");
 
+const setProductDialogGallery = (product) => {
+  const media = productDialogElement?.querySelector(".product-dialog-media");
+  const mainImage = productDialogElement?.querySelector("#product-dialog-image");
+  if (!media || !mainImage) return;
+
+  media.querySelector(".product-dialog-thumbnails")?.remove();
+  const images = Array.isArray(product.imagens) && product.imagens.length
+    ? product.imagens
+    : [product.imagem];
+
+  mainImage.src = images[0];
+  mainImage.alt = product.nome;
+  if (images.length < 2) return;
+
+  const thumbnails = document.createElement("div");
+  thumbnails.className = "product-dialog-thumbnails";
+  thumbnails.setAttribute("aria-label", `Fotos de ${product.nome}`);
+
+  images.forEach((imageSource, index) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = index === 0 ? "is-active" : "";
+    button.dataset.galleryImage = imageSource;
+    button.setAttribute("aria-label", `Ver foto ${index + 1} de ${images.length}`);
+    button.setAttribute("aria-pressed", String(index === 0));
+
+    const thumbnail = document.createElement("img");
+    thumbnail.src = imageSource;
+    thumbnail.alt = "";
+    thumbnail.loading = "lazy";
+    button.appendChild(thumbnail);
+    thumbnails.appendChild(button);
+  });
+
+  media.appendChild(thumbnails);
+};
+
 const setProductDialogText = (selector, value, fallback) => {
   const element = productDialogElement?.querySelector(selector);
   if (element) element.textContent = value || fallback;
@@ -1339,8 +1388,8 @@ const openProductDialog = (slug, { syncUrl = true } = {}) => {
   const isBible = product.categoriaSlug.startsWith("biblias");
   const usesFullDialog = isChristianBook || isBible || product.brinquedo || product.casa;
   productDialogElement.dataset.category = product.categoriaSlug;
-  image.src = product.imagem;
-  image.alt = product.nome;
+  productDialogElement.dataset.productSlug = product.slug;
+  setProductDialogGallery(product);
   productDialogElement.querySelector("#product-dialog-category").textContent =
     [product.categoria, product.autor || product.marca, product.editora].filter(Boolean).join(" • ");
   productDialogElement.querySelector("#product-dialog-title").textContent = product.nome;
@@ -1367,9 +1416,10 @@ const openProductDialog = (slug, { syncUrl = true } = {}) => {
 
   const hasPrice = typeof product.preco === "number";
   const hasStock = typeof product.estoque === "number";
+  const canUseTestCart = product.testeCarrinho === true && hasPrice && hasStock && product.estoque > 0;
   const availability = hasPrice && hasStock
     ? product.estoque > 0
-      ? "Disponível para compra."
+      ? `${product.estoque} ${product.estoque === 1 ? "unidade disponível" : "unidades disponíveis"} em estoque.`
       : "Produto indisponível no momento."
     : hasPrice
       ? "Preço cadastrado. Disponibilidade ainda não informada."
@@ -1377,8 +1427,26 @@ const openProductDialog = (slug, { syncUrl = true } = {}) => {
         ? "Disponibilidade cadastrada. Preço ainda não informado."
         : "Preço e disponibilidade ainda não cadastrados.";
   setProductDialogText("#product-dialog-availability", availability, "Consulte disponibilidade.");
+  setProductDialogText(
+    ".product-dialog-activation-note",
+    canUseTestCart
+      ? "Carrinho de teste ativo. Pagamento e cálculo de frete ainda não estão disponíveis."
+      : "A compra será liberada após o cadastro do preço, estoque, frete e checkout.",
+    "Checkout em preparação."
+  );
 
   if (productDialogQuantity) productDialogQuantity.textContent = "1";
+  productDialogElement.querySelectorAll("[data-quantity-action]").forEach((button) => {
+    button.disabled = !canUseTestCart;
+  });
+  const addCartButton = productDialogElement.querySelector("#product-dialog-add-cart");
+  if (addCartButton) addCartButton.disabled = !canUseTestCart;
+  const buyNowButton = productDialogElement.querySelector("#product-dialog-buy-now");
+  if (buyNowButton) buyNowButton.disabled = true;
+  const postcodeInput = productDialogElement.querySelector("#product-dialog-postcode");
+  if (postcodeInput) postcodeInput.disabled = true;
+  const shippingButton = productDialogElement.querySelector(".product-dialog-shipping-field button");
+  if (shippingButton) shippingButton.disabled = true;
 
   if (typeof productDialogElement.showModal === "function") {
     if (!productDialogElement.open) productDialogElement.showModal();
@@ -1395,6 +1463,17 @@ document.addEventListener("click", (event) => {
     openProductDialog(productButton.dataset.productSlug);
   }
 
+  const galleryButton = event.target.closest("[data-gallery-image]");
+  if (galleryButton && productDialogElement) {
+    const mainImage = productDialogElement.querySelector("#product-dialog-image");
+    if (mainImage) mainImage.src = galleryButton.dataset.galleryImage;
+    productDialogElement.querySelectorAll("[data-gallery-image]").forEach((button) => {
+      const isActive = button === galleryButton;
+      button.classList.toggle("is-active", isActive);
+      button.setAttribute("aria-pressed", String(isActive));
+    });
+  }
+
   if (event.target.closest("[data-close-dialog]")) {
     closeProductDialog();
   }
@@ -1402,8 +1481,10 @@ document.addEventListener("click", (event) => {
   const quantityAction = event.target.closest("[data-quantity-action]");
   if (quantityAction && productDialogQuantity && !quantityAction.disabled) {
     const currentQuantity = Number(productDialogQuantity.textContent) || 1;
+    const currentProduct = catalogProducts.find((product) => product.slug === productDialogElement?.dataset.productSlug);
+    const stockLimit = typeof currentProduct?.estoque === "number" ? currentProduct.estoque : 1;
     const nextQuantity = quantityAction.dataset.quantityAction === "increase"
-      ? currentQuantity + 1
+      ? Math.min(stockLimit, currentQuantity + 1)
       : Math.max(1, currentQuantity - 1);
     productDialogQuantity.textContent = String(nextQuantity);
   }
@@ -1416,6 +1497,175 @@ document.addEventListener("click", (event) => {
 productDialogElement?.addEventListener("close", () => {
   if (new URLSearchParams(window.location.search).has("produto")) setBookDialogUrl(null);
 });
+
+const TEST_CART_STORAGE_KEY = "chi-rho-test-cart-v1";
+
+const loadTestCart = () => {
+  try {
+    const storedCart = JSON.parse(localStorage.getItem(TEST_CART_STORAGE_KEY) || "[]");
+    return Array.isArray(storedCart)
+      ? storedCart.filter((item) => typeof item?.slug === "string" && Number.isInteger(item?.quantity))
+      : [];
+  } catch {
+    return [];
+  }
+};
+
+let testCart = loadTestCart();
+
+const testCartDialog = document.createElement("dialog");
+testCartDialog.className = "test-cart-dialog";
+testCartDialog.id = "test-cart-dialog";
+testCartDialog.setAttribute("aria-labelledby", "test-cart-title");
+testCartDialog.innerHTML = `
+  <div class="test-cart-layout">
+    <header class="test-cart-header">
+      <div>
+        <span>Carrinho piloto</span>
+        <h2 id="test-cart-title">Seu carrinho</h2>
+      </div>
+      <button type="button" data-cart-close aria-label="Fechar carrinho">×</button>
+    </header>
+    <div class="test-cart-items" aria-live="polite"></div>
+    <footer class="test-cart-footer">
+      <div><span>Subtotal</span><strong data-cart-subtotal>R$ 0,00</strong></div>
+      <button class="btn btn-primary" type="button" disabled>Finalizar compra</button>
+      <small>Ambiente de teste: pagamento e frete ainda não estão disponíveis.</small>
+    </footer>
+  </div>
+`;
+document.body.appendChild(testCartDialog);
+
+const saveTestCart = () => {
+  try {
+    localStorage.setItem(TEST_CART_STORAGE_KEY, JSON.stringify(testCart));
+  } catch {
+    // O carrinho continua funcionando nesta página mesmo sem armazenamento local.
+  }
+};
+
+const getTestCartProduct = (slug) => catalogProducts.find((product) =>
+  product.slug === slug
+  && product.testeCarrinho === true
+  && typeof product.preco === "number"
+  && typeof product.estoque === "number"
+);
+
+const updateTestCartQuantity = (slug, requestedQuantity) => {
+  const product = getTestCartProduct(slug);
+  if (!product) return;
+
+  const quantity = Math.max(0, Math.min(product.estoque, requestedQuantity));
+  const existingItem = testCart.find((item) => item.slug === slug);
+
+  if (quantity === 0) {
+    testCart = testCart.filter((item) => item.slug !== slug);
+  } else if (existingItem) {
+    existingItem.quantity = quantity;
+  } else {
+    testCart.push({ slug, quantity });
+  }
+
+  saveTestCart();
+  renderTestCart();
+};
+
+const renderTestCart = () => {
+  testCart = testCart
+    .map((item) => {
+      const product = getTestCartProduct(item.slug);
+      if (!product) return null;
+      return { slug: item.slug, quantity: Math.max(1, Math.min(product.estoque, item.quantity)) };
+    })
+    .filter(Boolean);
+
+  const itemsElement = testCartDialog.querySelector(".test-cart-items");
+  const validItems = testCart.map((item) => ({ ...item, product: getTestCartProduct(item.slug) }));
+  const totalQuantity = validItems.reduce((total, item) => total + item.quantity, 0);
+  const subtotal = validItems.reduce((total, item) => total + item.product.preco * item.quantity, 0);
+
+  document.querySelectorAll('a[href$="#carrinho"]').forEach((link) => {
+    let count = link.querySelector(".test-cart-count");
+    if (!count) {
+      count = document.createElement("strong");
+      count.className = "test-cart-count";
+      link.appendChild(count);
+    }
+    count.textContent = String(totalQuantity);
+    count.hidden = totalQuantity === 0;
+    link.setAttribute("aria-label", `Carrinho com ${totalQuantity} ${totalQuantity === 1 ? "item" : "itens"}`);
+  });
+
+  itemsElement.innerHTML = validItems.length
+    ? validItems.map(({ product, quantity }) => `
+      <article class="test-cart-item">
+        <img src="${product.imagem}" alt="" />
+        <div class="test-cart-item-copy">
+          <small>${product.categoria}</small>
+          <h3>${product.nome}</h3>
+          <strong>${getProductStatus(product)}</strong>
+          <div class="test-cart-item-controls" aria-label="Quantidade de ${product.nome}">
+            <button type="button" data-cart-action="decrease" data-cart-slug="${product.slug}" aria-label="Diminuir quantidade">−</button>
+            <output>${quantity}</output>
+            <button type="button" data-cart-action="increase" data-cart-slug="${product.slug}" aria-label="Aumentar quantidade" ${quantity >= product.estoque ? "disabled" : ""}>+</button>
+            <button class="test-cart-remove" type="button" data-cart-action="remove" data-cart-slug="${product.slug}">Remover</button>
+          </div>
+          <span>${product.estoque} unidades em estoque</span>
+        </div>
+      </article>
+    `).join("")
+    : '<div class="test-cart-empty"><strong>Seu carrinho está vazio.</strong><span>Adicione um dos itens de Casa disponíveis para o teste.</span></div>';
+
+  testCartDialog.querySelector("[data-cart-subtotal]").textContent = subtotal.toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL"
+  });
+};
+
+const openTestCart = () => {
+  renderTestCart();
+  if (typeof testCartDialog.showModal === "function") {
+    if (!testCartDialog.open) testCartDialog.showModal();
+  } else {
+    testCartDialog.setAttribute("open", "");
+  }
+};
+
+document.addEventListener("click", (event) => {
+  const cartLink = event.target.closest('a[href$="#carrinho"]');
+  if (cartLink) {
+    event.preventDefault();
+    openTestCart();
+  }
+
+  if (event.target.closest("[data-cart-close]")) testCartDialog.close();
+
+  const addCartButton = event.target.closest("#product-dialog-add-cart");
+  if (addCartButton && !addCartButton.disabled) {
+    const slug = productDialogElement?.dataset.productSlug;
+    const quantity = Number(productDialogQuantity?.textContent) || 1;
+    const existingQuantity = testCart.find((item) => item.slug === slug)?.quantity || 0;
+    if (slug) updateTestCartQuantity(slug, existingQuantity + quantity);
+    closeProductDialog();
+    openTestCart();
+  }
+
+  const cartAction = event.target.closest("[data-cart-action]");
+  if (cartAction && !cartAction.disabled) {
+    const slug = cartAction.dataset.cartSlug;
+    const currentQuantity = testCart.find((item) => item.slug === slug)?.quantity || 0;
+    const nextQuantity = cartAction.dataset.cartAction === "increase"
+      ? currentQuantity + 1
+      : cartAction.dataset.cartAction === "decrease"
+        ? currentQuantity - 1
+        : 0;
+    updateTestCartQuantity(slug, nextQuantity);
+  }
+
+  if (event.target === testCartDialog) testCartDialog.close();
+});
+
+renderTestCart();
 
 const requestedProductSlug = new URLSearchParams(window.location.search).get("produto");
 const legacyProductSlug = window.location.hash.length > 1 ? window.location.hash.slice(1) : "";

@@ -20,8 +20,9 @@ a{text-decoration:none;color:inherit} button,input{font:inherit}
 .search input{flex:1;border:0;outline:0;padding:0 18px;font-size:16px}
 .search button{width:60px;border:0;background:linear-gradient(135deg,var(--teal),#31b8ad);color:white;font-size:26px;cursor:pointer}
 .header-actions{display:flex;gap:24px}
-.header-actions a{display:flex;flex-direction:column;align-items:center;font-size:26px;color:var(--navy)}
+.header-actions a{position:relative;display:flex;flex-direction:column;align-items:center;font-size:26px;color:var(--navy)}
 .header-actions span{font-size:13px;font-weight:700;margin-top:5px;white-space:nowrap}
+.test-cart-count{position:absolute;right:3px;top:-5px;min-width:20px;height:20px;padding:0 5px;border:2px solid #fff;border-radius:999px;display:grid;place-items:center;background:var(--orange);color:#fff;font-size:10px;line-height:1}
 .menu-toggle{display:none;border:0;background:transparent;font-size:28px;color:var(--navy)}
 .nav{border-top:1px solid #eef4f5}
 .nav-row{min-height:62px;display:flex;align-items:center;gap:6px}
@@ -545,16 +546,21 @@ a{text-decoration:none;color:inherit} button,input{font:inherit}
 .product-dialog-close{position:absolute;right:16px;top:16px;z-index:2;width:42px;height:42px;border:1px solid #d6e5e6;border-radius:50%;background:#fff;color:var(--navy);font-size:25px;cursor:pointer}
 .product-dialog-grid{display:grid;grid-template-columns:minmax(360px,.86fr) minmax(0,1.14fr)}
 .product-dialog-media{position:relative;min-height:680px;background:#edf6f5}
-.product-dialog-media img{display:block;width:100%;height:100%;object-fit:cover}
+.product-dialog-media #product-dialog-image{display:block;width:100%;height:100%;object-fit:cover}
 .product-dialog-badge{position:absolute;left:24px;top:24px;padding:8px 13px;border-radius:999px;background:var(--orange);color:#fff;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;box-shadow:0 8px 20px rgba(236,107,42,.25)}
 .product-dialog[data-category="brinquedos-infantis"] .product-dialog-media{background:#fff}
-.product-dialog[data-category="brinquedos-infantis"] .product-dialog-media img{object-fit:contain;padding:20px}
+.product-dialog[data-category="brinquedos-infantis"] .product-dialog-media #product-dialog-image{object-fit:contain;padding:20px}
 .product-dialog:is([data-category="cozinha"],[data-category="utilidades-domesticas"]) .product-dialog-media{background:#fff}
-.product-dialog:is([data-category="cozinha"],[data-category="utilidades-domesticas"]) .product-dialog-media img{object-fit:contain;padding:20px}
+.product-dialog:is([data-category="cozinha"],[data-category="utilidades-domesticas"]) .product-dialog-media #product-dialog-image{object-fit:contain;padding:20px}
 .product-dialog[data-category^="biblias"] .product-dialog-media{background:#fff}
-.product-dialog[data-category^="biblias"] .product-dialog-media img{object-fit:contain;padding:20px}
+.product-dialog[data-category^="biblias"] .product-dialog-media #product-dialog-image{object-fit:contain;padding:20px}
 .product-dialog[data-category="livros-cristaos"] .product-dialog-media{background:#fff}
-.product-dialog[data-category="livros-cristaos"] .product-dialog-media img{object-fit:contain;padding:42px}
+.product-dialog[data-category="livros-cristaos"] .product-dialog-media #product-dialog-image{object-fit:contain;padding:42px}
+.product-dialog-thumbnails{position:absolute;left:20px;right:20px;bottom:20px;z-index:2;display:flex;justify-content:center;gap:10px}
+.product-dialog-thumbnails button{width:66px;height:66px;padding:4px;border:2px solid transparent;border-radius:12px;background:rgba(255,255,255,.94);box-shadow:0 5px 18px rgba(5,46,70,.14);cursor:pointer;overflow:hidden}
+.product-dialog-thumbnails button:hover,.product-dialog-thumbnails button.is-active{border-color:var(--teal)}
+.product-dialog-thumbnails img{display:block;width:100%;height:100%;border-radius:8px;object-fit:contain}
+.product-dialog-media:has(.product-dialog-thumbnails) #product-dialog-image{padding-bottom:105px!important}
 .product-dialog-copy{padding:48px 46px;display:flex;flex-direction:column;justify-content:center}
 .product-dialog-copy h2{margin:10px 0 14px;color:var(--navy);font-size:32px;line-height:1.15}
 .product-dialog-copy p{margin:0;color:var(--muted);font-size:16px;line-height:1.7}
@@ -584,6 +590,39 @@ a{text-decoration:none;color:inherit} button,input{font:inherit}
 .product-dialog-actions .btn-secondary{border:1px solid var(--teal);background:#fff;color:var(--teal)}
 .product-dialog-activation-note{margin-top:12px!important;color:var(--muted)!important;font-size:11px!important;line-height:1.5!important}
 body:has(.product-dialog[open]){overflow:hidden}
+.test-cart-dialog{width:min(470px,100%);height:100dvh;max-height:none;margin:0 0 0 auto;padding:0;border:0;border-radius:24px 0 0 24px;background:#fff;box-shadow:-20px 0 60px rgba(3,35,53,.24);overflow:hidden}
+.test-cart-dialog::backdrop{background:rgba(3,35,53,.62);backdrop-filter:blur(3px)}
+.test-cart-layout{height:100%;display:grid;grid-template-rows:auto minmax(0,1fr) auto}
+.test-cart-header{padding:25px 24px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:20px}
+.test-cart-header span{color:var(--teal);font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.09em}
+.test-cart-header h2{margin:3px 0 0;color:var(--navy);font-size:27px;line-height:1.1}
+.test-cart-header button{width:42px;height:42px;border:1px solid #d6e5e6;border-radius:50%;background:#fff;color:var(--navy);font-size:25px;cursor:pointer}
+.test-cart-items{padding:8px 24px;overflow:auto}
+.test-cart-item{padding:20px 0;border-bottom:1px solid var(--line);display:grid;grid-template-columns:96px minmax(0,1fr);gap:15px}
+.test-cart-item>img{width:96px;height:112px;border-radius:12px;background:#f4f8f7;object-fit:contain}
+.test-cart-item-copy{min-width:0}
+.test-cart-item-copy>small{display:block;color:var(--teal);font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em}
+.test-cart-item-copy h3{margin:4px 0 6px;color:var(--navy);font-size:15px;line-height:1.35}
+.test-cart-item-copy>strong{color:var(--navy);font-size:16px}
+.test-cart-item-copy>span{display:block;margin-top:7px;color:var(--muted);font-size:11px}
+.test-cart-item-controls{margin-top:12px;display:flex;align-items:center;gap:0}
+.test-cart-item-controls button:not(.test-cart-remove),.test-cart-item-controls output{width:34px;height:34px;border:1px solid #c8ddda;display:grid;place-items:center;background:#fff;color:var(--navy);font-weight:800}
+.test-cart-item-controls button:first-child{border-radius:8px 0 0 8px}
+.test-cart-item-controls button:nth-of-type(2){border-radius:0 8px 8px 0}
+.test-cart-item-controls output{border-width:1px 0;font-size:12px}
+.test-cart-item-controls button:disabled{cursor:not-allowed;opacity:.45}
+.test-cart-remove{margin-left:10px;padding:7px 0;border:0;background:transparent;color:#b14c3e;font-size:11px;font-weight:800;cursor:pointer}
+.test-cart-empty{min-height:320px;display:grid;place-content:center;gap:7px;text-align:center}
+.test-cart-empty strong{color:var(--navy);font-size:19px}
+.test-cart-empty span{max-width:280px;color:var(--muted);font-size:13px;line-height:1.55}
+.test-cart-footer{padding:22px 24px 24px;border-top:1px solid var(--line);background:#f8fbfb}
+.test-cart-footer>div{margin-bottom:15px;display:flex;align-items:center;justify-content:space-between;color:var(--navy)}
+.test-cart-footer>div span{font-size:14px;font-weight:700}
+.test-cart-footer>div strong{font-size:23px}
+.test-cart-footer .btn{width:100%}
+.test-cart-footer .btn:disabled{cursor:not-allowed;opacity:.58}
+.test-cart-footer small{display:block;margin-top:10px;color:var(--muted);font-size:10px;text-align:center;line-height:1.45}
+body:has(.test-cart-dialog[open]){overflow:hidden}
 
 @media(max-width:980px){
   .catalog-product-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -630,10 +669,15 @@ body:has(.product-dialog[open]){overflow:hidden}
   .catalog-filter{flex:0 0 auto}
   .product-dialog{width:100%;max-width:none;max-height:96vh;margin:auto 0 0;border-radius:22px 22px 0 0}
   .product-dialog-media{min-height:290px;max-height:330px}
-  .product-dialog[data-category="livros-cristaos"] .product-dialog-media img{padding:28px}
+  .product-dialog[data-category="livros-cristaos"] .product-dialog-media #product-dialog-image{padding:28px}
   .product-dialog-copy{padding:28px 18px 34px}
   .product-dialog-copy h2{font-size:25px}
   .product-dialog-details{grid-template-columns:1fr 1fr;gap:12px}
   .product-dialog-purchase{padding:18px 15px}
   .product-dialog-actions{grid-template-columns:1fr}
+  .product-dialog-thumbnails{left:12px;right:12px;bottom:12px;gap:7px}
+  .product-dialog-thumbnails button{width:56px;height:56px;border-radius:10px}
+  .product-dialog-media:has(.product-dialog-thumbnails) #product-dialog-image{padding-bottom:85px!important}
+  .test-cart-dialog{width:100%;height:min(88dvh,760px);margin:auto 0 0;border-radius:22px 22px 0 0}
+  .test-cart-header,.test-cart-items,.test-cart-footer{padding-left:18px;padding-right:18px}
 }
