@@ -79,7 +79,7 @@ const catalogProducts = Object.freeze([
     nome: "Bíblia de Estudo Pentecostal",
     categoria: "Bíblias de Estudo",
     categoriaSlug: "biblias-de-estudo",
-    imagem: "assets/products/biblia-estudo-pentecostal-real.webp",
+    imagem: "assets/products/biblia-estudo-pentecostal-02.webp",
     descricao: "Conteúdo de estudo voltado à tradição pentecostal, liderança, ensino e vida ministerial.",
     perfil: "Estudo, liderança e ministério",
     editora: "CPAD",
@@ -1261,9 +1261,8 @@ const bibleCatalogUpdates = Object.freeze({
   },
   "biblia-estudo-pentecostal": {
     nome: "Bíblia de Estudo Pentecostal Preta, Luxo, Média",
-    imagem: "assets/products/biblia-estudo-pentecostal-01.webp",
+    imagem: "assets/products/biblia-estudo-pentecostal-02.webp",
     imagens: [
-      "assets/products/biblia-estudo-pentecostal-01.webp",
       "assets/products/biblia-estudo-pentecostal-02.webp",
       "assets/products/biblia-estudo-pentecostal-03.webp",
       "assets/products/biblia-estudo-pentecostal-04.webp"
@@ -1603,6 +1602,246 @@ const bibleCatalogUpdates = Object.freeze({
   }
 });
 
+const bookCatalogUpdates = Object.freeze({
+  "panorama-da-biblia": {
+    precoOriginal: 69.95,
+    preco: 59.46,
+    fontePreco: "Casa Publicadora das Assembleias de Deus (CPAD)",
+    fontePrecoUrl: "https://www.cpad.com.br/panorama-da-biblia-307545/p",
+    dataConsultaPreco: "2026-08-24",
+    isbn: "9788526313279 / 7898203061026",
+    paginas: "268",
+    dimensoes: "17,5 × 24,5 cm",
+    acabamento: "Brochura",
+    peso: "300 g"
+  },
+  "herois-da-fe": {
+    precoOriginal: 49.99,
+    preco: 42.49,
+    fontePreco: "Casa Publicadora das Assembleias de Deus (CPAD)",
+    fontePrecoUrl: "https://www.cpad.com.br/herois-da-fe--651/p",
+    dataConsultaPreco: "2026-08-24",
+    paginas: "248",
+    dimensoes: "14 × 21 cm",
+    acabamento: "Brochura",
+    peso: "310 g"
+  },
+  "uma-garota-segundo-o-coracao-de-deus": {
+    precoOriginal: 32.99,
+    preco: 28.04,
+    fontePreco: "Casa Publicadora das Assembleias de Deus (CPAD)",
+    fontePrecoUrl: "https://www.cpad.com.br/uma-garota-segundo-o-coracao-de-deus-350221/p",
+    dataConsultaPreco: "2026-08-24",
+    isbn: "9786586146783 / 7908234003954",
+    paginas: "128",
+    dimensoes: "14 × 21 cm",
+    acabamento: "Brochura",
+    peso: "164 g"
+  },
+  "orando-a-palavra": {
+    editora: "Penkal",
+    precoOriginal: 29.90,
+    preco: 24.90,
+    fontePreco: "Editora Penkal Books — Livrarias Família Cristã",
+    fontePrecoUrl: "https://www.livrariasfamiliacrista.com.br/products/orando-a-palavra-charles-spurgeon-edward-bounds-e-r-a-torrey",
+    dataConsultaPreco: "2026-08-24",
+    isbn: "9786559966240"
+  },
+  "como-ter-o-coracao-de-maria-no-mundo-de-marta": {
+    editora: "CPAD",
+    precoOriginal: 54.99,
+    preco: 46.74,
+    fontePreco: "Casa Publicadora das Assembleias de Deus (CPAD)",
+    fontePrecoUrl: "https://www.cpad.com.br/como-ter-o-coracao-de-maria-no-mundo-de-marta/p",
+    dataConsultaPreco: "2026-08-24",
+    isbn: "9788526306499 / 7898203060494",
+    paginas: "246",
+    dimensoes: "14 × 21 cm",
+    acabamento: "Brochura",
+    peso: "300 g"
+  },
+  "historia-dos-hebreus": {
+    nome: "História dos Hebreus — Edição de Luxo",
+    editora: "CPAD",
+    precoOriginal: 199.99,
+    preco: 169.99,
+    fontePreco: "Casa Publicadora das Assembleias de Deus (CPAD)",
+    fontePrecoUrl: "https://www.cpad.com.br/historia-dos-hebreus-edicao-luxo-334295/p",
+    dataConsultaPreco: "2026-08-24",
+    isbn: "9788526315990 / 7908234000861",
+    paginas: "1.570",
+    dimensoes: "17,5 × 24 cm",
+    acabamento: "Capa dura",
+    peso: "2,4 kg"
+  },
+  "pequena-enciclopedia-biblica": {
+    precoOriginal: 84.95,
+    preco: 72.21,
+    fontePreco: "Casa Publicadora das Assembleias de Deus (CPAD)",
+    fontePrecoUrl: "https://www.cpad.com.br/pequena-enciclopedia-biblica-brochura/p",
+    dataConsultaPreco: "2026-08-24",
+    isbn: "9788526316911 / 7898203060449",
+    paginas: "576",
+    dimensoes: "15,5 × 23 cm",
+    acabamento: "Brochura"
+  },
+  "historia-eclesiastica": {
+    precoOriginal: 79.99,
+    preco: 67.99,
+    fontePreco: "Casa Publicadora das Assembleias de Deus (CPAD)",
+    fontePrecoUrl: "https://www.cpad.com.br/historia-eclesiastica-105599/p",
+    dataConsultaPreco: "2026-08-24",
+    isbn: "9788526318816 / 7898203060951",
+    paginas: "416",
+    dimensoes: "16,5 × 24,5 cm",
+    acabamento: "Brochura"
+  },
+  "declaracao-de-fe-atualizada": {
+    precoOriginal: 49.95,
+    preco: 42.46,
+    fontePreco: "Casa Publicadora das Assembleias de Deus (CPAD)",
+    fontePrecoUrl: "https://www.cpad.com.br/declaracao-de-fe-atualizada-preta-373079/p",
+    dataConsultaPreco: "2026-08-24",
+    isbn: "9786559684302 / 7908234019610",
+    paginas: "264",
+    dimensoes: "14 × 21 cm",
+    acabamento: "Brochura",
+    peso: "287 g"
+  },
+  "cafe-com-as-mulheres-da-biblia": {
+    editora: "Penkal",
+    precoOriginal: 39.80,
+    preco: 19.90,
+    fontePreco: "Editora Penkal Books — Livrarias Família Cristã",
+    fontePrecoUrl: "https://www.livrariasfamiliacrista.com.br/products/caf-com-as-mulheres-da-b-blia-isabelle-s-alves",
+    dataConsultaPreco: "2026-08-24",
+    isbn: "9786559967315",
+    paginas: "112",
+    dimensoes: "14 × 21 × 2 cm",
+    acabamento: "Brochura",
+    peso: "200 g"
+  },
+  "teologia-sistematica-herman-bavinck": {
+    precoOriginal: 149.90,
+    preco: 99.90,
+    fontePreco: "Editora Penkal Books — Livrarias Família Cristã",
+    fontePrecoUrl: "https://www.livrariasfamiliacrista.com.br/products/box-teologia-sistem-tica-vol-1-e-2-herman-bavinck",
+    dataConsultaPreco: "2026-08-24",
+    isbn: "9786559963478",
+    acabamento: "Box com 2 volumes"
+  },
+  "israel-gogue-e-o-anticristo": {
+    precoOriginal: 39.99,
+    preco: 33.99,
+    fontePreco: "Casa Publicadora das Assembleias de Deus (CPAD)",
+    fontePrecoUrl: "https://www.cpad.com.br/israel-gogue-e-o-anticristo-/p",
+    dataConsultaPreco: "2026-08-24",
+    isbn: "9788526311992 / 7898203063204",
+    paginas: "168",
+    dimensoes: "14 × 21 cm",
+    acabamento: "Brochura",
+    peso: "200 g"
+  },
+  "tempo-do-fim": {
+    precoOriginal: 79.95,
+    preco: 67.96,
+    fontePreco: "Casa Publicadora das Assembleias de Deus (CPAD)",
+    fontePrecoUrl: "https://www.cpad.com.br/tempo-do-fim-372943/p",
+    dataConsultaPreco: "2026-08-24",
+    isbn: "9786559684359 / 7908234019504",
+    paginas: "384",
+    dimensoes: "14,5 × 22,5 cm",
+    acabamento: "Brochura",
+    peso: "498 g"
+  },
+  "cafe-com-o-espirito-santo": {
+    editora: "Penkal",
+    precoOriginal: 29.90,
+    preco: 19.90,
+    fontePreco: "Editora Penkal Books — Livrarias Família Cristã",
+    fontePrecoUrl: "https://www.livrariasfamiliacrista.com.br/products/caf-com-o-esp-rito-santo-charles-spurgeon",
+    dataConsultaPreco: "2026-08-24",
+    isbn: "9786559968275",
+    peso: "150 g"
+  },
+  "comentario-biblico-beacon-antigo-testamento": {
+    precoOriginal: 489.99,
+    preco: 416.49,
+    fontePreco: "Casa Publicadora das Assembleias de Deus (CPAD)",
+    fontePrecoUrl: "https://www.cpad.com.br/comentario-biblico-beacon-antigo-testamento/p",
+    dataConsultaPreco: "2026-08-24",
+    acabamento: "Capa dura — coleção com 5 volumes",
+    dimensoes: "17 × 24,5 cm"
+  },
+  "cute-jesus-and-disciples": {
+    statusPreco: "Preço pendente de validação",
+    fontePreco: "Pendente: fonte oficial da edição exata não localizada",
+    dataConsultaPreco: "2026-08-24",
+    pendencias: "Confirmar editora, ISBN e edição exata antes de cadastrar o preço."
+  },
+  "os-presentes-do-espirito-santo": {
+    precoOriginal: 29.90,
+    preco: 19.90,
+    fontePreco: "Editora Penkal Books — Livrarias Família Cristã",
+    fontePrecoUrl: "https://www.livrariasfamiliacrista.com.br/products/os-presentes-do-esp-rito-santo-charles-spurgeon-amp-r-a-torrey",
+    dataConsultaPreco: "2026-08-24",
+    isbn: "9786559966226"
+  },
+  "oracao-para-a-cura-emocional": {
+    precoOriginal: 29.90,
+    preco: 19.90,
+    fontePreco: "Editora Penkal Books — Livrarias Família Cristã",
+    fontePrecoUrl: "https://www.livrariasfamiliacrista.com.br/products/ora-o-para-a-cura-emocional-charles-spurgeon",
+    dataConsultaPreco: "2026-08-24",
+    isbn: "9786559967568"
+  },
+  "conselhos-de-paulo-para-uma-vida-em-cristo": {
+    editora: "Penkal",
+    precoOriginal: 29.90,
+    preco: 19.90,
+    fontePreco: "Editora Penkal Books — Livrarias Família Cristã",
+    fontePrecoUrl: "https://www.livrariasfamiliacrista.com.br/products/conselhos-de-paulo-para-uma-vida-em-cristo-charles-hodge",
+    dataConsultaPreco: "2026-08-24",
+    isbn: "9786559967438",
+    peso: "150 g"
+  },
+  "confissoes-santo-agostinho": {
+    nome: "Confissões de Santo Agostinho — Box com 2 volumes",
+    editora: "Penkal",
+    precoOriginal: 99.90,
+    preco: 54.90,
+    fontePreco: "Editora Penkal Books — Livrarias Família Cristã",
+    fontePrecoUrl: "https://www.livrariasfamiliacrista.com.br/products/box-2-livros-confiss-es-de-santo-agostinho-capa-dura",
+    dataConsultaPreco: "2026-08-24",
+    isbn: "9786589845867",
+    acabamento: "Box com 2 volumes em capa dura"
+  },
+  "comentario-exegetico-de-atos": {
+    precoOriginal: 999.00,
+    preco: 849.15,
+    fontePreco: "Casa Publicadora das Assembleias de Deus (CPAD)",
+    fontePrecoUrl: "https://www.cpad.com.br/comentario-exegetico-atos-obra-completa-367656/p",
+    dataConsultaPreco: "2026-08-24",
+    isbn: "9786559684861 / 7908234017807",
+    paginas: "4.996",
+    dimensoes: "17,5 × 24 cm",
+    acabamento: "Capa dura — coleção com 4 volumes",
+    peso: "6,495 kg"
+  },
+  "teologia-sistematica-stanley-horton": {
+    precoOriginal: 119.95,
+    preco: 101.96,
+    fontePreco: "Casa Publicadora das Assembleias de Deus (CPAD)",
+    fontePrecoUrl: "https://www.cpad.com.br/teologia-sistematica-5092/p",
+    dataConsultaPreco: "2026-08-24",
+    isbn: "7898203060760",
+    paginas: "808",
+    dimensoes: "15 × 22 cm",
+    acabamento: "Capa dura",
+    peso: "1,150 kg"
+  }
+});
+
 const masculineBibleSlugs = new Set([
   "biblia-letra-extragigante-indice-preta",
   "biblia-media-letra-gigante-harpa",
@@ -1619,8 +1858,10 @@ const masculineBibleSlugs = new Set([
 ]);
 
 catalogProducts.forEach((product) => {
-  const update = bibleCatalogUpdates[product.slug];
-  if (update) Object.assign(product, update);
+  const bibleUpdate = bibleCatalogUpdates[product.slug];
+  const bookUpdate = bookCatalogUpdates[product.slug];
+  if (bibleUpdate) Object.assign(product, bibleUpdate);
+  if (bookUpdate) Object.assign(product, bookUpdate);
   if (masculineBibleSlugs.has(product.slug)) {
     product.categoriasComplementares = [
       ...new Set([...(product.categoriasComplementares || []), "biblias-masculinas"])
@@ -1990,8 +2231,6 @@ const setProductDialogDetails = (product) => {
     product.indice ? { label: "Índice", value: product.indice } : null,
     product.isbn ? { label: "ISBN / GTIN", value: product.isbn } : null,
     product.recursos ? { label: "Recursos", value: product.recursos } : null,
-    product.fontePreco ? { label: "Fonte do preço", value: product.fontePreco } : null,
-    product.dataConsultaPreco ? { label: "Preço consultado em", value: product.dataConsultaPreco } : null,
     product.pendencias ? { label: "Validação pendente", value: product.pendencias } : null
   ].filter((detail) => detail?.value);
 
