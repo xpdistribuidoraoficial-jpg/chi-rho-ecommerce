@@ -1642,7 +1642,7 @@ const bookCatalogUpdates = Object.freeze({
   "orando-a-palavra": {
     editora: "Penkal",
     precoOriginal: 29.90,
-    preco: 24.90,
+    preco: 23.92,
     fontePreco: "Editora Penkal Books — Livrarias Família Cristã",
     fontePrecoUrl: "https://www.livrariasfamiliacrista.com.br/products/orando-a-palavra-charles-spurgeon-edward-bounds-e-r-a-torrey",
     dataConsultaPreco: "2026-08-24",
@@ -1712,7 +1712,7 @@ const bookCatalogUpdates = Object.freeze({
   "cafe-com-as-mulheres-da-biblia": {
     editora: "Penkal",
     precoOriginal: 39.80,
-    preco: 19.90,
+    preco: 31.84,
     fontePreco: "Editora Penkal Books — Livrarias Família Cristã",
     fontePrecoUrl: "https://www.livrariasfamiliacrista.com.br/products/caf-com-as-mulheres-da-b-blia-isabelle-s-alves",
     dataConsultaPreco: "2026-08-24",
@@ -1724,7 +1724,7 @@ const bookCatalogUpdates = Object.freeze({
   },
   "teologia-sistematica-herman-bavinck": {
     precoOriginal: 149.90,
-    preco: 99.90,
+    preco: 119.92,
     fontePreco: "Editora Penkal Books — Livrarias Família Cristã",
     fontePrecoUrl: "https://www.livrariasfamiliacrista.com.br/products/box-teologia-sistem-tica-vol-1-e-2-herman-bavinck",
     dataConsultaPreco: "2026-08-24",
@@ -1758,7 +1758,7 @@ const bookCatalogUpdates = Object.freeze({
   "cafe-com-o-espirito-santo": {
     editora: "Penkal",
     precoOriginal: 29.90,
-    preco: 19.90,
+    preco: 23.92,
     fontePreco: "Editora Penkal Books — Livrarias Família Cristã",
     fontePrecoUrl: "https://www.livrariasfamiliacrista.com.br/products/caf-com-o-esp-rito-santo-charles-spurgeon",
     dataConsultaPreco: "2026-08-24",
@@ -1782,7 +1782,7 @@ const bookCatalogUpdates = Object.freeze({
   },
   "os-presentes-do-espirito-santo": {
     precoOriginal: 29.90,
-    preco: 19.90,
+    preco: 23.92,
     fontePreco: "Editora Penkal Books — Livrarias Família Cristã",
     fontePrecoUrl: "https://www.livrariasfamiliacrista.com.br/products/os-presentes-do-esp-rito-santo-charles-spurgeon-amp-r-a-torrey",
     dataConsultaPreco: "2026-08-24",
@@ -1790,7 +1790,7 @@ const bookCatalogUpdates = Object.freeze({
   },
   "oracao-para-a-cura-emocional": {
     precoOriginal: 29.90,
-    preco: 19.90,
+    preco: 23.92,
     fontePreco: "Editora Penkal Books — Livrarias Família Cristã",
     fontePrecoUrl: "https://www.livrariasfamiliacrista.com.br/products/ora-o-para-a-cura-emocional-charles-spurgeon",
     dataConsultaPreco: "2026-08-24",
@@ -1799,7 +1799,7 @@ const bookCatalogUpdates = Object.freeze({
   "conselhos-de-paulo-para-uma-vida-em-cristo": {
     editora: "Penkal",
     precoOriginal: 29.90,
-    preco: 19.90,
+    preco: 23.92,
     fontePreco: "Editora Penkal Books — Livrarias Família Cristã",
     fontePrecoUrl: "https://www.livrariasfamiliacrista.com.br/products/conselhos-de-paulo-para-uma-vida-em-cristo-charles-hodge",
     dataConsultaPreco: "2026-08-24",
@@ -1810,7 +1810,7 @@ const bookCatalogUpdates = Object.freeze({
     nome: "Confissões de Santo Agostinho — Box com 2 volumes",
     editora: "Penkal",
     precoOriginal: 99.90,
-    preco: 54.90,
+    preco: 79.92,
     fontePreco: "Editora Penkal Books — Livrarias Família Cristã",
     fontePrecoUrl: "https://www.livrariasfamiliacrista.com.br/products/box-2-livros-confiss-es-de-santo-agostinho-capa-dura",
     dataConsultaPreco: "2026-08-24",
