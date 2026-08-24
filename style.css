@@ -680,6 +680,7 @@ body:has(.test-cart-dialog[open]){overflow:hidden}
 .checkout-pilot-note>span{font-size:20px}
 .checkout-pilot-note p{margin:0;color:#315b62;font-size:12px;line-height:1.5}
 .checkout-layout{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(330px,.85fr);gap:28px;align-items:start}
+.checkout-layout[hidden],.checkout-empty[hidden]{display:none}
 .checkout-form{display:grid;gap:18px}
 .checkout-card,.checkout-summary-card,.checkout-empty{border:1px solid #dbe7e8;border-radius:18px;background:#fff;box-shadow:0 10px 35px rgba(5,46,70,.05)}
 .checkout-card{padding:25px}
