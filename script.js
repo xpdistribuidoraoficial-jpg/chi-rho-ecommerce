@@ -1181,31 +1181,30 @@ const bibleCatalogUpdates = Object.freeze({
     recursos: "Palavras de Jesus destacadas; leituras especiais; tabela de pesos, moedas e medidas"
   },
   "biblia-media-letra-gigante-harpa": {
-    nome: "Bíblia Grande com Harpa Cristã, Letra Gigante, Preta",
+    nome: "Bíblia Grande Harpa Cristã Luxo Letra Gigante Preta",
     imagem: "assets/products/biblia-harpa-crista-letra-gigante-preta-01.webp",
     imagens: [
       "assets/products/biblia-harpa-crista-letra-gigante-preta-01.webp",
-      "assets/products/biblia-harpa-crista-letra-gigante-preta-02.webp",
-      "assets/products/biblia-harpa-crista-letra-gigante-preta-03.webp",
-      "assets/products/biblia-harpa-crista-letra-gigante-preta-04.webp"
+      "assets/products/biblia-harpa-crista-letra-gigante-preta-02.webp"
     ],
-    descricao: "Edição popular grande na ARC, com Harpa Cristã, letra gigante e palavras de Jesus em vermelho.",
+    descricao: "Bíblia de fácil leitura e perfeita para meditação, em edição de luxo com Harpa Cristã, letra gigante, palavras de Jesus em vermelho, notas e referências.",
     editora: "CPAD",
-    preco: 79.99,
-    precoOriginal: null,
+    preco: 135.99,
+    precoOriginal: 159.99,
     fontePreco: "Casa Publicadora das Assembleias de Deus (CPAD)",
-    fontePrecoUrl: "https://www.cpad.com.br/biblia-grande-popular-preta-337515/p",
+    fontePrecoUrl: "https://www.cpad.com.br/biblia-grande-harpa-crista-luxo-letra-gigante-preta/p",
     dataConsultaPreco: "2026-08-24",
     traducao: "Almeida Revista e Corrigida (ARC)",
     cor: "Preta",
-    acabamento: "Semiflex",
+    acabamento: "Brochura, modelo luxo",
     tamanhoLetra: "Gigante",
-    dimensoes: "14 × 21 × 3,5 cm",
-    peso: "795 g",
+    paginas: "1.920",
+    dimensoes: "14 × 20 × 4 cm",
+    peso: "810 g",
     harpa: "Sim",
-    indice: "Não informado",
-    isbn: "9788531112577",
-    recursos: "Palavras de Jesus em vermelho; borda amarela"
+    indice: "Não",
+    isbn: "7908234010471",
+    recursos: "Palavras de Jesus em vermelho; notas e referências; mapas; Harpa Cristã"
   },
   "biblia-letra-gigante-indice-couro-preta": {
     nome: "Bíblia Sagrada NAA, Letra Gigante, com Índice, Capa Preta",
