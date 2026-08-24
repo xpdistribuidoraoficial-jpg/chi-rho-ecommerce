@@ -1603,9 +1603,29 @@ const bibleCatalogUpdates = Object.freeze({
   }
 });
 
+const masculineBibleSlugs = new Set([
+  "biblia-letra-extragigante-indice-preta",
+  "biblia-media-letra-gigante-harpa",
+  "biblia-letra-gigante-indice-couro-preta",
+  "biblia-estudo-pentecostal",
+  "biblia-aplicacao-pessoal-nvt",
+  "biblia-arc-harpa",
+  "biblia-assembleia-de-deus-capa-luxo",
+  "biblia-king-james-ultrafina-preta",
+  "biblia-king-james-estudo-holman",
+  "biblia-estudo-spurgeon",
+  "biblia-pregador-pentecostal",
+  "biblia-estudo-defesa-da-fe"
+]);
+
 catalogProducts.forEach((product) => {
   const update = bibleCatalogUpdates[product.slug];
   if (update) Object.assign(product, update);
+  if (masculineBibleSlugs.has(product.slug)) {
+    product.categoriasComplementares = [
+      ...new Set([...(product.categoriasComplementares || []), "biblias-masculinas"])
+    ];
+  }
 });
 
 const inactiveCatalogSlugs = new Set([
@@ -1708,17 +1728,23 @@ const faithCategorySlugs = new Set([
   "livros-cristaos"
 ]);
 
+const getProductCategorySlugs = (product) => [
+  product.categoriaSlug,
+  ...(product.categoriasComplementares || [])
+];
+
 const setCatalogFilter = (filter = "todas", query = "") => {
   if (!catalogGrid) return;
 
   const normalizedQuery = query.trim().toLocaleLowerCase("pt-BR");
   const filteredProducts = catalogProducts.filter((product) => {
     if (!isProductActive(product)) return false;
+    const productCategorySlugs = getProductCategorySlugs(product);
     const matchesCategory = filter === "todas"
-      || (filter === "infantil" ? product.infantil : product.categoriaSlug === filter);
+      || (filter === "infantil" ? product.infantil : productCategorySlugs.includes(filter));
     const matchesCatalog = matchesCategory
       || (filter === "casa" && product.casa)
-      || (filter === "fe" && faithCategorySlugs.has(product.categoriaSlug));
+      || (filter === "fe" && productCategorySlugs.some((slug) => faithCategorySlugs.has(slug)));
     const searchText = [product.nome, product.categoria, product.descricao, product.perfil, product.autor, product.editora, product.marca]
       .join(" ")
       .toLocaleLowerCase("pt-BR");
