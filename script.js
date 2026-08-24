@@ -1263,6 +1263,7 @@ const bibleCatalogUpdates = Object.freeze({
     nome: "Bíblia de Estudo Pentecostal Preta, Luxo, Média",
     imagem: "assets/products/biblia-estudo-pentecostal-02.webp",
     imagens: [
+      "assets/products/biblia-estudo-pentecostal-01.webp",
       "assets/products/biblia-estudo-pentecostal-02.webp",
       "assets/products/biblia-estudo-pentecostal-03.webp",
       "assets/products/biblia-estudo-pentecostal-04.webp"
