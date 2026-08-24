@@ -1125,6 +1125,490 @@ const catalogProducts = Object.freeze([
   }
 ]);
 
+const bibleCatalogUpdates = Object.freeze({
+  "biblia-naa-mulher-floral": {
+    nome: "Bíblia Sagrada NAA para Mulher, Letra Regular, Capa Semi Flexível Floral",
+    imagem: "assets/products/biblia-naa-mulher-floral-01.webp",
+    imagens: [
+      "assets/products/biblia-naa-mulher-floral-01.webp",
+      "assets/products/biblia-naa-mulher-floral-02.webp",
+      "assets/products/biblia-naa-mulher-floral-03.webp",
+      "assets/products/biblia-naa-mulher-floral-04.webp"
+    ],
+    descricao: "Edição feminina ultrafina na Nova Almeida Atualizada, com capa floral e formato amplo para leitura diária.",
+    preco: 107.90,
+    precoOriginal: null,
+    fontePreco: "Sociedade Bíblica do Brasil (SBB)",
+    fontePrecoUrl: "https://www.sbb.com.br/produto/biblia-sagrada-naa-para-mulher-letra-regular-capa-semi-flexivel-floral-150958",
+    dataConsultaPreco: "2026-08-24",
+    traducao: "Nova Almeida Atualizada (NAA)",
+    cor: "Floral",
+    acabamento: "Capa dura",
+    tamanhoLetra: "Regular",
+    paginas: "960",
+    dimensoes: "17 × 23,5 cm",
+    peso: "0,67 kg",
+    harpa: "Não",
+    indice: "Não",
+    isbn: "7899938422663",
+    recursos: "Edição ultrafina, sem auxílios adicionais"
+  },
+  "biblia-letra-extragigante-indice-preta": {
+    nome: "Bíblia Sagrada ARA, Letra Extragigante, com Índice, Capa Preta",
+    imagem: "assets/products/biblia-ara-extragigante-indice-preta-01.webp",
+    imagens: [
+      "assets/products/biblia-ara-extragigante-indice-preta-01.webp",
+      "assets/products/biblia-ara-extragigante-indice-preta-02.webp",
+      "assets/products/biblia-ara-extragigante-indice-preta-03.webp",
+      "assets/products/biblia-ara-extragigante-indice-preta-04.webp"
+    ],
+    descricao: "Bíblia ARA com letra extragigante, palavras de Jesus destacadas e capa preta em couro sintético.",
+    preco: 216.90,
+    precoOriginal: null,
+    fontePreco: "Sociedade Bíblica do Brasil (SBB)",
+    fontePrecoUrl: "https://www.sbb.com.br/produto/biblia-sagrada-ara-letra-extragigante-com-palavras-de-jesus-destacadas-com-indice-capa-couro-sin-151555",
+    dataConsultaPreco: "2026-08-24",
+    traducao: "Almeida Revista e Atualizada (ARA)",
+    cor: "Preta",
+    acabamento: "Flexível em couro sintético",
+    tamanhoLetra: "Extragigante",
+    paginas: "1.664",
+    dimensoes: "17 × 23,5 cm",
+    peso: "1,09 kg",
+    harpa: "Não",
+    indice: "Sim",
+    isbn: "7899938430804",
+    recursos: "Palavras de Jesus destacadas; leituras especiais; tabela de pesos, moedas e medidas"
+  },
+  "biblia-media-letra-gigante-harpa": {
+    nome: "Bíblia Grande com Harpa Cristã, Letra Gigante, Preta",
+    imagem: "assets/products/biblia-harpa-crista-letra-gigante-preta-01.webp",
+    imagens: [
+      "assets/products/biblia-harpa-crista-letra-gigante-preta-01.webp",
+      "assets/products/biblia-harpa-crista-letra-gigante-preta-02.webp",
+      "assets/products/biblia-harpa-crista-letra-gigante-preta-03.webp",
+      "assets/products/biblia-harpa-crista-letra-gigante-preta-04.webp"
+    ],
+    descricao: "Edição popular grande na ARC, com Harpa Cristã, letra gigante e palavras de Jesus em vermelho.",
+    editora: "CPAD",
+    preco: 79.99,
+    precoOriginal: null,
+    fontePreco: "Casa Publicadora das Assembleias de Deus (CPAD)",
+    fontePrecoUrl: "https://www.cpad.com.br/biblia-grande-popular-preta-337515/p",
+    dataConsultaPreco: "2026-08-24",
+    traducao: "Almeida Revista e Corrigida (ARC)",
+    cor: "Preta",
+    acabamento: "Semiflex",
+    tamanhoLetra: "Gigante",
+    dimensoes: "14 × 21 × 3,5 cm",
+    peso: "795 g",
+    harpa: "Sim",
+    indice: "Não informado",
+    isbn: "9788531112577",
+    recursos: "Palavras de Jesus em vermelho; borda amarela"
+  },
+  "biblia-letra-gigante-indice-couro-preta": {
+    nome: "Bíblia Sagrada NAA, Letra Gigante, com Índice, Capa Preta",
+    imagem: "assets/products/biblia-naa-gigante-indice-preta-01.webp",
+    imagens: [
+      "assets/products/biblia-naa-gigante-indice-preta-01.webp",
+      "assets/products/biblia-naa-gigante-indice-preta-02.webp",
+      "assets/products/biblia-naa-gigante-indice-preta-03.webp"
+    ],
+    descricao: "Bíblia NAA com letra gigante, índice lateral e capa geométrica preta em couro sintético.",
+    preco: 136.90,
+    precoOriginal: null,
+    fontePreco: "Sociedade Bíblica do Brasil (SBB)",
+    fontePrecoUrl: "https://www.sbb.com.br/produto/biblia-sagrada-naa-letra-gigante-com-indice-capa-couro-sintetico-preta-151197",
+    dataConsultaPreco: "2026-08-24",
+    traducao: "Nova Almeida Atualizada (NAA)",
+    cor: "Preta",
+    acabamento: "Flexível em couro sintético",
+    tamanhoLetra: "Gigante",
+    paginas: "1.800",
+    dimensoes: "13,5 × 20 cm",
+    peso: "0,752 kg",
+    harpa: "Não",
+    indice: "Sim",
+    isbn: "9788531117527",
+    recursos: "Notas e referências bíblicas; roteiros de leitura"
+  },
+  "biblia-ara-mulher-branca": {
+    nome: "Bíblia Sagrada ARA para Mulher, Letra Grande, Capa Branca",
+    imagem: "assets/products/biblia-ara-mulher-branca-01.webp",
+    imagens: [
+      "assets/products/biblia-ara-mulher-branca-01.webp",
+      "assets/products/biblia-ara-mulher-branca-02.webp",
+      "assets/products/biblia-ara-mulher-branca-03.webp",
+      "assets/products/biblia-ara-mulher-branca-04.webp"
+    ],
+    descricao: "Edição feminina compacta na ARA, com letra grande, capa branca e recursos para leitura devocional.",
+    preco: 97.90,
+    precoOriginal: null,
+    fontePreco: "Sociedade Bíblica do Brasil (SBB)",
+    fontePrecoUrl: "https://www.sbb.com.br/produto/biblia-sagrada-ara-para-mulher-letra-grande-capa-couro-sintetico-branca-150741",
+    dataConsultaPreco: "2026-08-24",
+    traducao: "Almeida Revista e Atualizada (ARA)",
+    cor: "Branca",
+    acabamento: "Flexível em couro sintético",
+    tamanhoLetra: "Grande",
+    paginas: "1.664",
+    dimensoes: "11,5 × 16,5 cm",
+    peso: "0,46 kg",
+    harpa: "Não",
+    indice: "Não",
+    isbn: "7898521805791",
+    recursos: "Leituras especiais; notas e referências; tabela de pesos, moedas e medidas"
+  },
+  "biblia-estudo-pentecostal": {
+    nome: "Bíblia de Estudo Pentecostal Preta, Luxo, Média",
+    imagem: "assets/products/biblia-estudo-pentecostal-01.webp",
+    imagens: [
+      "assets/products/biblia-estudo-pentecostal-01.webp",
+      "assets/products/biblia-estudo-pentecostal-02.webp",
+      "assets/products/biblia-estudo-pentecostal-03.webp",
+      "assets/products/biblia-estudo-pentecostal-04.webp"
+    ],
+    descricao: "Bíblia de estudo pentecostal clássica na ARC, edição média de luxo, sem Harpa Cristã.",
+    precoOriginal: 329.99,
+    preco: 280.49,
+    fontePreco: "Casa Publicadora das Assembleias de Deus (CPAD)",
+    fontePrecoUrl: "https://www.cpad.com.br/biblia-de-estudo-pentecostal-preta-luxo-media/p",
+    dataConsultaPreco: "2026-08-24",
+    traducao: "Almeida Revista e Corrigida (ARC)",
+    cor: "Preta",
+    acabamento: "Brochura, modelo luxo",
+    dimensoes: "13,5 × 21 cm",
+    harpa: "Não",
+    indice: "Não informado",
+    isbn: "8526300482",
+    recursos: "Notas de estudo e referências voltadas à tradição pentecostal"
+  },
+  "biblia-aplicacao-pessoal-nvt": {
+    nome: "Bíblia de Estudo Aplicação Pessoal Grande Luxo Preta NVT",
+    imagem: "assets/products/biblia-aplicacao-pessoal-nvt-01.webp",
+    imagens: [
+      "assets/products/biblia-aplicacao-pessoal-nvt-01.webp",
+      "assets/products/biblia-aplicacao-pessoal-nvt-02.webp"
+    ],
+    descricao: "Edição grande de estudo na NVT, com notas voltadas à aplicação prática da Palavra de Deus.",
+    editora: "CPAD",
+    precoOriginal: 399.99,
+    preco: 339.99,
+    fontePreco: "Casa Publicadora das Assembleias de Deus (CPAD)",
+    fontePrecoUrl: "https://www.cpad.com.br/biblia-de-estudo-aplicacao-pessoal-grande-luxo-preta-365119/p",
+    dataConsultaPreco: "2026-08-24",
+    traducao: "Nova Versão Transformadora (NVT)",
+    cor: "Preta",
+    acabamento: "Couro sintético, modelo luxo",
+    paginas: "2.468",
+    dimensoes: "17 × 23,5 × 6 cm",
+    peso: "1,733 kg",
+    harpa: "Não",
+    indice: "Não informado",
+    isbn: "9786559680979",
+    recursos: "Notas de aplicação pessoal; borda dourada"
+  },
+  "biblia-letra-gigante-indice-azul": {
+    nome: "Bíblia Sagrada ARA, Letra Gigante, com Índice, Capa Azul",
+    imagem: "assets/products/biblia-ara-gigante-indice-azul-01.webp",
+    imagens: [
+      "assets/products/biblia-ara-gigante-indice-azul-01.webp",
+      "assets/products/biblia-ara-gigante-indice-azul-02.webp",
+      "assets/products/biblia-ara-gigante-indice-azul-03.webp",
+      "assets/products/biblia-ara-gigante-indice-azul-04.webp"
+    ],
+    descricao: "Edição ARA com letra gigante, índice lateral, capa azul e recursos auxiliares de leitura.",
+    preco: 129.90,
+    precoOriginal: null,
+    fontePreco: "Sociedade Bíblica do Brasil (SBB)",
+    fontePrecoUrl: "https://www.sbb.com.br/produto/biblia-sagrada-ara-letra-gigante-com-indice-capa-couro-sintetico-azul-151041",
+    dataConsultaPreco: "2026-08-24",
+    traducao: "Almeida Revista e Atualizada (ARA)",
+    cor: "Azul",
+    acabamento: "Flexível em couro sintético",
+    tamanhoLetra: "Gigante",
+    paginas: "1.680",
+    dimensoes: "13,5 × 21 cm",
+    peso: "0,74 kg",
+    harpa: "Não",
+    indice: "Sim",
+    isbn: "7898521811150",
+    recursos: "Mapas; leituras especiais; tabela de pesos, moedas e medidas"
+  },
+  "biblia-arc-harpa": {
+    imagens: ["assets/products/biblia-arc-harpa-normalized.webp"],
+    statusPreco: "Preço pendente de validação",
+    fontePreco: "Pendente: edição exata não confirmada",
+    dataConsultaPreco: "2026-08-24",
+    pendencias: "Confirmar ISBN e edição exata da capa preta antes de alterar preço, dados ou imagens."
+  },
+  "biblia-assembleia-de-deus-capa-luxo": {
+    nome: "Bíblia Assembleia de Deus Preta Capa Logo",
+    imagem: "assets/products/biblia-assembleia-deus-preta-01.webp",
+    imagens: [
+      "assets/products/biblia-assembleia-deus-preta-01.webp",
+      "assets/products/biblia-assembleia-deus-preta-02.webp",
+      "assets/products/biblia-assembleia-deus-preta-03.webp",
+      "assets/products/biblia-assembleia-deus-preta-04.webp"
+    ],
+    descricao: "Bíblia ARC com Harpa Cristã, encarte sobre a história das Assembleias de Deus e resumo da Declaração de Fé.",
+    precoOriginal: 129.99,
+    preco: 110.49,
+    fontePreco: "Casa Publicadora das Assembleias de Deus (CPAD)",
+    fontePrecoUrl: "https://www.cpad.com.br/biblia-assembleia-de-deus-logo-346130/p",
+    dataConsultaPreco: "2026-08-24",
+    traducao: "Almeida Revista e Corrigida (ARC)",
+    cor: "Preta",
+    acabamento: "Couro simulado, modelo luxo",
+    dimensoes: "14 × 21,5 × 3 cm",
+    peso: "730 g",
+    harpa: "Sim",
+    indice: "Não informado",
+    isbn: "7908234001783",
+    recursos: "História da denominação; resumo da Declaração de Fé; borda dourada"
+  },
+  "biblia-estudo-cronologica": {
+    nome: "Bíblia de Estudo Cronológica Aplicação Pessoal Tarja Marrom",
+    imagem: "assets/products/biblia-estudo-cronologica-01.webp",
+    imagens: [
+      "assets/products/biblia-estudo-cronologica-01.webp",
+      "assets/products/biblia-estudo-cronologica-02.webp",
+      "assets/products/biblia-estudo-cronologica-03.webp",
+      "assets/products/biblia-estudo-cronologica-04.webp"
+    ],
+    descricao: "Bíblia de estudo na ARC organizada em sequência cronológica, com recursos de aplicação pessoal.",
+    precoOriginal: 499.99,
+    preco: 424.99,
+    fontePreco: "Casa Publicadora das Assembleias de Deus (CPAD)",
+    fontePrecoUrl: "https://www.cpad.com.br/biblia-de-estudo-cronologica-/p",
+    dataConsultaPreco: "2026-08-24",
+    traducao: "Almeida Revista e Corrigida (ARC)",
+    cor: "Duotone marrom",
+    acabamento: "Couro simulado, modelo luxo",
+    dimensoes: "19 × 25 × 5 cm",
+    peso: "1,7 kg",
+    harpa: "Não",
+    indice: "Não informado",
+    isbn: "9788526313101",
+    recursos: "Ordem cronológica; notas de aplicação pessoal; borda dourada"
+  },
+  "biblia-king-james-ultrafina-preta": {
+    nome: "Bíblia King James Fiel 1611 Ultrafina Slim, Capa Luxo Premium Preta",
+    imagem: "assets/products/biblia-king-james-ultrafina-preta-01.webp",
+    imagens: [
+      "assets/products/biblia-king-james-ultrafina-preta-01.webp",
+      "assets/products/biblia-king-james-ultrafina-preta-02.webp",
+      "assets/products/biblia-king-james-ultrafina-preta-03.webp",
+      "assets/products/biblia-king-james-ultrafina-preta-04.webp"
+    ],
+    descricao: "Sétima edição ultrafina da Bíblia King James Fiel 1611, com epígrafes, pilcrow e capa premium preta.",
+    precoOriginal: 119.90,
+    preco: 77.90,
+    fontePreco: "BV Books",
+    fontePrecoUrl: "https://www.bvbooks.com.br/biblias/biblia-king-james-1611-ultrafina-slim-capa-luxo-premium-preta",
+    dataConsultaPreco: "2026-08-24",
+    traducao: "King James Fiel 1611",
+    cor: "Preta",
+    acabamento: "Capa luxo premium",
+    paginas: "752",
+    dimensoes: "13,6 × 21,5 cm",
+    harpa: "Não",
+    indice: "Não",
+    isbn: "9786583664099",
+    recursos: "7ª edição; epígrafes; pilcrow; fonte Avenir Next Condensed"
+  },
+  "biblia-king-james-estudo-holman": {
+    imagens: ["assets/products/biblia-king-james-estudo-holman.webp"],
+    statusPreco: "Preço pendente de validação",
+    fontePreco: "Pendente: edição exata não confirmada",
+    dataConsultaPreco: "2026-08-24",
+    pendencias: "A edição oficial atual é duotone e não corresponde à capa preta cadastrada; confirmar ISBN antes de atualizar."
+  },
+  "biblia-estudo-spurgeon": {
+    nome: "Bíblia BKJ Fiel 1611 Estudo Spurgeon, Capa Luxo",
+    imagem: "assets/products/biblia-estudo-spurgeon-01.webp",
+    imagens: [
+      "assets/products/biblia-estudo-spurgeon-01.webp",
+      "assets/products/biblia-estudo-spurgeon-02.webp",
+      "assets/products/biblia-estudo-spurgeon-03.webp",
+      "assets/products/biblia-estudo-spurgeon-04.webp"
+    ],
+    descricao: "Bíblia de Estudo Spurgeon na King James 1611, com estudos expositivos e aplicações pessoais.",
+    editora: "BV Books",
+    precoOriginal: 394.90,
+    preco: 256.60,
+    fontePreco: "BV Books",
+    fontePrecoUrl: "https://www.bvbooks.com.br/biblias/biblia-estudo-spurgeon-bkj-1611",
+    dataConsultaPreco: "2026-08-24",
+    traducao: "King James Fiel 1611",
+    cor: "Marrom e preta",
+    acabamento: "Couro PU com luva protetora",
+    paginas: "2.104",
+    dimensoes: "16,5 × 23,7 cm",
+    harpa: "Não",
+    indice: "Não informado",
+    isbn: "9786586996647",
+    recursos: "Estudos expositivos; aplicação pessoal; palavras divinas em vermelho; epígrafes e pilcrow"
+  },
+  "biblia-pregador-pentecostal": {
+    nome: "Bíblia do Pregador Pentecostal ARC, com Mapa e Índice, Capa Preta",
+    imagem: "assets/products/biblia-pregador-pentecostal-01.webp",
+    imagens: [
+      "assets/products/biblia-pregador-pentecostal-01.webp",
+      "assets/products/biblia-pregador-pentecostal-02.webp",
+      "assets/products/biblia-pregador-pentecostal-03.webp",
+      "assets/products/biblia-pregador-pentecostal-04.webp"
+    ],
+    descricao: "Ferramenta ministerial na ARC, com conteúdo para preparação de mensagens, mapas e índice lateral.",
+    preco: 357.90,
+    precoOriginal: null,
+    fontePreco: "Sociedade Bíblica do Brasil (SBB)",
+    fontePrecoUrl: "https://www.sbb.com.br/produto/biblia-do-pregador-pentecostal-arc-letra-regular-com-mapa-com-indice-capa-couro-sintetico-preta-preto-150728",
+    dataConsultaPreco: "2026-08-24",
+    traducao: "Almeida Revista e Corrigida (ARC)",
+    cor: "Preta",
+    acabamento: "Flexível em couro sintético",
+    tamanhoLetra: "Regular",
+    paginas: "2.272",
+    dimensoes: "16,2 × 23,4 cm",
+    peso: "1,513 kg",
+    harpa: "Não",
+    indice: "Sim",
+    isbn: "9788531115424",
+    recursos: "Conteúdo para pregação; mapas; índice lateral"
+  },
+  "biblia-estudo-defesa-da-fe": {
+    nome: "Bíblia de Estudo em Defesa da Fé Grande Capa Dura",
+    imagem: "assets/products/biblia-estudo-defesa-fe-01.webp",
+    imagens: [
+      "assets/products/biblia-estudo-defesa-fe-01.webp",
+      "assets/products/biblia-estudo-defesa-fe-02.webp",
+      "assets/products/biblia-estudo-defesa-fe-03.webp",
+      "assets/products/biblia-estudo-defesa-fe-04.webp"
+    ],
+    descricao: "Bíblia de estudo apologética na ARC, desenvolvida para compreender, defender e proclamar a fé cristã.",
+    precoOriginal: 149.99,
+    preco: 127.49,
+    fontePreco: "Casa Publicadora das Assembleias de Deus (CPAD)",
+    fontePrecoUrl: "https://www.cpad.com.br/biblia-de-estudo-defesa-da-fe-capa-dura-180004/p",
+    dataConsultaPreco: "2026-08-24",
+    traducao: "Almeida Revista e Corrigida (ARC)",
+    cor: "Preta",
+    acabamento: "Capa dura, modelo luxo",
+    paginas: "2.304",
+    dimensoes: "16 × 23 × 5 cm",
+    peso: "1,358 kg",
+    harpa: "Não",
+    indice: "Não informado",
+    isbn: "7908234018897",
+    recursos: "Notas e artigos de apologética cristã"
+  },
+  "minha-primeira-biblia-meninos": {
+    nome: "Livro Almofadado Pequeno Minha Primeira Bíblia — Meninos",
+    imagem: "assets/products/minha-primeira-biblia-meninos-01.webp",
+    imagens: [
+      "assets/products/minha-primeira-biblia-meninos-01.webp",
+      "assets/products/minha-primeira-biblia-meninos-02.webp"
+    ],
+    descricao: "Histórias bíblicas curtas e acolhedoras para apresentar o amor de Deus aos meninos a partir de 4 anos.",
+    precoOriginal: 24.90,
+    preco: 22.41,
+    fontePreco: "Ciranda Cultural",
+    fontePrecoUrl: "https://www.cirandacultural.com.br/produto/livro-almofadado-pequeno-minha-primeira-biblia-meninos-71268",
+    dataConsultaPreco: "2026-08-24",
+    acabamento: "Livro almofadado",
+    paginas: "20",
+    dimensoes: "12,7 × 15,5 × 2,2 cm",
+    isbn: "9786555005929",
+    recursos: "Ilustrações de Dotty Lottie; faixa etária +4 anos"
+  },
+  "minha-primeira-biblia-meninas": {
+    nome: "Livro Almofadado Pequeno Minha Primeira Bíblia — Meninas",
+    imagem: "assets/products/minha-primeira-biblia-meninas-01.webp",
+    imagens: [
+      "assets/products/minha-primeira-biblia-meninas-01.webp",
+      "assets/products/minha-primeira-biblia-meninas-02.webp"
+    ],
+    descricao: "Histórias bíblicas curtas e acolhedoras para apresentar o amor de Deus às meninas a partir de 4 anos.",
+    precoOriginal: 24.90,
+    preco: 22.41,
+    fontePreco: "Ciranda Cultural",
+    fontePrecoUrl: "https://www.cirandacultural.com.br/produto/livro-almofadado-pequeno-minha-primeira-biblia-meninas-71269",
+    dataConsultaPreco: "2026-08-24",
+    acabamento: "Livro almofadado",
+    paginas: "20",
+    dimensoes: "12,7 × 15,5 × 2,2 cm",
+    isbn: "9786555005912",
+    recursos: "Ilustrações de Dotty Lottie; faixa etária +4 anos"
+  },
+  "minha-primeira-biblia-palavras-ilustradas": {
+    nome: "Livro Almofadado Pequeno Minha Primeira Bíblia de Palavras Ilustradas",
+    imagem: "assets/products/minha-primeira-biblia-palavras-ilustradas-01.webp",
+    imagens: [
+      "assets/products/minha-primeira-biblia-palavras-ilustradas-01.webp",
+      "assets/products/minha-primeira-biblia-palavras-ilustradas-02.webp"
+    ],
+    descricao: "Histórias bíblicas em que ilustrações substituem palavras, apoiando o aprendizado de crianças a partir de 4 anos.",
+    precoOriginal: 24.90,
+    preco: 22.41,
+    fontePreco: "Ciranda Cultural",
+    fontePrecoUrl: "https://www.cirandacultural.com.br/produto/livro-almofadado-pequeno-minha-primeira-biblia-de-palavras-ilustradas-71267",
+    dataConsultaPreco: "2026-08-24",
+    acabamento: "Livro almofadado",
+    paginas: "20",
+    dimensoes: "12,7 × 15,5 × 2,2 cm",
+    isbn: "9786555005936",
+    recursos: "Palavras ilustradas; faixa etária +4 anos"
+  },
+  "biblia-da-garotada": {
+    nome: "A Bíblia da Garotada",
+    imagem: "assets/products/biblia-da-garotada-01.webp",
+    imagens: [
+      "assets/products/biblia-da-garotada-01.webp",
+      "assets/products/biblia-da-garotada-02.webp",
+      "assets/products/biblia-da-garotada-03.webp",
+      "assets/products/biblia-da-garotada-04.webp"
+    ],
+    descricao: "Seleção de histórias bíblicas com textos simples e ilustrações coloridas para crianças a partir de 3 anos.",
+    preco: 29.90,
+    precoOriginal: null,
+    fontePreco: "Todolivro",
+    fontePrecoUrl: "https://www.todolivro.com.br/a-biblia-da-garotada/p",
+    dataConsultaPreco: "2026-08-24",
+    acabamento: "Cartonado, capa dura almofadada com verniz",
+    paginas: "30",
+    dimensoes: "14,7 × 18,4 × 2,5 cm",
+    isbn: "9788537642276",
+    recursos: "Textos curtos; ilustrações coloridas; faixa etária a partir de 3 anos"
+  },
+  "minha-primeira-biblia-ilustrada": {
+    nome: "Livro Almofadado Pequeno Minha Primeira Bíblia Ilustrada",
+    imagem: "assets/products/minha-primeira-biblia-ilustrada-01.webp",
+    imagens: [
+      "assets/products/minha-primeira-biblia-ilustrada-01.webp",
+      "assets/products/minha-primeira-biblia-ilustrada-02.webp",
+      "assets/products/minha-primeira-biblia-ilustrada-03.webp"
+    ],
+    descricao: "Histórias bíblicas rimadas em um livro almofadado feito para pequenas mãos, indicado a partir de 4 anos.",
+    preco: 49.90,
+    precoOriginal: null,
+    fontePreco: "Ciranda Cultural",
+    fontePrecoUrl: "https://www.cirandacultural.com.br/produto/livro-almofadado-pequeno-minha-primeira-biblia-ilustrada-75150",
+    dataConsultaPreco: "2026-08-24",
+    acabamento: "Livro almofadado",
+    paginas: "20",
+    dimensoes: "13 × 15,8 × 2,6 cm",
+    isbn: "9786526112847",
+    recursos: "Texto rimado; ilustrações de Jayne Schofield; faixa etária +4 anos"
+  }
+});
+
+catalogProducts.forEach((product) => {
+  const update = bibleCatalogUpdates[product.slug];
+  if (update) Object.assign(product, update);
+});
+
 const inactiveCatalogSlugs = new Set([
   "ate-que-nada-mais-importe",
   "cartas-de-um-diabo-a-seu-aprendiz",
@@ -1150,11 +1634,26 @@ document.querySelectorAll(".nav-row a").forEach((link) => {
   link.addEventListener("click", () => nav?.classList.remove("open"));
 });
 
-const getProductStatus = (product) => {
-  if (typeof product.preco === "number") {
-    return product.preco.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+const formatProductPrice = (value) =>
+  value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+
+const getProductStatus = (product) =>
+  typeof product.preco === "number"
+    ? formatProductPrice(product.preco)
+    : product.statusPreco || "Preço em breve";
+
+const getProductPriceMarkup = (product) => {
+  if (typeof product.preco !== "number") {
+    return `<span class="product-price-current product-price-pending">${getProductStatus(product)}</span>`;
   }
-  return "Preço em breve";
+
+  const hasRealDiscount =
+    typeof product.precoOriginal === "number" && product.precoOriginal > product.preco;
+
+  return `
+    ${hasRealDiscount ? `<del class="product-price-original">De: ${formatProductPrice(product.precoOriginal)}</del>` : ""}
+    <span class="product-price-current">${hasRealDiscount ? "Por: " : ""}${formatProductPrice(product.preco)}</span>
+  `;
 };
 
 const getProductMeta = (product) =>
@@ -1172,7 +1671,7 @@ const createProductCard = (product) => `
       <h3>${product.nome}</h3>
       ${getProductMeta(product) ? `<span class="catalog-product-meta">${getProductMeta(product)}</span>` : ""}
       <p>${product.descricao}</p>
-      <strong>${getProductStatus(product)}</strong>
+      <div class="catalog-product-price" aria-label="Preço">${getProductPriceMarkup(product)}</div>
       <button type="button" data-product-slug="${product.slug}">Ver produto</button>
     </div>
   </article>
@@ -1453,16 +1952,42 @@ const setProductDialogDetails = (product) => {
     product.editora ? { label: "Editora", value: product.editora } : null,
     product.marca ? { label: "Marca", value: product.marca } : null,
     { label: "Categoria", value: product.categoria },
-    { label: "Indicação", value: product.perfil }
-  ].filter(Boolean).slice(0, 4);
+    { label: "Indicação", value: product.perfil },
+    product.traducao ? { label: "Tradução", value: product.traducao } : null,
+    product.cor ? { label: "Cor", value: product.cor } : null,
+    product.acabamento ? { label: "Acabamento", value: product.acabamento } : null,
+    product.materialCapa ? { label: "Material da capa", value: product.materialCapa } : null,
+    product.tamanhoLetra ? { label: "Tamanho da letra", value: product.tamanhoLetra } : null,
+    product.paginas ? { label: "Páginas", value: product.paginas } : null,
+    product.dimensoes ? { label: "Dimensões", value: product.dimensoes } : null,
+    product.peso ? { label: "Peso", value: product.peso } : null,
+    product.harpa ? { label: "Harpa Cristã", value: product.harpa } : null,
+    product.indice ? { label: "Índice", value: product.indice } : null,
+    product.isbn ? { label: "ISBN / GTIN", value: product.isbn } : null,
+    product.recursos ? { label: "Recursos", value: product.recursos } : null,
+    product.fontePreco ? { label: "Fonte do preço", value: product.fontePreco } : null,
+    product.dataConsultaPreco ? { label: "Preço consultado em", value: product.dataConsultaPreco } : null,
+    product.pendencias ? { label: "Validação pendente", value: product.pendencias } : null
+  ].filter((detail) => detail?.value);
 
-  productDialogElement?.querySelectorAll("[data-product-detail]").forEach((element, index) => {
-    const detail = details[index];
-    element.hidden = !detail;
-    if (!detail) return;
-    element.querySelector("[data-product-detail-label]").textContent = detail.label;
-    element.querySelector("[data-product-detail-value]").textContent = detail.value;
+  const container = productDialogElement?.querySelector(".product-dialog-details");
+  if (!container) return;
+  container.replaceChildren();
+
+  details.forEach((detail) => {
+    const row = document.createElement("div");
+    const label = document.createElement("dt");
+    const value = document.createElement("dd");
+    label.textContent = detail.label;
+    value.textContent = detail.value;
+    row.append(label, value);
+    container.appendChild(row);
   });
+};
+
+const setProductDialogPrice = (selector, product) => {
+  const element = productDialogElement?.querySelector(selector);
+  if (element) element.innerHTML = getProductPriceMarkup(product);
 };
 
 const setBookDialogUrl = (slug) => {
@@ -1495,8 +2020,8 @@ const openProductDialog = (slug, { syncUrl = true } = {}) => {
     [product.categoria, product.autor || product.marca, product.editora].filter(Boolean).join(" • ");
   productDialogElement.querySelector("#product-dialog-title").textContent = product.nome;
   productDialogElement.querySelector("#product-dialog-description").textContent = product.descricao;
-  productDialogElement.querySelector("#product-dialog-status").textContent = getProductStatus(product);
-  setProductDialogText("#product-dialog-simple-status", getProductStatus(product), "Preço em breve");
+  setProductDialogPrice("#product-dialog-status", product);
+  setProductDialogPrice("#product-dialog-simple-status", product);
   setProductDialogText("#product-dialog-author", product.autor || product.marca, "Não informado");
   setProductDialogText("#product-dialog-publisher", product.editora, "Não informada");
   setProductDialogText("#product-dialog-detail-category", product.categoria, "Não informada");
