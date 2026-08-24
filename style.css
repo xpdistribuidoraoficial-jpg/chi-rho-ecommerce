@@ -722,6 +722,7 @@ body:has(.test-cart-dialog[open]){overflow:hidden}
 .checkout-submit{width:100%;min-height:52px;border:0;font-size:14px}
 .checkout-form-status{min-height:20px;margin:-5px 0 0;color:var(--muted);font-size:11px;text-align:center}
 .checkout-form-status.is-success{padding:11px;border:1px solid #bfe0d5;border-radius:10px;background:#edf9f4;color:#176b54;font-weight:700}
+.checkout-form-status.is-error{padding:11px;border:1px solid #efc9ba;border-radius:10px;background:#fff5f1;color:#a13f24;font-weight:700}
 .checkout-summary{position:sticky;top:24px}
 .checkout-summary-card{padding:23px}
 .checkout-summary-heading{padding-bottom:17px;border-bottom:1px solid var(--line);display:flex;align-items:flex-start;justify-content:space-between;gap:20px}

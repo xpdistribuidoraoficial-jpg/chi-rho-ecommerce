@@ -2,6 +2,20 @@ import { shippingProducts } from "./data/shipping-products.mjs";
 
 const CART_STORAGE_KEY = "chi-rho-test-cart-v1";
 const SHIPPING_STORAGE_KEY = "chi-rho-test-shipping-v1";
+const LAST_ORDER_STORAGE_KEY = "chi-rho-last-order-v1";
+const ORDER_ENDPOINT = "https://sailabcmcqdzrqhqztqs.supabase.co/functions/v1/create-casa-order";
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_ipNBmuf0pUOZRzzlpU8kWw_Md1Y5FuE";
+
+const createRequestId = () => {
+  if (typeof crypto.randomUUID === "function") return crypto.randomUUID();
+  const bytes = crypto.getRandomValues(new Uint8Array(16));
+  bytes[6] = (bytes[6] & 0x0f) | 0x40;
+  bytes[8] = (bytes[8] & 0x3f) | 0x80;
+  const value = [...bytes].map((byte) => byte.toString(16).padStart(2, "0")).join("");
+  return `${value.slice(0, 8)}-${value.slice(8, 12)}-${value.slice(12, 16)}-${value.slice(16, 20)}-${value.slice(20)}`;
+};
+
+const checkoutRequestId = createRequestId();
 
 const formatCurrency = (value) => Number(value).toLocaleString("pt-BR", {
   style: "currency",
@@ -167,10 +181,11 @@ document.querySelector("[data-whatsapp-input]")?.addEventListener("input", (even
   event.target.value = formatWhatsapp(event.target.value);
 });
 
-document.querySelector("#checkout-form")?.addEventListener("submit", (event) => {
+document.querySelector("#checkout-form")?.addEventListener("submit", async (event) => {
   event.preventDefault();
   const form = event.currentTarget;
   const status = form.querySelector("[data-checkout-form-status]");
+  const submitButton = form.querySelector(".checkout-submit");
   const whatsapp = onlyDigits(form.elements.whatsapp.value);
 
   if (whatsapp.length < 10) {
@@ -180,7 +195,68 @@ document.querySelector("#checkout-form")?.addEventListener("submit", (event) => 
     return;
   }
 
-  status.textContent = "Dados validados. A conexão com o Mercado Pago será liberada na próxima etapa.";
-  status.classList.add("is-success");
-  form.querySelector(".checkout-payment-preview")?.scrollIntoView({ behavior: "smooth", block: "center" });
+  if (cart.length === 0 || !shipping) {
+    status.textContent = "O carrinho ou o frete não está mais disponível. Volte ao catálogo e refaça a cotação.";
+    status.className = "checkout-form-status is-error";
+    return;
+  }
+
+  const payload = {
+    clientRequestId: checkoutRequestId,
+    customer: {
+      name: form.elements.name.value,
+      email: form.elements.email.value,
+      whatsapp,
+      whatsappMarketing: form.elements.whatsappMarketing.checked
+    },
+    address: {
+      postcode: form.elements.postcode.value,
+      street: form.elements.street.value,
+      number: form.elements.number.value,
+      complement: form.elements.complement.value,
+      district: form.elements.district.value,
+      city: form.elements.city.value,
+      state: form.elements.state.value
+    },
+    items: cart.map((item) => ({ slug: item.slug, quantity: item.quantity })),
+    shipping
+  };
+
+  submitButton.disabled = true;
+  submitButton.textContent = "Registrando pedido…";
+  status.textContent = "Confirmando o frete e salvando o pedido com segurança…";
+  status.className = "checkout-form-status";
+
+  try {
+    const response = await fetch(ORDER_ENDPOINT, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        apikey: SUPABASE_PUBLISHABLE_KEY,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload),
+      signal: AbortSignal.timeout(30000)
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(result.error || "Não foi possível registrar o pedido.");
+
+    try {
+      sessionStorage.setItem(LAST_ORDER_STORAGE_KEY, JSON.stringify(result.order));
+    } catch {
+      // O pedido permanece salvo no Supabase mesmo sem armazenamento nesta sessão.
+    }
+    status.textContent = `Pedido de teste ${result.order.code} registrado. Nenhuma cobrança foi realizada.`;
+    status.className = "checkout-form-status is-success";
+    submitButton.textContent = "Pedido registrado";
+    document.querySelector(".checkout-pilot-note p").innerHTML = `<strong>Pedido salvo no banco.</strong> Código ${result.order.code}. O pagamento pelo Mercado Pago ainda não foi iniciado.`;
+    form.querySelector(".checkout-payment-preview")?.scrollIntoView({ behavior: "smooth", block: "center" });
+  } catch (error) {
+    status.textContent = error?.name === "TimeoutError"
+      ? "O registro demorou mais que o esperado. Tente novamente; o mesmo pedido não será duplicado."
+      : error.message;
+    status.className = "checkout-form-status is-error";
+    submitButton.disabled = false;
+    submitButton.textContent = "Registrar pedido de teste";
+  }
 });
