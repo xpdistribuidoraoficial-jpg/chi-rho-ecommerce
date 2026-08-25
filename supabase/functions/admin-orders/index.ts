@@ -9,15 +9,20 @@ const response=(body:unknown,status=200,origin=SITE_ORIGIN)=>new Response(status
     "Content-Type":"application/json; charset=utf-8","Vary":"Origin"}
 });
 const safe=(value:unknown,max:number)=>String(value||"").trim().slice(0,max);
+const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const jwtPayload=(token:string)=>{try{return JSON.parse(atob(token.split(".")[1].replace(/-/g,"+").replace(/_/g,"/")));}catch{return null;}};
 
 const getAdmin=async(request:Request,url:string,serviceKey:string)=>{
   const authorization=request.headers.get("authorization")||"";
   if(!authorization.startsWith("Bearer ")) return null;
   const userResponse=await fetch(`${url}/auth/v1/user`,{headers:{apikey:PUBLIC_KEY,Authorization:authorization},signal:AbortSignal.timeout(8000)});
   if(!userResponse.ok) return null;
-  const user=await userResponse.json();
-  const check=await fetch(`${url}/rest/v1/admin_users?user_id=eq.${encodeURIComponent(user.id)}&active=eq.true&select=user_id,display_name&limit=1`,{
-    headers:{apikey:serviceKey,Authorization:`Bearer ${serviceKey}`},signal:AbortSignal.timeout(8000)});
+  const user=await userResponse.json(),payload=jwtPayload(authorization.slice(7));
+  const sessionId=safe(payload?.session_id,36);
+  if(!uuid.test(String(user?.id||""))||!uuid.test(sessionId)) return null;
+  const check=await fetch(`${url}/rest/v1/rpc/authorize_admin_session`,{method:"POST",headers:{
+    apikey:serviceKey,Authorization:`Bearer ${serviceKey}`,"Content-Type":"application/json"},
+    body:JSON.stringify({target_user_id:user.id,target_session_id:sessionId}),signal:AbortSignal.timeout(8000)});
   const admins=check.ok?await check.json():[];
   return admins[0]?{id:user.id,email:user.email,displayName:admins[0].display_name}:null;
 };
@@ -36,15 +41,18 @@ Deno.serve(async(request)=>{
   if(request.method==="GET"&&requestUrl.searchParams.get("action")==="detail"){
     const id=safe(requestUrl.searchParams.get("id"),36);
     if(!/^[0-9a-f-]{36}$/i.test(id)) return response({error:"Pedido inválido."},400,origin);
-    const orderSelect="id,code,customer_name,customer_email,customer_whatsapp,customer_phone,tax_id,postal_code,street,address_number,complement,district,city,state,shipping_carrier,shipping_carrier_code,shipping_service,shipping_service_code,shipping_delivery_time,shipping_price,shipping_quote_id,subtotal,discount,grand_total,financial_status,operational_status,payment_method,payment_external_id,tracking_code,tracking_url,label_url,shipped_at,reservation_expires_at,cancellation_reason,created_at,updated_at";
-    const [orderResult,itemsResult,historyResult]=await Promise.all([
+    const orderSelect="id,code,customer_name,customer_email,customer_whatsapp,customer_phone,tax_id,postal_code,street,address_number,complement,district,city,state,shipping_carrier,shipping_carrier_code,shipping_service,shipping_service_code,shipping_delivery_time,shipping_price,shipping_quote_id,subtotal,discount,grand_total,financial_status,operational_status,payment_method,payment_external_id,tracking_code,tracking_url,label_url,shipping_label_provider,shipping_label_id,label_status,label_created_at,label_valid_through,declaration_url,shipped_at,reservation_expires_at,cancellation_reason,created_at,updated_at";
+    const [orderResult,itemsResult,historyResult,inventoryResult]=await Promise.all([
       fetch(`${url}/rest/v1/orders?id=eq.${id}&select=${orderSelect}&limit=1`,{headers}),
       fetch(`${url}/rest/v1/order_items?order_id=eq.${id}&select=id,product_slug,sku,product_name,image_url,unit_price,quantity,line_total&order=id`,{headers}),
-      fetch(`${url}/rest/v1/order_status_history?order_id=eq.${id}&select=previous_status,status,status_type,note,created_at&order=created_at`,{headers})
+      fetch(`${url}/rest/v1/order_status_history?order_id=eq.${id}&select=previous_status,status,status_type,note,created_at&order=created_at`,{headers}),
+      fetch(`${url}/rest/v1/inventory?select=product_slug,stock_total,stock_reserved,stock_available&order=product_slug`,{headers})
     ]);
     const orders=orderResult.ok?await orderResult.json():[];
     if(!orders[0]) return response({error:"Pedido não encontrado."},404,origin);
-    return response({order:orders[0],items:itemsResult.ok?await itemsResult.json():[],
+    const items=itemsResult.ok?await itemsResult.json():[],inventory=inventoryResult.ok?await inventoryResult.json():[];
+    const stock=new Map(inventory.map((item:any)=>[item.product_slug,item]));
+    return response({order:orders[0],items:items.map((item:any)=>({...item,inventory:stock.get(item.product_slug)||null})),
       history:historyResult.ok?await historyResult.json():[]},200,origin);
   }
 

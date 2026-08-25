@@ -1,8 +1,9 @@
 <!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Pedidos | Administração Chi Rho</title><link rel="stylesheet" href="style.css"><link rel="stylesheet" href="admin.css"></head>
+<title>Pedidos | Administração Chi Rho</title><meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; connect-src 'self' https://sailabcmcqdzrqhqztqs.supabase.co; base-uri 'self'; form-action 'self'">
+<link rel="stylesheet" href="style.css"><link rel="stylesheet" href="admin.css"></head>
 <body class="admin-page"><header class="admin-header"><div class="container admin-header-row">
   <a class="brand" href="index.html"><img src="assets/logo-chi-rho.png" alt="Chi Rho"><span><strong>CHI RHO</strong><small>ADMINISTRAÇÃO</small></span></a>
-  <button class="admin-signout" type="button" data-admin-signout hidden>Sair</button></div></header>
+  <div class="admin-session"><span data-admin-user></span><button class="admin-signout" type="button" data-admin-signout hidden>Sair</button></div></div></header>
 <main class="container admin-main">
   <section class="admin-login" data-admin-login><span>ÁREA RESTRITA</span><h1>Gestão de pedidos</h1>
     <p>Entre com um usuário autorizado no Supabase para consultar clientes e atualizar a operação.</p>
