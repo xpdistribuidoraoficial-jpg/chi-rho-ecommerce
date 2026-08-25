@@ -242,11 +242,35 @@ document.querySelector("#checkout-form")?.addEventListener("submit", async (even
     if (!response.ok) throw new Error(result.error || "Não foi possível registrar o pedido.");
 
     try {
-      sessionStorage.setItem(LAST_ORDER_STORAGE_KEY, JSON.stringify(result.order));
+      sessionStorage.setItem(LAST_ORDER_STORAGE_KEY, JSON.stringify({
+        ...result.order,
+        checkoutSnapshot: {
+          items: cart.map((item) => ({
+            product_name: item.product.name,
+            sku: item.product.sku,
+            image_url: item.product.image,
+            quantity: item.quantity,
+            line_total: Number(item.product.price) * item.quantity
+          })),
+          subtotal: cart.reduce((sum, item) => sum + Number(item.product.price) * item.quantity, 0),
+          shippingPrice: Number(shipping.service.price),
+          total: Number(result.order.total),
+          shipping: {
+            carrier: shipping.service.carrier,
+            service: shipping.service.description,
+            deliveryTime: shipping.service.deliveryTime
+          },
+          address: payload.address
+        }
+      }));
     } catch {
       // O pedido permanece salvo no Supabase mesmo sem armazenamento nesta sessão.
     }
     status.textContent = `Pedido de teste ${result.order.code} registrado. Nenhuma cobrança foi realizada.`;
+    const trackingLink = document.createElement("a");
+    trackingLink.href = "pagamento-pendente.html";
+    trackingLink.textContent = "Acompanhar pedido";
+    status.append(" ", trackingLink);
     status.className = "checkout-form-status is-success";
     submitButton.textContent = "Pedido registrado";
     document.querySelector(".checkout-pilot-note p").innerHTML = `<strong>Pedido salvo no banco.</strong> Código ${result.order.code}. O pagamento pelo Mercado Pago ainda não foi iniciado.`;
