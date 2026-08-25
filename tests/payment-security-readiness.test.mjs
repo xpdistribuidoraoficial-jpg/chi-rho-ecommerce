@@ -69,6 +69,18 @@ test("checkout não injeta dados de frete ou pedido por HTML", () => {
   assert.doesNotMatch(read("checkout.js"), /\.innerHTML\s*=/);
 });
 
+test("páginas usam política CSP sem manipuladores inline", () => {
+  const config = JSON.parse(read("vercel.json"));
+  const globalHeaders = config.headers.find((entry) => entry.source === "/(.*)")?.headers || [];
+  const csp = globalHeaders.find((header) => header.key === "Content-Security-Policy")?.value || "";
+  assert.ok(csp.includes("script-src 'self'"));
+  assert.ok(csp.includes("frame-ancestors 'none'"));
+  assert.ok(csp.includes("object-src 'none'"));
+  for (const page of ["index.html", "quem-somos.html"]) {
+    assert.doesNotMatch(read(page), /\son[a-z]+\s*=/i, `Manipulador inline encontrado: ${page}`);
+  }
+});
+
 test("entradas públicas e administrativas mantêm viewport e breakpoints responsivos", () => {
   for (const page of [
     "index.html",
