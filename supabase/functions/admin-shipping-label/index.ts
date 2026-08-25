@@ -6,7 +6,7 @@ const ALLOWED_ORIGINS=new Set([SITE_ORIGIN,"http://localhost:3000","http://127.0
 const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const response=(body:unknown,status=200,origin=SITE_ORIGIN)=>new Response(JSON.stringify(body),{status,headers:{
   "Access-Control-Allow-Origin":origin,"Access-Control-Allow-Headers":"authorization, apikey, content-type",
-  "Access-Control-Allow-Methods":"POST, OPTIONS","Cache-Control":"no-store",
+  "Access-Control-Allow-Methods":"GET, POST, OPTIONS","Cache-Control":"no-store",
   "Content-Type":"application/json; charset=utf-8","Vary":"Origin"}});
 const safe=(value:unknown,max:number)=>String(value||"").trim().slice(0,max);
 const digits=(value:unknown)=>String(value||"").replace(/\D/g,"");
@@ -34,7 +34,7 @@ Deno.serve(async(request)=>{
   const origin=request.headers.get("origin")||SITE_ORIGIN;
   if(!ALLOWED_ORIGINS.has(origin)) return response({error:"Origem não autorizada."},403,SITE_ORIGIN);
   if(request.method==="OPTIONS") return response({},204,origin);
-  if(request.method!=="POST") return response({error:"Método não permitido."},405,origin);
+  if(request.method!=="GET"&&request.method!=="POST") return response({error:"Método não permitido."},405,origin);
   const url=Deno.env.get("SUPABASE_URL"),serviceKey=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
   if(!url||!serviceKey) return response({error:"Operação temporariamente indisponível."},503,origin);
   const admin=await getAdmin(request,url,serviceKey);
@@ -42,9 +42,15 @@ Deno.serve(async(request)=>{
 
   const frenetToken=Deno.env.get("FRENET_TOKEN")?.trim();
   const partnerToken=Deno.env.get("FRENET_PARTNER_TOKEN")?.trim();
+  const configured=Boolean(frenetToken&&partnerToken);
+  if(request.method==="GET") return response({
+    available:configured,
+    provider:"frenet",
+    reason:configured?null:"partner_token_pending"
+  },200,origin);
   const printFormat=/^(A4|A6)$/i.test(Deno.env.get("FRENET_PRINTING_FORMAT")||"")
     ? String(Deno.env.get("FRENET_PRINTING_FORMAT")).toUpperCase():"A4";
-  if(!frenetToken||!partnerToken) return response({
+  if(!configured) return response({
     error:"A emissão de etiquetas Frenet está preparada, mas ainda depende do Partner Token autorizado.",
     code:"LABEL_NOT_CONFIGURED"
   },503,origin);

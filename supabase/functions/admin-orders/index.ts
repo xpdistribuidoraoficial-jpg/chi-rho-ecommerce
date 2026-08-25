@@ -42,18 +42,25 @@ Deno.serve(async(request)=>{
     const id=safe(requestUrl.searchParams.get("id"),36);
     if(!/^[0-9a-f-]{36}$/i.test(id)) return response({error:"Pedido inválido."},400,origin);
     const orderSelect="id,code,customer_name,customer_email,customer_whatsapp,customer_phone,tax_id,postal_code,street,address_number,complement,district,city,state,shipping_carrier,shipping_carrier_code,shipping_service,shipping_service_code,shipping_delivery_time,shipping_price,shipping_quote_id,subtotal,discount,grand_total,financial_status,operational_status,payment_method,payment_external_id,tracking_code,tracking_url,label_url,shipping_label_provider,shipping_label_id,label_status,label_created_at,label_valid_through,declaration_url,shipped_at,reservation_expires_at,cancellation_reason,created_at,updated_at";
-    const [orderResult,itemsResult,historyResult,inventoryResult]=await Promise.all([
+    const [orderResult,itemsResult,historyResult,paymentHistoryResult,inventoryResult]=await Promise.all([
       fetch(`${url}/rest/v1/orders?id=eq.${id}&select=${orderSelect}&limit=1`,{headers}),
       fetch(`${url}/rest/v1/order_items?order_id=eq.${id}&select=id,product_slug,sku,product_name,image_url,unit_price,quantity,line_total&order=id`,{headers}),
       fetch(`${url}/rest/v1/order_status_history?order_id=eq.${id}&select=previous_status,status,status_type,note,created_at&order=created_at`,{headers}),
+      fetch(`${url}/rest/v1/payment_events?order_id=eq.${id}&select=event_type,mapped_status,processed,error_code,created_at&order=created_at`,{headers}),
       fetch(`${url}/rest/v1/inventory?select=product_slug,stock_total,stock_reserved,stock_available&order=product_slug`,{headers})
     ]);
     const orders=orderResult.ok?await orderResult.json():[];
     if(!orders[0]) return response({error:"Pedido não encontrado."},404,origin);
     const items=itemsResult.ok?await itemsResult.json():[],inventory=inventoryResult.ok?await inventoryResult.json():[];
     const stock=new Map(inventory.map((item:any)=>[item.product_slug,item]));
-    return response({order:orders[0],items:items.map((item:any)=>({...item,inventory:stock.get(item.product_slug)||null})),
-      history:historyResult.ok?await historyResult.json():[]},200,origin);
+    const operationalHistory=historyResult.ok?await historyResult.json():[];
+    const paymentHistory=paymentHistoryResult.ok?await paymentHistoryResult.json():[];
+    const history=[...operationalHistory,...paymentHistory.filter((event:any)=>event.mapped_status).map((event:any)=>({
+      previous_status:null,status:event.mapped_status,status_type:"financial",
+      note:event.processed?`Evento ${event.event_type} processado.`:`Evento ${event.event_type} não processado${event.error_code?` (${event.error_code})`:""}.`,
+      created_at:event.created_at
+    }))].sort((left:any,right:any)=>String(left.created_at).localeCompare(String(right.created_at)));
+    return response({order:orders[0],items:items.map((item:any)=>({...item,inventory:stock.get(item.product_slug)||null})),history},200,origin);
   }
 
   if(request.method==="GET"){
