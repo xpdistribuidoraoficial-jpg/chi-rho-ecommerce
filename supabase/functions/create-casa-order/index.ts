@@ -45,6 +45,22 @@ const cleanText = (value: unknown, maxLength: number) => String(value || "").tri
 const roundMoney = (value: number) => Number(value.toFixed(2));
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const validTaxId = (value: string) => {
+  if (!/^\d{11}$|^\d{14}$/.test(value) || /^(\d)\1+$/.test(value)) return false;
+  const digit = (base: string, factors: number[]) => {
+    const sum = [...base].reduce((total, number, index) => total + Number(number) * factors[index], 0);
+    const remainder = sum % 11;
+    return remainder < 2 ? 0 : 11 - remainder;
+  };
+  if (value.length === 11) {
+    const first = digit(value.slice(0, 9), [10, 9, 8, 7, 6, 5, 4, 3, 2]);
+    const second = digit(value.slice(0, 10), [11, 10, 9, 8, 7, 6, 5, 4, 3, 2]);
+    return value.endsWith(`${first}${second}`);
+  }
+  const first = digit(value.slice(0, 12), [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]);
+  const second = digit(value.slice(0, 13), [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]);
+  return value.endsWith(`${first}${second}`);
+};
 
 const validateItems = (requestedItems: unknown) => {
   if (!Array.isArray(requestedItems) || requestedItems.length === 0 || requestedItems.length > 2) {
@@ -80,13 +96,18 @@ const validateContact = (body: any) => {
   const name = cleanText(body?.customer?.name, 160);
   const email = cleanText(body?.customer?.email, 320).toLowerCase();
   const whatsapp = onlyDigits(body?.customer?.whatsapp).slice(0, 11);
-  if (name.length < 3 || !emailPattern.test(email) || !/^\d{10,11}$/.test(whatsapp)) {
+  const phone = onlyDigits(body?.customer?.phone || body?.customer?.whatsapp).slice(0, 11);
+  const taxId = onlyDigits(body?.customer?.taxId).slice(0, 14);
+  if (name.length < 3 || !emailPattern.test(email) || !/^\d{10,11}$/.test(whatsapp)
+    || !/^\d{10,11}$/.test(phone) || (taxId && !validTaxId(taxId))) {
     throw new Error("INVALID_CUSTOMER");
   }
   return {
     name,
     email,
     whatsapp,
+    phone,
+    tax_id: taxId,
     whatsapp_marketing_consent: body?.customer?.whatsappMarketing === true
   };
 };
