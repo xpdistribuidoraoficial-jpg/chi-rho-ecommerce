@@ -99,7 +99,7 @@ const validateContact = (body: any) => {
   const phone = onlyDigits(body?.customer?.phone || body?.customer?.whatsapp).slice(0, 11);
   const taxId = onlyDigits(body?.customer?.taxId).slice(0, 14);
   if (name.length < 3 || !emailPattern.test(email) || !/^\d{10,11}$/.test(whatsapp)
-    || !/^\d{10,11}$/.test(phone) || !validTaxId(taxId)) {
+    || !/^\d{10,11}$/.test(phone) || (taxId && !validTaxId(taxId))) {
     throw new Error("INVALID_CUSTOMER");
   }
   return {
