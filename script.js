@@ -2656,6 +2656,8 @@ productDialogElement?.addEventListener("close", () => {
 
 const TEST_CART_STORAGE_KEY = "chi-rho-test-cart-v1";
 const TEST_CART_SHIPPING_STORAGE_KEY = "chi-rho-test-shipping-v1";
+const INVENTORY_ENDPOINT = "https://sailabcmcqdzrqhqztqs.supabase.co/functions/v1/inventory-status";
+const INVENTORY_PUBLIC_KEY = "sb_publishable_ipNBmuf0pUOZRzzlpU8kWw_Md1Y5FuE";
 
 const loadTestCart = () => {
   try {
@@ -2913,6 +2915,26 @@ const openTestCart = () => {
   }
 };
 
+const refreshAvailableInventory = async () => {
+  try {
+    const response = await fetch(INVENTORY_ENDPOINT, {
+      headers: { apikey: INVENTORY_PUBLIC_KEY },
+      signal: AbortSignal.timeout(8000)
+    });
+    const data = await response.json();
+    if (!response.ok || !Array.isArray(data.inventory)) return;
+    data.inventory.forEach((item) => {
+      const product = catalogProducts.find((candidate) => candidate.slug === item.slug && candidate.testeCarrinho === true);
+      if (product && Number.isInteger(item.available)) product.estoque = Math.max(0, item.available);
+    });
+    const activeFilter = document.querySelector(".catalog-filter.is-active")?.dataset.filter;
+    if (catalogGrid) setCatalogFilter(activeFilter || requestedCategory, requestedQuery);
+    renderTestCart();
+  } catch {
+    // Mantém o último limite local; o servidor confirma o estoque antes de reservar.
+  }
+};
+
 document.addEventListener("click", (event) => {
   const cartLink = event.target.closest('a[href$="#carrinho"]');
   if (cartLink) {
@@ -2975,6 +2997,7 @@ testCartDialog.querySelector("#test-cart-postcode")?.addEventListener("keydown",
 });
 
 renderTestCart();
+refreshAvailableInventory();
 
 const requestedProductSlug = new URLSearchParams(window.location.search).get("produto");
 const legacyProductSlug = window.location.hash.length > 1 ? window.location.hash.slice(1) : "";

@@ -188,7 +188,7 @@ Deno.serve(async (request: Request) => {
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
     if (!supabaseUrl || !serviceRoleKey) throw new Error("DATABASE_UNAVAILABLE");
 
-    const databaseResponse = await fetch(`${supabaseUrl}/rest/v1/rpc/create_checkout_order`, {
+    const databaseResponse = await fetch(`${supabaseUrl}/rest/v1/rpc/create_checkout_order_v2`, {
       method: "POST",
       headers: {
         "apikey": serviceRoleKey,
@@ -209,7 +209,10 @@ Deno.serve(async (request: Request) => {
     });
     const databaseData = await databaseResponse.json().catch(() => ({}));
     if (!databaseResponse.ok) {
+      const databaseMessage = String(databaseData?.message || "");
       console.error("Order database error", databaseResponse.status, databaseData?.code || "unknown");
+      if (databaseMessage.includes("OUT_OF_STOCK")) throw new Error("OUT_OF_STOCK");
+      if (databaseMessage.includes("INVALID_ITEMS")) throw new Error("INVALID_ITEMS");
       throw new Error("DATABASE_ERROR");
     }
 
@@ -218,10 +221,13 @@ Deno.serve(async (request: Request) => {
       order: {
         id: order.order_id,
         code: order.order_code,
-        status: order.order_status,
-        total: Number(order.order_total)
+        publicToken: order.order_public_token,
+        status: order.order_financial_status,
+        operationalStatus: order.order_operational_status,
+        total: Number(order.order_total),
+        reservationExpiresAt: order.order_reservation_expires_at
       },
-      payment: { status: "not_started" }
+      payment: { status: "aguardando_pagamento" }
     }, 201, origin);
   } catch (error) {
     const code = error instanceof Error ? error.message : "UNKNOWN";
