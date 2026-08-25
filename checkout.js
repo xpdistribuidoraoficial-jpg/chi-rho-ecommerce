@@ -5,6 +5,9 @@ const SHIPPING_STORAGE_KEY = "chi-rho-test-shipping-v1";
 const LAST_ORDER_STORAGE_KEY = "chi-rho-last-order-v1";
 const ORDER_ENDPOINT = "https://sailabcmcqdzrqhqztqs.supabase.co/functions/v1/create-casa-order";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_ipNBmuf0pUOZRzzlpU8kWw_Md1Y5FuE";
+const PAYMENT_ENDPOINT = "/api/mercadopago/create-preference";
+let createdOrder = null;
+let paymentAvailable = false;
 
 const createRequestId = () => {
   if (typeof crypto.randomUUID === "function") return crypto.randomUUID();
@@ -23,6 +26,24 @@ const formatCurrency = (value) => Number(value).toLocaleString("pt-BR", {
 });
 
 const onlyDigits = (value) => String(value || "").replace(/\D/g, "");
+
+const isValidTaxId = (value) => {
+  const document = onlyDigits(value);
+  if (!/^\d{11}$|^\d{14}$/.test(document) || /^(\d)\1+$/.test(document)) return false;
+  const digit = (base, factors) => {
+    const sum = [...base].reduce((total, number, index) => total + Number(number) * factors[index], 0);
+    const remainder = sum % 11;
+    return remainder < 2 ? 0 : 11 - remainder;
+  };
+  if (document.length === 11) {
+    const first = digit(document.slice(0, 9), [10, 9, 8, 7, 6, 5, 4, 3, 2]);
+    const second = digit(document.slice(0, 10), [11, 10, 9, 8, 7, 6, 5, 4, 3, 2]);
+    return document.endsWith(`${first}${second}`);
+  }
+  const first = digit(document.slice(0, 12), [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]);
+  const second = digit(document.slice(0, 13), [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]);
+  return document.endsWith(`${first}${second}`);
+};
 
 const formatPostcode = (value) => {
   const digits = onlyDigits(value).slice(0, 8);
@@ -181,17 +202,73 @@ document.querySelector("[data-whatsapp-input]")?.addEventListener("input", (even
   event.target.value = formatWhatsapp(event.target.value);
 });
 
+document.querySelector("[data-tax-id-input]")?.addEventListener("input", (event) => {
+  event.target.value = onlyDigits(event.target.value).slice(0, 14);
+});
+
+const paymentButton = document.querySelector("[data-payment-button]");
+const paymentStatus = document.querySelector("[data-payment-status]");
+const paymentProviderStatus = document.querySelector("[data-payment-provider-status]");
+
+const checkPaymentAvailability = async () => {
+  try {
+    const response = await fetch(PAYMENT_ENDPOINT, { headers: { Accept: "application/json" } });
+    const data = await response.json().catch(() => ({}));
+    paymentAvailable = response.ok && data.available === true;
+  } catch {
+    paymentAvailable = false;
+  }
+  paymentProviderStatus.textContent = paymentAvailable ? "Disponível" : "Em configuração";
+  if (createdOrder) {
+    paymentButton.hidden = false;
+    paymentButton.disabled = !paymentAvailable;
+    paymentButton.textContent = paymentAvailable ? "Finalizar pagamento" : "Pagamento em configuração";
+  }
+};
+
+paymentButton?.addEventListener("click", async () => {
+  if (!createdOrder || !paymentAvailable) return;
+  paymentButton.disabled = true;
+  paymentButton.textContent = "Abrindo Mercado Pago…";
+  paymentStatus.textContent = "Validando valores, estoque e frete no servidor…";
+  paymentStatus.className = "checkout-form-status";
+  try {
+    const response = await fetch(PAYMENT_ENDPOINT, { method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ code: createdOrder.code, publicToken: createdOrder.publicToken }), signal: AbortSignal.timeout(25000) });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.error || "Não foi possível iniciar o pagamento.");
+    const paymentUrl = new URL(data.paymentUrl);
+    if (paymentUrl.protocol !== "https:") throw new Error("A URL de pagamento recebida não é segura.");
+    window.location.assign(paymentUrl.href);
+  } catch (error) {
+    paymentStatus.textContent = error?.name === "TimeoutError" ? "O Mercado Pago demorou mais que o esperado. Tente novamente." : error.message;
+    paymentStatus.className = "checkout-form-status is-error";
+    paymentButton.disabled = !paymentAvailable;
+    paymentButton.textContent = "Finalizar pagamento";
+  }
+});
+
+checkPaymentAvailability();
+
 document.querySelector("#checkout-form")?.addEventListener("submit", async (event) => {
   event.preventDefault();
   const form = event.currentTarget;
   const status = form.querySelector("[data-checkout-form-status]");
   const submitButton = form.querySelector(".checkout-submit");
   const whatsapp = onlyDigits(form.elements.whatsapp.value);
+  const taxId = onlyDigits(form.elements.taxId.value);
 
   if (whatsapp.length < 10) {
     form.elements.whatsapp.setCustomValidity("Informe um WhatsApp válido com DDD.");
     form.elements.whatsapp.reportValidity();
     form.elements.whatsapp.setCustomValidity("");
+    return;
+  }
+
+  if (!isValidTaxId(taxId)) {
+    form.elements.taxId.setCustomValidity("Informe um CPF ou CNPJ válido.");
+    form.elements.taxId.reportValidity();
+    form.elements.taxId.setCustomValidity("");
     return;
   }
 
@@ -207,6 +284,8 @@ document.querySelector("#checkout-form")?.addEventListener("submit", async (even
       name: form.elements.name.value,
       email: form.elements.email.value,
       whatsapp,
+      phone: whatsapp,
+      taxId,
       whatsappMarketing: form.elements.whatsappMarketing.checked
     },
     address: {
@@ -240,6 +319,7 @@ document.querySelector("#checkout-form")?.addEventListener("submit", async (even
     });
     const result = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(result.error || "Não foi possível registrar o pedido.");
+    createdOrder = result.order;
 
     try {
       sessionStorage.setItem(LAST_ORDER_STORAGE_KEY, JSON.stringify({
@@ -266,14 +346,17 @@ document.querySelector("#checkout-form")?.addEventListener("submit", async (even
     } catch {
       // O pedido permanece salvo no Supabase mesmo sem armazenamento nesta sessão.
     }
-    status.textContent = `Pedido de teste ${result.order.code} registrado. Nenhuma cobrança foi realizada.`;
+    status.textContent = `Pedido ${result.order.code} registrado. Nenhuma cobrança foi realizada até você abrir o Mercado Pago.`;
     const trackingLink = document.createElement("a");
     trackingLink.href = "pagamento-pendente.html";
     trackingLink.textContent = "Acompanhar pedido";
     status.append(" ", trackingLink);
     status.className = "checkout-form-status is-success";
     submitButton.textContent = "Pedido registrado";
-    document.querySelector(".checkout-pilot-note p").innerHTML = `<strong>Pedido salvo no banco.</strong> Código ${result.order.code}. O pagamento pelo Mercado Pago ainda não foi iniciado.`;
+    document.querySelector(".checkout-pilot-note p").innerHTML = `<strong>Pedido salvo no banco.</strong> Código ${result.order.code}. O pagamento só será iniciado pelo botão seguro abaixo.`;
+    paymentButton.hidden = false;
+    paymentButton.disabled = !paymentAvailable;
+    paymentButton.textContent = paymentAvailable ? "Finalizar pagamento" : "Pagamento em configuração";
     form.querySelector(".checkout-payment-preview")?.scrollIntoView({ behavior: "smooth", block: "center" });
   } catch (error) {
     status.textContent = error?.name === "TimeoutError"

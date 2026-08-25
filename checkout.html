@@ -81,6 +81,11 @@
                 <span>WhatsApp</span>
                 <input name="whatsapp" type="tel" inputmode="tel" autocomplete="tel" required placeholder="(00) 00000-0000" data-whatsapp-input />
               </label>
+              <label class="checkout-field">
+                <span>CPF ou CNPJ</span>
+                <input name="taxId" inputmode="numeric" autocomplete="off" required placeholder="Somente números" maxlength="18" data-tax-id-input />
+                <small>Necessário para faturamento e emissão da etiqueta de envio.</small>
+              </label>
             </div>
           </section>
 
@@ -157,7 +162,7 @@
               <span>4</span>
               <div>
                 <h2 id="checkout-payment-title">Pagamento</h2>
-                <p>O Mercado Pago será conectado depois que esta tela for aprovada.</p>
+                <p>O pagamento será iniciado em ambiente seguro quando a integração estiver disponível.</p>
               </div>
             </header>
             <div class="checkout-payment-method">
@@ -166,8 +171,10 @@
                 <strong>Mercado Pago</strong>
                 <small>Pix, cartões e boleto em ambiente seguro.</small>
               </div>
-              <b>Em configuração</b>
+              <b data-payment-provider-status>Verificando…</b>
             </div>
+            <button class="btn btn-primary checkout-payment-button" type="button" data-payment-button hidden disabled>Finalizar pagamento</button>
+            <p class="checkout-form-status" data-payment-status aria-live="polite"></p>
           </section>
 
           <label class="checkout-confirmation">
@@ -175,7 +182,7 @@
             <span>Confirmo que revisei os dados, o endereço, os produtos e o frete deste pedido.</span>
           </label>
 
-          <button class="btn btn-primary checkout-submit" type="submit">Registrar pedido de teste</button>
+          <button class="btn btn-primary checkout-submit" type="submit">Registrar pedido</button>
           <p class="checkout-form-status" data-checkout-form-status aria-live="polite"></p>
         </form>
 
