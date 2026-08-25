@@ -68,3 +68,26 @@ test("página de sucesso não aprova pagamento pela URL", () => {
 test("checkout não injeta dados de frete ou pedido por HTML", () => {
   assert.doesNotMatch(read("checkout.js"), /\.innerHTML\s*=/);
 });
+
+test("entradas públicas e administrativas mantêm viewport e breakpoints responsivos", () => {
+  for (const page of [
+    "index.html",
+    "catalogo-biblias.html",
+    "catalogo-infantil.html",
+    "catalogo-casa.html",
+    "checkout.html",
+    "pagamento-sucesso.html",
+    "pagamento-pendente.html",
+    "pagamento-falhou.html",
+    "admin-pedidos.html"
+  ]) {
+    assert.match(read(page), /<meta\s+name="viewport"\s+content="width=device-width,\s*initial-scale=1(?:\.0)?"/i, `Viewport ausente: ${page}`);
+  }
+
+  const publicStyles = read("style.css");
+  const adminStyles = read("admin.css");
+  for (const breakpoint of ["980px", "900px", "700px", "620px", "560px"]) {
+    assert.ok(publicStyles.includes(`max-width:${breakpoint}`), `Breakpoint público ausente: ${breakpoint}`);
+  }
+  assert.ok(adminStyles.includes("max-width:720px"));
+});
