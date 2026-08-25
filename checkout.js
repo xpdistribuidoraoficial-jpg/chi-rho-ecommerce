@@ -185,11 +185,14 @@ if (cart.length === 0 || !shipping) {
     itemsContainer.appendChild(item);
   });
 
-  document.querySelector("[data-checkout-delivery]").innerHTML = `
-    <span>ENTREGA SELECIONADA</span>
-    <strong>${shipping.service.carrier} • ${shipping.service.description}</strong>
-    <small>${formatDeliveryTime(shipping.service.deliveryTime)} para o CEP ${formatPostcode(shipping.cep)}</small>
-  `;
+  const delivery = document.querySelector("[data-checkout-delivery]");
+  const deliveryLabel = document.createElement("span");
+  const deliveryService = document.createElement("strong");
+  const deliveryTime = document.createElement("small");
+  deliveryLabel.textContent = "ENTREGA SELECIONADA";
+  deliveryService.textContent = `${shipping.service.carrier} • ${shipping.service.description}`;
+  deliveryTime.textContent = `${formatDeliveryTime(shipping.service.deliveryTime)} para o CEP ${formatPostcode(shipping.cep)}`;
+  delivery.replaceChildren(deliveryLabel, deliveryService, deliveryTime);
   document.querySelector("[data-checkout-postcode]").value = formatPostcode(shipping.cep);
   document.querySelector("[data-checkout-subtotal]").textContent = formatCurrency(subtotal);
   document.querySelector("[data-checkout-shipping-price]").textContent = formatCurrency(shipping.service.price);
@@ -353,7 +356,10 @@ document.querySelector("#checkout-form")?.addEventListener("submit", async (even
     status.append(" ", trackingLink);
     status.className = "checkout-form-status is-success";
     submitButton.textContent = "Pedido registrado";
-    document.querySelector(".checkout-pilot-note p").innerHTML = `<strong>Pedido salvo no banco.</strong> Código ${result.order.code}. O pagamento só será iniciado pelo botão seguro abaixo.`;
+    const pilotNote = document.querySelector(".checkout-pilot-note p");
+    const pilotTitle = document.createElement("strong");
+    pilotTitle.textContent = "Pedido salvo no banco.";
+    pilotNote.replaceChildren(pilotTitle, ` Código ${result.order.code}. O pagamento só será iniciado pelo botão seguro abaixo.`);
     paymentButton.hidden = false;
     paymentButton.disabled = !paymentAvailable;
     paymentButton.textContent = paymentAvailable ? "Finalizar pagamento" : "Pagamento em configuração";
