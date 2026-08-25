@@ -1,0 +1,28 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pedidos | Administração Chi Rho</title><link rel="stylesheet" href="style.css"><link rel="stylesheet" href="admin.css"></head>
+<body class="admin-page"><header class="admin-header"><div class="container admin-header-row">
+  <a class="brand" href="index.html"><img src="assets/logo-chi-rho.png" alt="Chi Rho"><span><strong>CHI RHO</strong><small>ADMINISTRAÇÃO</small></span></a>
+  <button class="admin-signout" type="button" data-admin-signout hidden>Sair</button></div></header>
+<main class="container admin-main">
+  <section class="admin-login" data-admin-login><span>ÁREA RESTRITA</span><h1>Gestão de pedidos</h1>
+    <p>Entre com um usuário autorizado no Supabase para consultar clientes e atualizar a operação.</p>
+    <form data-admin-login-form><label>E-mail<input name="email" type="email" autocomplete="username" required></label>
+      <label>Senha<input name="password" type="password" autocomplete="current-password" required></label>
+      <button class="btn btn-primary" type="submit">Entrar no painel</button><p class="admin-status" data-admin-login-status></p></form>
+  </section>
+  <section data-admin-dashboard hidden><div class="admin-title"><div><span>OPERAÇÃO CHI RHO</span><h1>Pedidos</h1><p data-admin-summary>Carregando pedidos…</p></div>
+    <button class="btn btn-secondary" type="button" data-admin-refresh>Atualizar</button></div>
+    <nav class="admin-filters" aria-label="Filtrar pedidos">
+      <button class="is-active" data-filter="all">Todos</button><button data-financial="aguardando_pagamento">Aguardando pagamento</button>
+      <button data-financial="pago">Pagos</button><button data-operational="em_separacao">Em separação</button>
+      <button data-operational="pronto_para_envio">Prontos para envio</button><button data-operational="enviado">Enviados</button>
+      <button data-operational="entregue">Entregues</button><button data-operational="cancelado">Cancelados</button>
+    </nav>
+    <div class="admin-table-wrap"><table class="admin-orders-table"><thead><tr><th>Pedido</th><th>Data</th><th>Cliente</th><th>WhatsApp</th><th>Itens</th><th>Total</th><th>Pagamento</th><th>Entrega</th></tr></thead>
+      <tbody data-admin-orders></tbody></table><div class="admin-empty" data-admin-empty hidden>Nenhum pedido encontrado neste filtro.</div></div>
+    <p class="admin-status" data-admin-status></p>
+  </section>
+</main>
+<dialog class="admin-order-dialog" data-order-dialog><div class="admin-dialog-head"><div><span>DETALHES DO PEDIDO</span><h2 data-detail-code></h2></div><button type="button" data-detail-close aria-label="Fechar">×</button></div>
+  <div class="admin-detail-content" data-detail-content></div></dialog>
+<script type="module" src="admin-pedidos.js"></script></body></html>
