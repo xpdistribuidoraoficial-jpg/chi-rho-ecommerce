@@ -3,7 +3,7 @@
 <link rel="stylesheet" href="style.css"><link rel="stylesheet" href="admin.css"></head>
 <body class="admin-page"><header class="admin-header"><div class="container admin-header-row">
   <a class="brand" href="index.html"><img src="assets/logo-chi-rho.png" alt="Chi Rho"><span><strong>CHI RHO</strong><small>ADMINISTRAÇÃO</small></span></a>
-  <div class="admin-session"><span data-admin-user></span><button class="admin-signout" type="button" data-admin-signout hidden>Sair</button></div></div></header>
+  <div class="admin-session"><span data-admin-user></span><button class="admin-password-button" type="button" data-admin-password hidden>Alterar senha</button><button class="admin-signout" type="button" data-admin-signout hidden>Sair</button></div></div></header>
 <main class="container admin-main">
   <section class="admin-login" data-admin-login><span>ÁREA RESTRITA</span><h1>Gestão de pedidos</h1>
     <p>Entre com um usuário autorizado no Supabase para consultar clientes e atualizar a operação.</p>
@@ -26,4 +26,17 @@
 </main>
 <dialog class="admin-order-dialog" data-order-dialog><div class="admin-dialog-head"><div><span>DETALHES DO PEDIDO</span><h2 data-detail-code></h2></div><button type="button" data-detail-close aria-label="Fechar">×</button></div>
   <div class="admin-detail-content" data-detail-content></div></dialog>
+<dialog class="admin-password-dialog" data-password-dialog aria-labelledby="admin-password-title">
+  <form class="admin-password-form" data-password-form>
+    <div class="admin-dialog-head"><div><span>SEGURANÇA DA CONTA</span><h2 id="admin-password-title">Alterar senha</h2></div><button type="button" data-password-close aria-label="Fechar">×</button></div>
+    <div class="admin-password-content">
+      <p>Confirme sua senha atual e defina uma nova senha com pelo menos 8 caracteres.</p>
+      <label>Senha atual<input name="current_password" type="password" autocomplete="current-password" minlength="8" required></label>
+      <label>Nova senha<input name="new_password" type="password" autocomplete="new-password" minlength="8" required></label>
+      <label>Confirmar nova senha<input name="confirm_password" type="password" autocomplete="new-password" minlength="8" required></label>
+      <div class="admin-password-actions"><button class="btn btn-secondary" type="button" data-password-cancel>Cancelar</button><button class="btn btn-primary" type="submit">Salvar nova senha</button></div>
+      <p class="admin-status" data-password-status aria-live="polite"></p>
+    </div>
+  </form>
+</dialog>
 <script type="module" src="admin-pedidos.js"></script></body></html>

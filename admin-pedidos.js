@@ -11,6 +11,8 @@ const label=value=>({aguardando_pagamento:"Aguardando pagamento",pago:"Pago",rec
 const node=(tag,className,text)=>{const element=document.createElement(tag);if(className)element.className=className;
   if(text!==undefined)element.textContent=text;return element;};
 const login=document.querySelector("[data-admin-login]"),dashboard=document.querySelector("[data-admin-dashboard]");
+const passwordButton=document.querySelector("[data-admin-password]"),passwordDialog=document.querySelector("[data-password-dialog]");
+const passwordForm=document.querySelector("[data-password-form]"),passwordStatus=document.querySelector("[data-password-status]");
 const loginStatus=document.querySelector("[data-admin-login-status]"),status=document.querySelector("[data-admin-status]");
 const tbody=document.querySelector("[data-admin-orders]"),empty=document.querySelector("[data-admin-empty]");
 const dialog=document.querySelector("[data-order-dialog]");let activeFilter={},refreshPromise=null;
@@ -18,8 +20,8 @@ const getSession=()=>{try{return JSON.parse(sessionStorage.getItem(SESSION_KEY)|
 const saveSession=session=>{const expiresAt=Number(session.expires_at)||Math.floor(Date.now()/1000)+Number(session.expires_in||3600);
   sessionStorage.setItem(SESSION_KEY,JSON.stringify({...session,expires_at:expiresAt}));};
 const setView=authenticated=>{login.hidden=authenticated;dashboard.hidden=!authenticated;
-  document.querySelector("[data-admin-signout]").hidden=!authenticated;};
-const clearSession=()=>{sessionStorage.removeItem(SESSION_KEY);setView(false);};
+  document.querySelector("[data-admin-signout]").hidden=!authenticated;passwordButton.hidden=!authenticated;};
+const clearSession=()=>{sessionStorage.removeItem(SESSION_KEY);if(passwordDialog.open)passwordDialog.close();setView(false);};
 const refreshSession=async()=>{const session=getSession();if(!session?.refresh_token)throw new Error("AUTH_REQUIRED");
   const response=await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`,{method:"POST",headers:{apikey:PUBLIC_KEY,"Content-Type":"application/json"},
     body:JSON.stringify({refresh_token:session.refresh_token}),signal:AbortSignal.timeout(10000)});
@@ -88,6 +90,35 @@ const updateOrder=async(orderId,newStatus)=>{status.textContent="Atualizando ped
   await Promise.all([loadOrders(),loadDetail(orderId)]);status.textContent="Pedido atualizado.";}catch(error){status.textContent=error.message;}};
 const generateLabel=async orderId=>{status.textContent="Solicitando a etiqueta à Frenet…";try{await apiRequest(LABEL_ENDPOINT,"",{method:"POST",body:JSON.stringify({orderId})});
   await Promise.all([loadOrders(),loadDetail(orderId)]);status.textContent="Etiqueta gerada. Confira os dados antes de imprimir.";}catch(error){status.textContent=error.message;await loadDetail(orderId);}};
+
+const passwordError=data=>{const code=String(data?.code||data?.error_code||"");
+  if(code.includes("same_password"))return "A nova senha precisa ser diferente da senha atual.";
+  if(code.includes("weak_password"))return "Escolha uma senha mais forte, com pelo menos 8 caracteres.";
+  return data?.msg||data?.message||data?.error_description||"Não foi possível alterar a senha.";};
+const changePassword=async event=>{event.preventDefault();passwordStatus.classList.remove("is-success");passwordStatus.textContent="Validando…";
+  const form=new FormData(event.currentTarget),currentPassword=String(form.get("current_password")||"");
+  const newPassword=String(form.get("new_password")||""),confirmation=String(form.get("confirm_password")||"");
+  if(newPassword.length<8){passwordStatus.textContent="A nova senha deve ter pelo menos 8 caracteres.";return;}
+  if(newPassword!==confirmation){passwordStatus.textContent="A confirmação da nova senha não confere.";return;}
+  if(newPassword===currentPassword){passwordStatus.textContent="A nova senha precisa ser diferente da senha atual.";return;}
+  try{const session=await ensureSession(),email=session.user?.email;if(!email)throw new Error("Não foi possível identificar o usuário conectado.");
+    const verifyResponse=await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`,{method:"POST",headers:{apikey:PUBLIC_KEY,"Content-Type":"application/json"},
+      body:JSON.stringify({email,password:currentPassword}),signal:AbortSignal.timeout(10000)});
+    const verified=await verifyResponse.json().catch(()=>({}));if(!verifyResponse.ok)throw new Error("A senha atual não confere.");
+    passwordStatus.textContent="Salvando nova senha…";
+    const updateResponse=await fetch(`${SUPABASE_URL}/auth/v1/user`,{method:"PUT",headers:{apikey:PUBLIC_KEY,Authorization:`Bearer ${verified.access_token}`,"Content-Type":"application/json"},
+      body:JSON.stringify({email,current_password:currentPassword,password:newPassword}),signal:AbortSignal.timeout(10000)});
+    const updated=await updateResponse.json().catch(()=>({}));if(!updateResponse.ok)throw new Error(passwordError(updated));
+    saveSession({...verified,user:updated.user||updated});event.currentTarget.reset();passwordStatus.classList.add("is-success");
+    passwordStatus.textContent="Senha alterada com sucesso.";setTimeout(()=>{if(passwordDialog.open)passwordDialog.close();},1200);
+  }catch(error){passwordStatus.textContent=error.message;}};
+
+passwordButton.onclick=()=>{passwordForm.reset();passwordStatus.textContent="";passwordStatus.classList.remove("is-success");passwordDialog.showModal();
+  passwordForm.elements.current_password.focus();};
+document.querySelector("[data-password-close]").onclick=()=>passwordDialog.close();
+document.querySelector("[data-password-cancel]").onclick=()=>passwordDialog.close();
+passwordDialog.addEventListener("click",event=>{if(event.target===passwordDialog)passwordDialog.close();});
+passwordForm.addEventListener("submit",changePassword);
 
 document.querySelector("[data-admin-login-form]").addEventListener("submit",async event=>{event.preventDefault();loginStatus.textContent="Entrando…";
   const form=new FormData(event.currentTarget);try{const response=await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`,{method:"POST",headers:{apikey:PUBLIC_KEY,"Content-Type":"application/json"},
