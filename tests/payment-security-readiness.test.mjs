@@ -45,7 +45,9 @@ test("preferência fica bloqueada antes da chamada externa sem as três credenci
   assert.ok(source.includes('source_news=webhooks'));
   assert.ok(source.includes('`${SITE_ORIGIN}/${page}?order='));
   assert.ok(source.includes('`${SITE_ORIGIN}/api/mercadopago-webhook?source_news=webhooks`'));
-  assert.ok(source.includes('preference.init_point||preference.sandbox_init_point'));
+  assert.ok(source.includes('testMode?preference.sandbox_init_point:preference.init_point'));
+  assert.ok(source.includes('sandbox\\.mercadopago\\.com\\.br'));
+  assert.ok(source.includes('www\\.mercadopago\\.com\\.br'));
   assert.ok(!source.includes('accessToken!.startsWith("TEST-")'));
 });
 

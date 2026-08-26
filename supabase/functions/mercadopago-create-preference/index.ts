@@ -63,8 +63,12 @@ Deno.serve(async(request)=>{
     ]);
     const orders=orderResponse.ok?await orderResponse.json():[],items=itemsResponse.ok?await itemsResponse.json():[];
     const order=orders[0];if(!order||!items.length) throw new Error("ORDER_DATA_MISSING");
-    if(order.payment_preference_id&&/^https:\/\//i.test(String(order.payment_preference_url||""))){
-      return json({paymentUrl:order.payment_preference_url,preferenceId:order.payment_preference_id,reused:true},200,origin);
+    const storedPaymentUrl=String(order.payment_preference_url||"");
+    const storedUrlMatchesMode=testMode
+      ? /^https:\/\/sandbox\.mercadopago\.com\.br\//i.test(storedPaymentUrl)
+      : /^https:\/\/www\.mercadopago\.com\.br\//i.test(storedPaymentUrl);
+    if(order.payment_preference_id&&storedUrlMatchesMode){
+      return json({paymentUrl:storedPaymentUrl,preferenceId:order.payment_preference_id,reused:true},200,origin);
     }
     const calculatedSubtotal=money(items.reduce((sum:number,item:any)=>sum+Number(item.unit_price)*Number(item.quantity),0));
     const calculatedTotal=money(calculatedSubtotal+Number(order.shipping_price)-Number(order.discount));
@@ -120,9 +124,7 @@ Deno.serve(async(request)=>{
       console.error("Mercado Pago preference creation failed",mercadoPagoResponse.status,safe(preference?.error,80));
       return json({error:"O Mercado Pago não aceitou a solicitação de pagamento neste momento."},502,origin);
     }
-    // As credenciais de teste atuais do Checkout Pro também usam APP_USR.
-    // Não inferimos o ambiente pelo prefixo: a conta vendedora de teste usa init_point.
-    const paymentUrl=String(preference.init_point||preference.sandbox_init_point||"");
+    const paymentUrl=String(testMode?preference.sandbox_init_point:preference.init_point);
     if(!/^https:\/\//i.test(paymentUrl)) throw new Error("PAYMENT_URL_MISSING");
     const save=await fetch(`${supabaseUrl}/rest/v1/orders?id=eq.${order.id}`,{method:"PATCH",headers:{...headers,Prefer:"return=minimal"},body:JSON.stringify({
       payment_preference_id:String(preference.id).slice(0,160),payment_preference_url:paymentUrl,
