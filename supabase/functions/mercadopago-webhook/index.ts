@@ -14,6 +14,7 @@ const equal=(left:string,right:string)=>{
   return difference===0;
 };
 const money=(value:unknown)=>Number(Number(value).toFixed(2));
+const paymentOrderTotal=(payment:any)=>money(money(payment?.transaction_amount)+money(payment?.shipping_amount||0));
 const paymentMethod=(payment:any)=>{
   const method=String(payment?.payment_method_id||"").slice(0,40);
   const type=String(payment?.payment_type_id||"").slice(0,40);
@@ -58,7 +59,7 @@ Deno.serve(async(request)=>{
   const orders=orderResponse.ok?await orderResponse.json():[];
   if(!orders[0]){console.error("Mercado Pago order reference not found");return json({received:true,orderFound:false},200);}
   const order=orders[0],metadataOrderId=String(payment?.metadata?.order_id||"");
-  if(String(payment?.currency_id||"")!==String(order.currency||"BRL")||money(payment?.transaction_amount)!==money(order.grand_total)
+  if(String(payment?.currency_id||"")!==String(order.currency||"BRL")||paymentOrderTotal(payment)!==money(order.grand_total)
     ||(metadataOrderId&&metadataOrderId!==String(order.id))){
     console.error("Mercado Pago payment does not match order",dataId);
     return json({received:true,processed:false,error:"PAYMENT_ORDER_MISMATCH"},200);
