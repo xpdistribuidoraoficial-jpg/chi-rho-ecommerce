@@ -72,8 +72,7 @@ Deno.serve(async(request)=>{
     const reservationExpiry=new Date(order.reservation_expires_at);
     if(!Number.isFinite(reservationExpiry.getTime())||reservationExpiry.getTime()<=Date.now()) throw new Error("RESERVATION_EXPIRED");
 
-    const checkoutOrigin=origin.startsWith("https://")?origin:SITE_ORIGIN;
-    const back=(page:string)=>`${checkoutOrigin}/${page}?order=${encodeURIComponent(order.code)}`;
+    const back=(page:string)=>`${SITE_ORIGIN}/${page}?order=${encodeURIComponent(order.code)}`;
     const taxId=String(order.tax_id||"").replace(/\D/g,"");
     const phone=String(order.customer_phone||"").replace(/\D/g,"");
     const preferencePayload={
@@ -90,7 +89,7 @@ Deno.serve(async(request)=>{
       },
       external_reference:order.code,
       back_urls:{success:back("pagamento-sucesso.html"),pending:back("pagamento-pendente.html"),failure:back("pagamento-falhou.html")},
-      notification_url:`${checkoutOrigin}/api/mercadopago-webhook?source_news=webhooks`,
+      notification_url:`${SITE_ORIGIN}/api/mercadopago-webhook?source_news=webhooks`,
       auto_return:"approved",
       expires:true,
       expiration_date_to:reservationExpiry.toISOString(),
