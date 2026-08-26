@@ -497,6 +497,13 @@ a{text-decoration:none;color:inherit} button,input{font:inherit}
 .catalog-product-card:is([data-category="cozinha"],[data-category="utilidades-domesticas"]) .catalog-product-image img{object-fit:contain;padding:10px}
 .catalog-product-card[data-category^="biblias"] .catalog-product-image{background:#fff}
 .catalog-product-card[data-category^="biblias"] .catalog-product-image img{object-fit:contain;padding:10px}
+/* Compensa a margem branca incorporada nas fotos de quatro capas da SBB. */
+.catalog-product-card:is(
+  #biblia-mulher-naa-laranja,
+  #biblia-naa-mulher-pink-grande,
+  #biblia-arc-mulher-supergigante-rosa-marrom,
+  #biblia-naa-mulher-flores-grande
+) .catalog-product-image img{transform:scale(1.58);transform-origin:center 44%}
 .catalog-product-card[data-category="livros-cristaos"] .catalog-product-image{background:#fff}
 .catalog-product-card[data-category="livros-cristaos"] .catalog-product-image img{object-fit:contain;padding:10px}
 .catalog-product-image>span{position:absolute;left:14px;right:14px;bottom:14px;min-height:38px;padding:9px 12px;border-radius:9px;display:flex;align-items:center;justify-content:center;background:rgba(5,46,70,.92);color:#fff;font-family:Inter,system-ui,sans-serif;font-size:12.5px;font-weight:700;line-height:1.3;letter-spacing:.005em;text-align:center;backdrop-filter:blur(4px)}
