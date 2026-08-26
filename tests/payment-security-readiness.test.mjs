@@ -70,6 +70,8 @@ test("webhook valida HMAC, consulta o pagamento e cobre os status financeiros", 
   assert.ok(source.includes("apply_order_payment_status"));
   assert.ok(source.includes("PAYMENT_ORDER_MISMATCH"));
   assert.ok(source.includes("transaction_amount"));
+  assert.ok(source.includes("shipping_amount"));
+  assert.ok(source.includes("paymentOrderTotal(payment)"));
   assert.ok(source.includes("currency_id"));
   assert.ok(source.includes("Assinatura expirada."));
   assert.ok(source.includes('mercadopago:payment:${dataId}:${String(payment.status)'));
