@@ -16,12 +16,14 @@ const passwordForm=document.querySelector("[data-password-form]"),passwordStatus
 const loginStatus=document.querySelector("[data-admin-login-status]"),status=document.querySelector("[data-admin-status]");
 const tbody=document.querySelector("[data-admin-orders]"),empty=document.querySelector("[data-admin-empty]");
 const dialog=document.querySelector("[data-order-dialog]");let activeFilter={},refreshPromise=null;
+let labelCapability={available:false,message:"A emissão aguarda a homologação do Partner Token da Frenet."};
 const getSession=()=>{try{return JSON.parse(sessionStorage.getItem(SESSION_KEY)||"null");}catch{return null;}};
 const saveSession=session=>{const expiresAt=Number(session.expires_at)||Math.floor(Date.now()/1000)+Number(session.expires_in||3600);
   sessionStorage.setItem(SESSION_KEY,JSON.stringify({...session,expires_at:expiresAt}));};
 const setView=authenticated=>{login.hidden=authenticated;dashboard.hidden=!authenticated;
   document.querySelector("[data-admin-signout]").hidden=!authenticated;passwordButton.hidden=!authenticated;};
-const clearSession=()=>{sessionStorage.removeItem(SESSION_KEY);if(passwordDialog.open)passwordDialog.close();setView(false);};
+const clearSession=()=>{sessionStorage.removeItem(SESSION_KEY);labelCapability={available:false,message:"A emissão aguarda a homologação do Partner Token da Frenet."};
+  if(passwordDialog.open)passwordDialog.close();setView(false);};
 const refreshSession=async()=>{const session=getSession();if(!session?.refresh_token)throw new Error("AUTH_REQUIRED");
   const response=await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`,{method:"POST",headers:{apikey:PUBLIC_KEY,"Content-Type":"application/json"},
     body:JSON.stringify({refresh_token:session.refresh_token}),signal:AbortSignal.timeout(10000)});
@@ -35,6 +37,11 @@ const apiRequest=async(endpoint,path="",options={})=>{let session;try{session=aw
   if(response.status===401){clearSession();throw new Error("AUTH_REQUIRED");}
   if(!response.ok)throw new Error(data.error||"Não foi possível concluir esta ação.");return data;};
 const request=(path="",options={})=>apiRequest(ADMIN_ENDPOINT,path,options);
+const loadLabelCapability=async()=>{try{const data=await apiRequest(LABEL_ENDPOINT);labelCapability={
+    available:data.available===true,
+    message:data.available===true?"Emissão Frenet disponível.":"A emissão aguarda a homologação do Partner Token da Frenet."
+  };}catch(error){if(error.message==="AUTH_REQUIRED")throw error;labelCapability={available:false,
+    message:"Não foi possível confirmar a disponibilidade da emissão Frenet."};}};
 
 const renderOrders=orders=>{tbody.replaceChildren();empty.hidden=orders.length>0;
   orders.forEach(order=>{const row=node("tr");row.tabIndex=0;row.setAttribute("role","button");
@@ -42,7 +49,7 @@ const renderOrders=orders=>{tbody.replaceChildren();empty.hidden=orders.length>0
       label(order.financial_status),label(order.operational_status)].forEach((value,index)=>{const cell=node("td",index>5?"admin-state":"",value);
       if(index===0)cell.classList.add("admin-order-code");row.append(cell);});
     const open=()=>loadDetail(order.id);row.addEventListener("click",open);row.addEventListener("keydown",event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();open();}});tbody.append(row);});};
-const loadOrders=async()=>{status.textContent="Carregando…";const params=new URLSearchParams(activeFilter);try{const data=await request(`?${params}`);
+const loadOrders=async()=>{status.textContent="Carregando…";const params=new URLSearchParams(activeFilter);try{const [data]=await Promise.all([request(`?${params}`),loadLabelCapability()]);
   renderOrders(data.orders||[]);document.querySelector("[data-admin-summary]").textContent=`${data.orders?.length||0} pedidos neste filtro`;
   document.querySelector("[data-admin-user]").textContent=data.admin?.displayName||data.admin?.email||"Administrador";status.textContent="";}catch(error){status.textContent=error.message==="AUTH_REQUIRED"?"Sua sessão expirou. Entre novamente.":error.message;}};
 const field=(title,value)=>{const wrapper=node("div","admin-detail-field");wrapper.append(node("span","",title),node("strong","",value||"—"));return wrapper;};
@@ -59,6 +66,7 @@ const loadDetail=async id=>{if(!dialog.open)dialog.showModal();const content=doc
       field("E-mail",order.customer_email),field("CPF/CNPJ",order.tax_id),field("Endereço",`${order.street}, ${order.address_number}${order.complement?` — ${order.complement}`:""} • ${order.district} • ${order.city}/${order.state} • ${order.postal_code}`));client.append(clientGrid);
     const products=section("Produtos");(data.items||[]).forEach(item=>{const card=node("article","admin-detail-item");
       const image=node("img");image.src=item.image_url||"";image.alt="";const copy=node("div");copy.append(node("strong","",item.product_name),node("span","",`${item.sku} • ${item.quantity} un.`),
+        node("span","",`${money(item.unit_price)} por unidade`),
         node("span","",`Estoque: ${item.inventory?.stock_total??"—"} total • ${item.inventory?.stock_reserved??"—"} reservado • ${item.inventory?.stock_available??"—"} disponível`));
       card.append(image,copy,node("b","",money(item.line_total)));products.append(card);});
     const shipping=section("Frete, etiqueta e entrega"),shippingGrid=node("div","admin-detail-grid");
@@ -66,13 +74,21 @@ const loadDetail=async id=>{if(!dialog.open)dialog.showModal();const content=doc
       field("Frete",money(order.shipping_price)),field("Etiqueta",label(order.label_status)),field("ID Frenet",order.shipping_label_id),
       field("Rastreamento",order.tracking_code||order.tracking_url),field("Validade da etiqueta",date(order.label_valid_through)),field("Situação",label(order.operational_status)));shipping.append(shippingGrid);
     const payment=section("Pagamento"),paymentGrid=node("div","admin-detail-grid");
-    paymentGrid.append(field("Total",money(order.grand_total)),field("Situação",label(order.financial_status)),field("Forma",order.payment_method),field("Transação",order.payment_external_id));payment.append(paymentGrid);
+    paymentGrid.append(field("Subtotal",money(order.subtotal)),field("Desconto",money(order.discount)),field("Frete",money(order.shipping_price)),
+      field("Total",money(order.grand_total)),field("Situação",label(order.financial_status)),field("Forma",order.payment_method),field("Transação",order.payment_external_id));payment.append(paymentGrid);
     const progress=section("Operação"),track=node("div","admin-progress");["novo","pago","em_separacao","pronto_para_envio","enviado","entregue"].forEach(step=>track.append(node("span",step===order.financial_status||step===order.operational_status?"is-current":"",label(step))));progress.append(track);
+    const history=section("Histórico"),timeline=node("ol","admin-history");
+    (data.history||[]).forEach(entry=>{const item=node("li"),head=node("div"),type=entry.status_type==="financial"?"Pagamento":"Operação";
+      head.append(node("strong","",`${type}: ${label(entry.status)}`),node("time","",date(entry.created_at)));item.append(head);
+      if(entry.previous_status)item.append(node("span","",`Anterior: ${label(entry.previous_status)}`));
+      if(entry.note)item.append(node("small","",entry.note));timeline.append(item);});
+    if(!timeline.children.length)timeline.append(node("li","admin-history-empty","Nenhuma alteração registrada."));history.append(timeline);
     const actions=section("Ações administrativas"),buttons=node("div","admin-actions");
     if(order.operational_status==="novo"&&order.financial_status==="pago")buttons.append(button("Iniciar separação","btn btn-primary",()=>updateOrder(order.id,"em_separacao")));
     if(order.operational_status==="em_separacao")buttons.append(button("Marcar como pronto para envio","btn btn-primary",()=>updateOrder(order.id,"pronto_para_envio")));
     if(order.operational_status==="pronto_para_envio"&&order.label_status!=="gerada"){
-      const generate=button(order.label_status==="gerando"?"Etiqueta em processamento":"Gerar etiqueta","btn btn-primary",()=>generateLabel(order.id));generate.disabled=order.label_status==="gerando";buttons.append(generate);
+      const generate=button(order.label_status==="gerando"?"Etiqueta em processamento":labelCapability.available?"Gerar etiqueta":"Etiqueta aguardando homologação","btn btn-primary",()=>generateLabel(order.id));
+      generate.disabled=order.label_status==="gerando"||!labelCapability.available;generate.title=labelCapability.available?"Gerar etiqueta na Frenet":labelCapability.message;buttons.append(generate);
     }
     if(order.label_status==="gerada"){
       buttons.append(button("Imprimir etiqueta","btn btn-secondary",()=>openDocument(order.label_url)));
@@ -84,7 +100,7 @@ const loadDetail=async id=>{if(!dialog.open)dialog.showModal();const content=doc
       buttons.append(button("Marcar como entregue","btn btn-primary",()=>updateOrder(order.id,"entregue")));
     }
     if(!buttons.children.length)buttons.append(node("p","admin-action-note",order.financial_status==="aguardando_pagamento"?"Aguarde a confirmação real do pagamento para iniciar a separação.":"Nenhuma ação disponível para o estado atual."));
-    actions.append(buttons);content.append(client,products,shipping,payment,progress,actions);
+    actions.append(buttons);content.append(client,products,shipping,payment,progress,history,actions);
   }catch(error){content.replaceChildren(node("p","admin-status",error.message));}};
 const updateOrder=async(orderId,newStatus)=>{status.textContent="Atualizando pedido…";try{await request("",{method:"PATCH",body:JSON.stringify({orderId,status:newStatus})});
   await Promise.all([loadOrders(),loadDetail(orderId)]);status.textContent="Pedido atualizado.";}catch(error){status.textContent=error.message;}};
