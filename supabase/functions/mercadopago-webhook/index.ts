@@ -13,6 +13,12 @@ const equal=(left:string,right:string)=>{
   for(let index=0;index<left.length;index++) difference|=left.charCodeAt(index)^right.charCodeAt(index);
   return difference===0;
 };
+const money=(value:unknown)=>Number(Number(value).toFixed(2));
+const paymentMethod=(payment:any)=>{
+  const method=String(payment?.payment_method_id||"").slice(0,40);
+  const type=String(payment?.payment_type_id||"").slice(0,40);
+  return method&&type&&method!==type?`${method} (${type})`.slice(0,80):(method||type);
+};
 const mapStatus=(status:string)=>({pending:"aguardando_pagamento",in_process:"aguardando_pagamento",
   authorized:"aguardando_pagamento",approved:"pago",rejected:"recusado",cancelled:"cancelado",
   refunded:"reembolsado",charged_back:"reembolsado"}[status]||null);
@@ -34,6 +40,8 @@ Deno.serve(async(request)=>{
   const signature=request.headers.get("x-signature")||"";
   const parts=Object.fromEntries(signature.split(",").map(part=>part.trim().split("=",2)));
   if(!dataId||!requestId||!parts.ts||!parts.v1) return json({error:"Assinatura ausente."},401);
+  const timestamp=Number(parts.ts),timestampMs=String(parts.ts).length<=10?timestamp*1000:timestamp;
+  if(!Number.isFinite(timestampMs)||Math.abs(Date.now()-timestampMs)>5*60*1000) return json({error:"Assinatura expirada."},401);
   const manifest=`id:${dataId};request-id:${requestId};ts:${parts.ts};`;
   if(!equal(await hex(secret,manifest),parts.v1)) return json({error:"Assinatura inválida."},401);
   if(String(body?.type||requestUrl.searchParams.get("type")||"")!=="payment") return json({received:true,ignored:true},200);
@@ -46,17 +54,24 @@ Deno.serve(async(request)=>{
   const orderCode=String(payment?.external_reference||"").slice(0,40);
   if(!mapped||!orderCode){console.error("Mercado Pago event missing supported status or reference");return json({received:true,ignored:true},200);}
   const headers={apikey:serviceKey,Authorization:`Bearer ${serviceKey}`,"Content-Type":"application/json"};
-  const orderResponse=await fetch(`${supabaseUrl}/rest/v1/orders?code=eq.${encodeURIComponent(orderCode)}&select=id&limit=1`,{headers});
+  const orderResponse=await fetch(`${supabaseUrl}/rest/v1/orders?code=eq.${encodeURIComponent(orderCode)}&select=id,grand_total,currency&limit=1`,{headers});
   const orders=orderResponse.ok?await orderResponse.json():[];
   if(!orders[0]){console.error("Mercado Pago order reference not found");return json({received:true,orderFound:false},200);}
-  const eventKey=`mercadopago:${String(body?.id||requestId).slice(0,120)}:${dataId}:${String(payment.status).slice(0,30)}`;
+  const order=orders[0],metadataOrderId=String(payment?.metadata?.order_id||"");
+  if(String(payment?.currency_id||"")!==String(order.currency||"BRL")||money(payment?.transaction_amount)!==money(order.grand_total)
+    ||(metadataOrderId&&metadataOrderId!==String(order.id))){
+    console.error("Mercado Pago payment does not match order",dataId);
+    return json({received:true,processed:false,error:"PAYMENT_ORDER_MISMATCH"},200);
+  }
+  const eventKey=`mercadopago:payment:${dataId}:${String(payment.status).slice(0,30)}`;
   const apply=await fetch(`${supabaseUrl}/rest/v1/rpc/apply_order_payment_status`,{method:"POST",headers,body:JSON.stringify({
-    target_order_id:orders[0].id,new_financial_status:mapped,provider_event_key:eventKey,
-    external_payment_id:String(payment.id),payment_method_name:String(payment.payment_type_id||payment.payment_method_id||"").slice(0,80),
+    target_order_id:order.id,new_financial_status:mapped,provider_event_key:eventKey,
+    external_payment_id:String(payment.id),payment_method_name:paymentMethod(payment),
     event_type_name:String(body?.action||"payment.updated").slice(0,80),raw_provider_status:String(payment.status).slice(0,40),
     event_signature_valid:true,event_reason:String(payment.status_detail||"").slice(0,160)||null
   })});
   if(!apply.ok){const error=await apply.json().catch(()=>({}));console.error("Payment state update failed",apply.status,error?.code||"unknown");
     return json({error:"Evento recebido, mas não processado."},503);}
-  return json({received:true,processed:true},200);
+  const applied=await apply.json().catch(()=>[]),result=Array.isArray(applied)?applied[0]:applied;
+  return json({received:true,processed:Boolean(result?.event_processed)},200);
 });

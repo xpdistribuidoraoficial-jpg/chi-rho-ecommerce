@@ -28,13 +28,28 @@ begin
      (select stock_reserved from public.inventory where product_slug='casa-balanca-digital-cozinha-10kg')<>initial_reserved+1
   then raise exception 'CREATE_OR_RESERVATION_IDEMPOTENCY_FAILED'; end if;
 
-  select * into payment from public.apply_order_payment_status(created.order_id,'pago','automated-test-event',null,'pix','test','approved',true,null);
+  select * into payment from public.apply_order_payment_status(created.order_id,'pago','automated-test-event','test-payment-approved','pix','test','approved',true,null);
   if not payment.event_processed or
      (select stock_total from public.inventory where product_slug='casa-balanca-digital-cozinha-10kg')<>initial_total-1
   then raise exception 'PAYMENT_COMMIT_FAILED'; end if;
 
-  select * into payment from public.apply_order_payment_status(created.order_id,'pago','automated-test-event',null,'pix','test','approved',true,null);
+  select * into payment from public.apply_order_payment_status(created.order_id,'pago','automated-test-event','test-payment-approved','pix','test','approved',true,null);
   if payment.event_processed then raise exception 'PAYMENT_IDEMPOTENCY_FAILED'; end if;
+
+  select * into payment from public.apply_order_payment_status(created.order_id,'aguardando_pagamento',
+    'automated-test-late-pending','test-payment-approved','pix','test','pending',true,null);
+  if payment.event_processed or payment.financial_status<>'pago' then
+    raise exception 'PAYMENT_STATUS_REGRESSION_ALLOWED';
+  end if;
+
+  select * into payment from public.apply_order_payment_status(created.order_id,'pago',
+    'automated-test-duplicate-approved','test-payment-duplicate','visa (credit_card)','test','approved',true,null);
+  if payment.event_processed or
+    not exists(select 1 from public.payment_events
+      where provider_event_id='automated-test-duplicate-approved'
+        and error_code='DUPLICATE_APPROVED_PAYMENT') then
+    raise exception 'DUPLICATE_APPROVED_PAYMENT_NOT_BLOCKED';
+  end if;
 
 end
 $test$;

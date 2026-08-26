@@ -37,6 +37,12 @@ test("preferência fica bloqueada antes da chamada externa sem as três credenci
   }
   assert.ok(source.includes("external_reference:order.code"));
   assert.ok(source.includes('"X-Idempotency-Key":order.id'));
+  assert.ok(source.includes('MERCADO_PAGO_TEST_MODE'));
+  assert.ok(source.includes('code:"PAYMENT_TEST_ONLY"'));
+  assert.ok(source.includes('expiration_date_to:reservationExpiry.toISOString()'));
+  assert.ok(source.includes('source_news=webhooks'));
+  assert.ok(source.includes('preference.init_point||preference.sandbox_init_point'));
+  assert.ok(!source.includes('accessToken!.startsWith("TEST-")'));
 });
 
 test("webhook valida HMAC, consulta o pagamento e cobre os status financeiros", () => {
@@ -55,6 +61,31 @@ test("webhook valida HMAC, consulta o pagamento e cobre os status financeiros", 
     assert.ok(source.includes(mapping), `Mapeamento ausente: ${mapping}`);
   }
   assert.ok(source.includes("apply_order_payment_status"));
+  assert.ok(source.includes("PAYMENT_ORDER_MISMATCH"));
+  assert.ok(source.includes("transaction_amount"));
+  assert.ok(source.includes("currency_id"));
+  assert.ok(source.includes("Assinatura expirada."));
+  assert.ok(source.includes('mercadopago:payment:${dataId}:${String(payment.status)'));
+});
+
+test("função financeira impede regressão e pagamento aprovado duplicado", () => {
+  const source = read("supabase/migrations/20260826121759_harden_payment_state_transitions.sql");
+  assert.ok(source.includes("DUPLICATE_APPROVED_PAYMENT"));
+  assert.ok(source.includes("INVALID_PAYMENT_TRANSITION"));
+  assert.ok(source.includes("v_order.financial_status='pago' and new_financial_status<>'reembolsado'"));
+  assert.ok(source.includes("order by inventory.product_slug for update"));
+});
+
+test("Preview da Chi Rho é permitido sem liberar pagamento no domínio público", () => {
+  for (const path of [
+    "supabase/functions/create-casa-order/index.ts",
+    "supabase/functions/public-order-status/index.ts",
+    "supabase/functions/mercadopago-create-preference/index.ts"
+  ]) {
+    assert.ok(read(path).includes("VERCEL_PREVIEW_ORIGIN"), `Preview ausente: ${path}`);
+  }
+  const preference = read("supabase/functions/mercadopago-create-preference/index.ts");
+  assert.ok(preference.includes("testMode&&origin===SITE_ORIGIN"));
 });
 
 test("página de sucesso não aprova pagamento pela URL", () => {
