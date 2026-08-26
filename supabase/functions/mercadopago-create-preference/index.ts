@@ -69,8 +69,22 @@ Deno.serve(async(request)=>{
     const calculatedSubtotal=money(items.reduce((sum:number,item:any)=>sum+Number(item.unit_price)*Number(item.quantity),0));
     const calculatedTotal=money(calculatedSubtotal+Number(order.shipping_price)-Number(order.discount));
     if(calculatedSubtotal!==money(order.subtotal)||calculatedTotal!==money(order.grand_total)) throw new Error("ORDER_TOTAL_MISMATCH");
-    const reservationExpiry=new Date(order.reservation_expires_at);
+    let reservationExpiry=new Date(order.reservation_expires_at);
     if(!Number.isFinite(reservationExpiry.getTime())||reservationExpiry.getTime()<=Date.now()) throw new Error("RESERVATION_EXPIRED");
+
+    // Pix é assíncrono e pode ser ocultado pelo Checkout Pro quando a vigência
+    // termina junto da reserva curta de carrinho. Somente no modo de teste,
+    // ampliamos reserva e preferência por 72 h para validar o fluxo pendente.
+    if(testMode){
+      const pixTestExpiry=new Date(Date.now()+72*60*60*1000);
+      const extend=await fetch(`${supabaseUrl}/rest/v1/rpc/extend_test_payment_reservation`,{
+        method:"POST",headers,body:JSON.stringify({target_order_id:order.id,requested_expires_at:pixTestExpiry.toISOString()}),
+        signal:AbortSignal.timeout(8000)
+      });
+      if(!extend.ok) throw new Error("TEST_RESERVATION_EXTENSION_FAILED");
+      const extended=await extend.json().catch(()=>null);
+      reservationExpiry=new Date(typeof extended==="string"?extended:pixTestExpiry.toISOString());
+    }
 
     const back=(page:string)=>`${SITE_ORIGIN}/${page}?order=${encodeURIComponent(order.code)}`;
     const taxId=String(order.tax_id||"").replace(/\D/g,"");
@@ -93,6 +107,7 @@ Deno.serve(async(request)=>{
       auto_return:"approved",
       expires:true,
       expiration_date_to:reservationExpiry.toISOString(),
+      date_of_expiration:reservationExpiry.toISOString(),
       statement_descriptor:"CHI RHO",
       binary_mode:false,
       metadata:{order_id:order.id,order_code:order.code}

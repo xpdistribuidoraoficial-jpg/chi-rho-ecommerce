@@ -40,6 +40,8 @@ test("preferência fica bloqueada antes da chamada externa sem as três credenci
   assert.ok(source.includes('MERCADO_PAGO_TEST_MODE'));
   assert.ok(source.includes('code:"PAYMENT_TEST_ONLY"'));
   assert.ok(source.includes('expiration_date_to:reservationExpiry.toISOString()'));
+  assert.ok(source.includes('date_of_expiration:reservationExpiry.toISOString()'));
+  assert.ok(source.includes('extend_test_payment_reservation'));
   assert.ok(source.includes('source_news=webhooks'));
   assert.ok(source.includes('`${SITE_ORIGIN}/${page}?order='));
   assert.ok(source.includes('`${SITE_ORIGIN}/api/mercadopago-webhook?source_news=webhooks`'));
@@ -76,6 +78,14 @@ test("função financeira impede regressão e pagamento aprovado duplicado", () 
   assert.ok(source.includes("INVALID_PAYMENT_TRANSITION"));
   assert.ok(source.includes("v_order.financial_status='pago' and new_financial_status<>'reembolsado'"));
   assert.ok(source.includes("order by inventory.product_slug for update"));
+});
+
+test("reserva ampliada para Pix existe somente no modo de teste", () => {
+  const source = read("supabase/migrations/20260826150000_extend_test_payment_reservations.sql");
+  assert.ok(source.includes("extend_test_payment_reservation"));
+  assert.ok(source.includes("interval '2 days'"));
+  assert.ok(source.includes("interval '4 days'"));
+  assert.ok(source.includes("to service_role"));
 });
 
 test("Preview da Chi Rho é permitido sem liberar pagamento no domínio público", () => {
