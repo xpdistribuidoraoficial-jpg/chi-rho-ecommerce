@@ -17,15 +17,18 @@ E-commerce estático em HTML, CSS e JavaScript, hospedado na Vercel, com pedidos
 
 ### Mercado Pago Checkout Pro
 
-Variáveis obrigatórias, somente nos ambientes seguros da Vercel/Supabase:
+Como a integração financeira é executada nas Edge Functions, os valores devem ser
+cadastrados em **Supabase Edge Function Secrets**. Não é necessário duplicar o Access
+Token ou o secret do webhook na Vercel, que atua apenas como proxy HTTPS:
 
 ```text
 MERCADO_PAGO_ACCESS_TOKEN
 MERCADO_PAGO_PUBLIC_KEY
 MERCADO_PAGO_WEBHOOK_SECRET
+MERCADO_PAGO_TEST_MODE=true
 ```
 
-Sem as três variáveis, o botão permanece indisponível e nenhuma chamada de pagamento é feita. A integração financeira não deve ser considerada concluída antes dos testes oficiais de cartão, Pix e webhook.
+Sem as três credenciais, o botão permanece indisponível e nenhuma chamada de pagamento é feita. Com `MERCADO_PAGO_TEST_MODE=true` (valor seguro e padrão), o Checkout Pro fica habilitado somente em uma URL de Preview da CHI RHO; o domínio público continua bloqueado. A integração financeira não deve ser considerada concluída antes dos testes oficiais de cartão, Pix e webhook.
 
 ### Frenet
 
@@ -59,13 +62,14 @@ Os testes SQL podem ser executados no SQL Editor/Supabase em ambiente controlado
 
 ## Liberação do Mercado Pago
 
-1. Inserir as três credenciais no ambiente seguro correto.
-2. Configurar o webhook para `/api/mercadopago-webhook` e o tópico `payment`.
-3. Implantar as funções e o frontend revisados.
-4. Confirmar que a disponibilidade do provedor ficou ativa.
-5. Criar um pedido de teste com estoque reservado.
-6. Testar cartão aprovado, recusado e pendente.
-7. Testar Pix e sua confirmação assíncrona.
-8. Validar assinatura, idempotência e reenvio do webhook.
-9. Confirmar pedido `pago`, baixa de estoque e liberação do fluxo de separação.
-10. Só então registrar a integração financeira como concluída.
+1. Inserir as três credenciais do vendedor de teste em Supabase Edge Function Secrets.
+2. Manter `MERCADO_PAGO_TEST_MODE=true` durante toda a validação.
+3. Configurar a URL de teste do webhook como `/api/mercadopago-webhook`, selecionar o tópico `payment` e copiar a assinatura secreta gerada.
+4. Implantar as funções e o frontend revisados em Preview.
+5. Confirmar que o provedor ficou ativo no Preview e segue bloqueado no domínio público.
+6. Criar um pedido de teste com estoque reservado.
+7. Testar cartão aprovado, recusado e pendente com a conta compradora de teste.
+8. Testar Pix; no ambiente de teste, o resultado esperado é `aguardando_pagamento`.
+9. Validar assinatura, idempotência e reenvio pelo simulador oficial de Webhooks.
+10. Confirmar pedido `pago`, baixa de estoque e liberação do fluxo de separação.
+11. Só então registrar a integração de teste como concluída.

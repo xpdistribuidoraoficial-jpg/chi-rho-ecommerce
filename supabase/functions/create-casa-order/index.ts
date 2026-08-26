@@ -7,6 +7,8 @@ const ALLOWED_ORIGINS = new Set([
   "http://localhost:3000",
   "http://127.0.0.1:3000"
 ]);
+const VERCEL_PREVIEW_ORIGIN = /^https:\/\/chi-rho-ecommerce(?:-[a-z0-9-]+)?\.vercel\.app$/i;
+const isAllowedOrigin = (origin: string) => ALLOWED_ORIGINS.has(origin) || VERCEL_PREVIEW_ORIGIN.test(origin);
 
 const PRODUCTS = Object.freeze({
   "casa-balanca-digital-cozinha-10kg": Object.freeze({
@@ -176,7 +178,7 @@ const getVerifiedShipping = async (body: any, items: Array<{ slug: string; quant
 
 Deno.serve(async (request: Request) => {
   const origin = request.headers.get("origin") || SITE_ORIGIN;
-  if (!ALLOWED_ORIGINS.has(origin)) return jsonResponse({ error: "Origem não autorizada." }, 403, SITE_ORIGIN);
+  if (!isAllowedOrigin(origin)) return jsonResponse({ error: "Origem não autorizada." }, 403, SITE_ORIGIN);
   if (request.method === "OPTIONS") return jsonResponse({}, 204, origin);
   if (request.method !== "POST") return jsonResponse({ error: "Método não permitido." }, 405, origin);
 

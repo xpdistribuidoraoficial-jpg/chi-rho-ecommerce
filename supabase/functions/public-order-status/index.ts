@@ -3,6 +3,8 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 const SITE_ORIGIN="https://chi-rho-ecommerce.vercel.app";
 const PUBLIC_KEY="sb_publishable_ipNBmuf0pUOZRzzlpU8kWw_Md1Y5FuE";
 const ALLOWED_ORIGINS=new Set([SITE_ORIGIN,"http://localhost:3000","http://127.0.0.1:3000"]);
+const VERCEL_PREVIEW_ORIGIN=/^https:\/\/chi-rho-ecommerce(?:-[a-z0-9-]+)?\.vercel\.app$/i;
+const isAllowedOrigin=(origin:string)=>ALLOWED_ORIGINS.has(origin)||VERCEL_PREVIEW_ORIGIN.test(origin);
 const clean=(value:unknown,max:number)=>String(value||"").trim().slice(0,max);
 const reply=(body:unknown,status=200,origin=SITE_ORIGIN)=>new Response(status===204?null:JSON.stringify(body),{
   status,headers:{"Access-Control-Allow-Origin":origin,"Access-Control-Allow-Headers":"apikey, content-type",
@@ -12,7 +14,7 @@ const reply=(body:unknown,status=200,origin=SITE_ORIGIN)=>new Response(status===
 
 Deno.serve(async(request)=>{
   const origin=request.headers.get("origin")||SITE_ORIGIN;
-  if(!ALLOWED_ORIGINS.has(origin)) return reply({error:"Origem não autorizada."},403);
+  if(!isAllowedOrigin(origin)) return reply({error:"Origem não autorizada."},403);
   if(request.method==="OPTIONS") return reply({},204,origin);
   if(request.method!=="POST") return reply({error:"Método não permitido."},405,origin);
   if(request.headers.get("apikey")!==PUBLIC_KEY) return reply({error:"Não autorizado."},401,origin);
