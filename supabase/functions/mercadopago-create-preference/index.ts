@@ -99,7 +99,7 @@ Deno.serve(async(request)=>{
         quantity:Number(item.quantity),currency_id:"BRL",unit_price:money(item.unit_price)
       })),
       shipments:{cost:money(order.shipping_price)},
-      payer:{
+      payer:testMode?undefined:{
         name:safe(order.customer_name,160),email:safe(order.customer_email,320),
         identification:taxId?{type:taxId.length===14?"CNPJ":"CPF",number:taxId}:undefined,
         phone:phone.length>=10?{area_code:phone.slice(0,2),number:phone.slice(2)}:undefined,
