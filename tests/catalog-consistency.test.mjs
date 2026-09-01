@@ -7,16 +7,22 @@ import { shippingProducts } from "../data/shipping-products.mjs";
 
 const projectRoot = new URL("../", import.meta.url);
 const source = fs.readFileSync(new URL("script.js", projectRoot), "utf8");
+const styles = fs.readFileSync(new URL("style.css", projectRoot), "utf8");
 const catalogEnd = source.indexOf("const toggle");
 assert.notEqual(catalogEnd, -1, "Não foi possível localizar o fim da definição do catálogo.");
 
 const context = { console };
 vm.runInNewContext(
-  `${source.slice(0, catalogEnd)}\nglobalThis.__catalogAudit={catalogProducts,inactiveCatalogSlugs};`,
+  `${source.slice(0, catalogEnd)}\nglobalThis.__catalogAudit={catalogProducts,inactiveCatalogSlugs,getProductCartAvailability,clampProductCartQuantity};`,
   context
 );
 
-const { catalogProducts, inactiveCatalogSlugs } = context.__catalogAudit;
+const {
+  catalogProducts,
+  inactiveCatalogSlugs,
+  getProductCartAvailability,
+  clampProductCartQuantity
+} = context.__catalogAudit;
 const activeProducts = catalogProducts.filter((product) => !inactiveCatalogSlugs.has(product.slug));
 const orderableProducts = activeProducts.filter((product) => product.testeCarrinho === true);
 const assetExists = (assetPath) => fs.existsSync(new URL(assetPath, projectRoot));
@@ -65,4 +71,34 @@ test("catálogo mantém pendências comerciais fora do checkout", () => {
   assert.equal(missingPrice.length, 15);
   assert.equal(zeroPrice.length, 0);
   assert.equal(duplicateSlugs.length, 0);
+});
+
+test("controle dos cards respeita disponibilidade e limites de estoque", () => {
+  const product = orderableProducts[0];
+  const pendingProduct = activeProducts.find((item) => item.testeCarrinho !== true);
+  const outOfStockProduct = { ...product, estoque: 0 };
+
+  assert.equal(getProductCartAvailability(product).available, true);
+  assert.equal(getProductCartAvailability(pendingProduct).available, false);
+  assert.equal(getProductCartAvailability(outOfStockProduct).available, false);
+  assert.equal(clampProductCartQuantity(product, -5), 1);
+  assert.equal(clampProductCartQuantity(product, 1), 1);
+  assert.equal(clampProductCartQuantity(product, product.estoque + 10), product.estoque);
+  assert.equal(clampProductCartQuantity(product, 0, { allowZero: true }), 0);
+});
+
+test("cards reutilizam o carrinho existente com proteção contra clique duplicado", () => {
+  assert.match(source, /getProductCardCartMarkup\(product\)/);
+  assert.match(source, /data-card-quantity-action="decrease"/);
+  assert.match(source, /data-card-quantity-action="increase"/);
+  assert.match(source, /data-card-add-cart/);
+  assert.match(source, /cardAddButton\.dataset\.processing !== "true"/);
+  assert.match(source, /updateTestCartQuantity\(slug, existingQuantity \+ selectedQuantity\)/);
+  assert.match(source, /cardAddButton\.innerHTML = cardCartSuccessIcon/);
+});
+
+test("controles dos cards permanecem compactos e na mesma linha", () => {
+  assert.match(styles, /\.catalog-product-cart\{[^}]*display:grid[^}]*grid-template-columns:minmax\(0,108px\) 42px/);
+  assert.match(styles, /\.catalog-card-quantity\{[^}]*grid-template-columns:36px 36px 36px/);
+  assert.match(styles, /\.catalog-card-add\{[^}]*width:42px[^}]*height:42px/);
 });
