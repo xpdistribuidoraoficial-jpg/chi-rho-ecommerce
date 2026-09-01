@@ -2132,6 +2132,24 @@ const inactiveCatalogSlugs = new Set([
 
 const isProductActive = (product) => !inactiveCatalogSlugs.has(product.slug);
 
+const getProductCartAvailability = (product) => {
+  const configured = product?.testeCarrinho === true
+    && typeof product.preco === "number"
+    && Number.isInteger(product.estoque);
+  const stock = configured ? Math.max(0, product.estoque) : 0;
+  return { configured, stock, available: configured && stock > 0 };
+};
+
+const clampProductCartQuantity = (product, requestedQuantity, { allowZero = false } = {}) => {
+  const { available, stock } = getProductCartAvailability(product);
+  const minimum = allowZero ? 0 : 1;
+  if (!available) return minimum;
+
+  const parsedQuantity = Number(requestedQuantity);
+  const quantity = Number.isFinite(parsedQuantity) ? Math.trunc(parsedQuantity) : minimum;
+  return Math.max(minimum, Math.min(stock, quantity));
+};
+
 const toggle = document.querySelector(".menu-toggle");
 const nav = document.querySelector(".nav-row");
 
@@ -2168,6 +2186,43 @@ const getProductPriceMarkup = (product) => {
 const getProductMeta = (product) =>
   [product.autor || product.marca, product.editora].filter(Boolean).join(" • ");
 
+const cardCartIcon = `
+  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <path d="M7 8V7a5 5 0 0 1 10 0v1m-12 0h14l-1 12H6L5 8Zm4 0h6V7a3 3 0 0 0-6 0v1Z" />
+  </svg>
+`;
+
+const cardCartSuccessIcon = `
+  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <path d="m5 12 4 4L19 6" />
+  </svg>
+`;
+
+const getProductCardCartMarkup = (product) => {
+  const { available, stock } = getProductCartAvailability(product);
+  const disabled = available ? "" : " disabled";
+  const increaseDisabled = !available || stock <= 1 ? " disabled" : "";
+  const status = available
+    ? `Adicionar ${product.nome} ao carrinho`
+    : stock === 0 && product.testeCarrinho === true
+      ? `${product.nome} está sem estoque`
+      : `${product.nome} ainda não está disponível para compra`;
+
+  return `
+    <div class="catalog-product-cart" data-card-cart-controls data-card-product-slug="${product.slug}">
+      <div class="catalog-card-quantity" aria-label="Quantidade de ${product.nome}">
+        <button type="button" data-card-quantity-action="decrease" aria-label="Diminuir quantidade" disabled>−</button>
+        <output data-card-quantity aria-live="polite">1</output>
+        <button type="button" data-card-quantity-action="increase" aria-label="Aumentar quantidade"${increaseDisabled}>+</button>
+      </div>
+      <button class="catalog-card-add" type="button" data-card-add-cart aria-label="${status}" title="${status}"${disabled}>
+        ${cardCartIcon}
+      </button>
+      <span class="catalog-card-feedback" data-card-cart-feedback aria-live="polite"></span>
+    </div>
+  `;
+};
+
 const createProductCard = (product) => `
   <article class="catalog-product-card" id="${product.slug}" data-category="${product.categoriaSlug}">
     <div class="catalog-product-image">
@@ -2181,7 +2236,8 @@ const createProductCard = (product) => `
       ${getProductMeta(product) ? `<span class="catalog-product-meta">${getProductMeta(product)}</span>` : ""}
       <p>${product.descricao}</p>
       <div class="catalog-product-price" aria-label="Preço">${getProductPriceMarkup(product)}</div>
-      <button type="button" data-product-slug="${product.slug}">Ver produto</button>
+      ${getProductCardCartMarkup(product)}
+      <button class="catalog-product-view" type="button" data-product-slug="${product.slug}">Ver produto</button>
     </div>
   </article>
 `;
@@ -2555,7 +2611,7 @@ const openProductDialog = (slug, { syncUrl = true } = {}) => {
 
   const hasPrice = typeof product.preco === "number";
   const hasStock = typeof product.estoque === "number";
-  const canUseTestCart = product.testeCarrinho === true && hasPrice && hasStock && product.estoque > 0;
+  const canUseTestCart = getProductCartAvailability(product).available;
   const availability = hasPrice && hasStock
     ? product.estoque > 0
       ? `${product.estoque} ${product.estoque === 1 ? "unidade disponível" : "unidades disponíveis"} em estoque.`
@@ -2821,16 +2877,14 @@ const saveTestCart = () => {
 
 const getTestCartProduct = (slug) => catalogProducts.find((product) =>
   product.slug === slug
-  && product.testeCarrinho === true
-  && typeof product.preco === "number"
-  && typeof product.estoque === "number"
+  && getProductCartAvailability(product).configured
 );
 
 const updateTestCartQuantity = (slug, requestedQuantity) => {
   const product = getTestCartProduct(slug);
   if (!product) return;
 
-  const quantity = Math.max(0, Math.min(product.estoque, requestedQuantity));
+  const quantity = clampProductCartQuantity(product, requestedQuantity, { allowZero: true });
   const existingItem = testCart.find((item) => item.slug === slug);
 
   if (quantity === 0) {
@@ -2844,16 +2898,18 @@ const updateTestCartQuantity = (slug, requestedQuantity) => {
   saveTestCart();
   resetCartShipping("Carrinho alterado. Calcule o frete novamente.");
   renderTestCart();
+  return quantity;
 };
 
 const renderTestCart = () => {
   testCart = testCart
     .map((item) => {
       const product = getTestCartProduct(item.slug);
-      if (!product) return null;
-      return { slug: item.slug, quantity: Math.max(1, Math.min(product.estoque, item.quantity)) };
+      if (!product || !getProductCartAvailability(product).available) return null;
+      return { slug: item.slug, quantity: clampProductCartQuantity(product, item.quantity) };
     })
     .filter(Boolean);
+  saveTestCart();
 
   const itemsElement = testCartDialog.querySelector(".test-cart-items");
   const validItems = testCart.map((item) => ({ ...item, product: getTestCartProduct(item.slug) }));
@@ -2936,6 +2992,59 @@ const refreshAvailableInventory = async () => {
 };
 
 document.addEventListener("click", (event) => {
+  const cardQuantityAction = event.target.closest("[data-card-quantity-action]");
+  if (cardQuantityAction && !cardQuantityAction.disabled) {
+    const controls = cardQuantityAction.closest("[data-card-cart-controls]");
+    const product = getTestCartProduct(controls?.dataset.cardProductSlug);
+    const quantityOutput = controls?.querySelector("[data-card-quantity]");
+    if (product && quantityOutput) {
+      const currentQuantity = Number(quantityOutput.textContent) || 1;
+      const requestedQuantity = cardQuantityAction.dataset.cardQuantityAction === "increase"
+        ? currentQuantity + 1
+        : currentQuantity - 1;
+      const nextQuantity = clampProductCartQuantity(product, requestedQuantity);
+      quantityOutput.textContent = String(nextQuantity);
+      controls.querySelector('[data-card-quantity-action="decrease"]').disabled = nextQuantity <= 1;
+      controls.querySelector('[data-card-quantity-action="increase"]').disabled = nextQuantity >= product.estoque;
+      controls.querySelector("[data-card-cart-feedback]").textContent = "";
+    }
+  }
+
+  const cardAddButton = event.target.closest("[data-card-add-cart]");
+  if (cardAddButton && !cardAddButton.disabled && cardAddButton.dataset.processing !== "true") {
+    const controls = cardAddButton.closest("[data-card-cart-controls]");
+    const slug = controls?.dataset.cardProductSlug;
+    const product = getTestCartProduct(slug);
+    const selectedQuantity = Number(controls?.querySelector("[data-card-quantity]")?.textContent) || 1;
+    const existingQuantity = testCart.find((item) => item.slug === slug)?.quantity || 0;
+    const feedback = controls?.querySelector("[data-card-cart-feedback]");
+
+    if (product && getProductCartAvailability(product).available) {
+      cardAddButton.dataset.processing = "true";
+      cardAddButton.disabled = true;
+      const updatedQuantity = updateTestCartQuantity(slug, existingQuantity + selectedQuantity);
+      const addedQuantity = Math.max(0, updatedQuantity - existingQuantity);
+      const reachedStockLimit = addedQuantity < selectedQuantity;
+      cardAddButton.classList.add("is-added");
+      cardAddButton.innerHTML = cardCartSuccessIcon;
+      cardAddButton.setAttribute("aria-label", reachedStockLimit ? "Estoque máximo atingido" : "Produto adicionado ao carrinho");
+      if (feedback) {
+        feedback.textContent = reachedStockLimit
+          ? `${product.nome}: estoque máximo de ${product.estoque} unidades atingido.`
+          : `${selectedQuantity} ${selectedQuantity === 1 ? "unidade adicionada" : "unidades adicionadas"} ao carrinho.`;
+      }
+
+      window.setTimeout(() => {
+        if (!cardAddButton.isConnected) return;
+        cardAddButton.classList.remove("is-added");
+        cardAddButton.innerHTML = cardCartIcon;
+        cardAddButton.removeAttribute("data-processing");
+        cardAddButton.disabled = !getProductCartAvailability(product).available;
+        cardAddButton.setAttribute("aria-label", `Adicionar ${product.nome} ao carrinho`);
+      }, 900);
+    }
+  }
+
   const cartLink = event.target.closest('a[href$="#carrinho"]');
   if (cartLink) {
     event.preventDefault();
