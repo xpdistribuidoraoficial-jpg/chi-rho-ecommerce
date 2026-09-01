@@ -6,7 +6,7 @@ E-commerce estático em HTML, CSS e JavaScript, hospedado na Vercel, com pedidos
 
 - 73 produtos cadastrados no catálogo: 64 ativos e 9 desativados.
 - 2 produtos Casa liberados para compra, com preço, estoque e dados logísticos completos.
-- 62 produtos ativos permanecem somente em catálogo até receberem SKU, estoque e dimensões; 15 deles também aguardam preço.
+- 62 produtos ativos permanecem somente em catálogo até receberem SKU, estoque e dimensões; 13 deles também aguardam preço.
 - Carrinho, cotação Frenet, seleção de entrega e checkout ativos para os 2 produtos liberados.
 - Pedidos com reserva temporária de 30 minutos, expiração, idempotência e proteção contra estoque negativo.
 - Status financeiro e operacional separados.
