@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import fs from "node:fs";
 import test from "node:test";
 import vm from "node:vm";
@@ -24,16 +25,81 @@ test("auditoria de brinquedos preserva todos os registros e seus estoques", () =
   });
 });
 
-test("preços de brinquedos têm fonte específica e não inventam promoções", () => {
+const approvedPrices = {
+  "brinquedo-caminhao-bombeiro-resgate": [2699, 2294],
+  "brinquedo-caminhao-bau-46cm": [3899, 3314],
+  "brinquedo-caminhao-boi-4-bois": [2696, 2292],
+  "brinquedo-caminhao-bombeiro-escada": [2990, 2542],
+  "brinquedo-trator-pa-carregadeira": [3390, 2882],
+  "brinquedo-jeep-trilha": [2798, 2378],
+  "brinquedo-trator-grande-articulado": [5826, 4952],
+  "brinquedo-carreta-basculante-24cm": [2290, 1947],
+  "brinquedo-onibus-speed-bus": [3990, 3392],
+  "brinquedo-kit-carretas-boiadeiro": [6990, 5942]
+};
+
+test("dez brinquedos recebem preços cheios aprovados e 15% com arredondamento em centavos", () => {
   const priced = toys.filter((product) => typeof product.preco === "number");
-  assert.equal(priced.length, 2);
+  assert.equal(priced.length, 10);
   priced.forEach((product) => {
-    assert.ok(product.preco > 0);
-    assert.match(product.fontePrecoUrl, /^https:\/\/www\.magazineluiza\.com\.br\/[^ ]+\/p\//);
-    assert.equal(product.dataConsultaPreco, "2026-09-01");
-    assert.equal(product.precoOriginal, undefined);
+    const [fullCents, discountedCents] = approvedPrices[product.slug];
+    assert.equal(product.precoOriginal, fullCents / 100);
+    assert.equal(product.preco, discountedCents / 100);
+    assert.equal(discountedCents, Math.round(fullCents * 85 / 100));
+    assert.equal(product.fontePrecoUrl, "https://lista.mercadolivre.com.br/brinquedos-hobbies/_CustId_222722705");
+    assert.match(product.fontePreco, /aprovado pelo lojista.*capturas.*15%/);
+    assert.equal(product.dataConsultaPreco, "2026-09-02");
     assert.equal(product.precoPromocional, undefined);
   });
+});
+
+test("versões não identificadas não recebem preço ou desconto de outro produto", () => {
+  const pending = toys.filter((product) => !approvedPrices[product.slug]);
+  assert.deepEqual(Array.from(pending, (p) => p.slug).sort(), [
+    "brinquedo-blocos-104-pecas", "brinquedo-kit-caminhoes-basculantes"
+  ]);
+  pending.forEach((product) => {
+    assert.equal(product.preco, null);
+    assert.equal(product.precoOriginal, undefined);
+  });
+});
+
+test("desconto preserva outras categorias e todos os campos não comerciais dos brinquedos", () => {
+  const priceFields = new Set(["preco", "precoOriginal", "fontePreco", "fontePrecoUrl", "dataConsultaPreco"]);
+  const unchanged = JSON.parse(JSON.stringify(catalogProducts)).map((product) => product.brinquedo
+    ? Object.fromEntries(Object.entries(product).filter(([key]) => !priceFields.has(key)))
+    : product);
+  assert.equal(createHash("sha256").update(JSON.stringify(unchanged)).digest("hex"),
+    "72c19b111d57422b31b80a72eda215ae29a1a2e29b6a924bb221aa374f27828b");
+});
+
+test("preço cheio e promocional usam a mesma renderização nos cards e nos detalhes", () => {
+  const prices = {};
+  vm.runInNewContext(source.slice(source.indexOf("const formatProductPrice"), source.indexOf("const getProductMeta"))
+    + ";this.markup=getProductPriceMarkup;", prices);
+  toys.filter((product) => approvedPrices[product.slug]).forEach((product) => {
+    const markup = prices.markup(product);
+    const money = (value) => value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+    assert.ok(markup.includes(`<del class="product-price-original">De: ${money(product.precoOriginal)}</del>`));
+    assert.ok(markup.includes(`Por: ${money(product.preco)}`));
+  });
+  assert.ok(source.includes('<div class="catalog-product-price" aria-label="Preço">${getProductPriceMarkup(product)}</div>'));
+  const elements = new Map();
+  const dialogContext = {
+    getProductPriceMarkup: prices.markup,
+    productDialogElement: { querySelector: (selector) => elements.get(selector) }
+  };
+  vm.runInNewContext(source.slice(source.indexOf("const setProductDialogPrice"), source.indexOf("const setBookDialogUrl"))
+    + ";this.render=setProductDialogPrice;", dialogContext);
+  for (const selector of ["#product-dialog-status", "#product-dialog-simple-status"]) {
+    const element = { innerHTML: "" };
+    elements.set(selector, element);
+    for (const product of toys) {
+      dialogContext.render(selector, product);
+      assert.equal(element.innerHTML, prices.markup(product));
+    }
+    assert.ok(source.includes(`setProductDialogPrice("${selector}", product);`));
+  }
 });
 
 test("imagens dos brinquedos são locais e galeria não repete arquivos", () => {
