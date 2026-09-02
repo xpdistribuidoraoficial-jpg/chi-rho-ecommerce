@@ -1,5 +1,14 @@
 {
+  "functions": {
+    "api/seo-page.js": {
+      "includeFiles": "{index.html,catalogo-biblias.html,catalogo-infantil.html,catalogo-casa.html,quem-somos.html,script.js}"
+    }
+  },
   "headers": [
+    {
+      "source": "/:internal(checkout|pagamento-sucesso|pagamento-pendente|pagamento-falhou|admin-pedidos).html",
+      "headers": [{ "key": "X-Robots-Tag", "value": "noindex, nofollow" }]
+    },
     {
       "source": "/(.*)",
       "headers": [
