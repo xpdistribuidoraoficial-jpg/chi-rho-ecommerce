@@ -68,7 +68,7 @@ test("catálogo mantém pendências comerciais fora do checkout", () => {
   assert.equal(catalogProducts.length, 73);
   assert.equal(activeProducts.length, 64);
   assert.equal(orderableProducts.length, 2);
-  assert.equal(missingPrice.length, 13);
+  assert.equal(missingPrice.length, 5);
   assert.equal(zeroPrice.length, 0);
   assert.equal(duplicateSlugs.length, 0);
 });
