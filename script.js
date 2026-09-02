@@ -2176,6 +2176,7 @@ catalogProducts.forEach((product) => {
 });
 
 const inactiveCatalogSlugs = new Set([
+  "brinquedo-kit-caminhoes-basculantes",
   "ate-que-nada-mais-importe",
   "cartas-de-um-diabo-a-seu-aprendiz",
   "cristianismo-puro-e-simples",

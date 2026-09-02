@@ -66,11 +66,22 @@ test("catálogo mantém pendências comerciais fora do checkout", () => {
   );
 
   assert.equal(catalogProducts.length, 73);
-  assert.equal(activeProducts.length, 64);
+  assert.equal(activeProducts.length, 63);
   assert.equal(orderableProducts.length, 2);
-  assert.equal(missingPrice.length, 5);
+  assert.equal(missingPrice.length, 4);
   assert.equal(zeroPrice.length, 0);
   assert.equal(duplicateSlugs.length, 0);
+});
+
+test("kit de basculantes é retirado da vitrine sem apagar seu registro", () => {
+  const slug = "brinquedo-kit-caminhoes-basculantes";
+  assert.ok(catalogProducts.some((product) => product.slug === slug));
+  assert.ok(inactiveCatalogSlugs.has(slug));
+  assert.ok(!activeProducts.some((product) => product.slug === slug));
+  assert.equal(activeProducts.filter((product) => product.brinquedo).length, 11);
+  assert.equal(activeProducts.filter((product) => product.brinquedo && product.precoOriginal).length, 10);
+  assert.ok(source.includes('catalogProducts.find((item) => item.slug === slug && isProductActive(item))'));
+  assert.ok(source.includes('product.slug === initialProductSlug && isProductActive(product)'));
 });
 
 test("controle dos cards respeita disponibilidade e limites de estoque", () => {
