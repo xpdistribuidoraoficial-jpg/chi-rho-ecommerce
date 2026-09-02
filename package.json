@@ -3,7 +3,11 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "seo:build": "node scripts/build-seo.mjs",
     "test": "node --test tests/*.test.mjs",
     "test:syntax": "node --check script.js && node --check checkout.js && node --check admin-pedidos.js && node --check pagamento-retorno.js && node --check api/cep.js && node --check api/frete.js && node --check api/mercadopago/create-preference.js && node --check api/mercadopago-webhook.js"
+  },
+  "dependencies": {
+    "@vercel/functions": "3.9.5"
   }
 }

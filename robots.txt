@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /admin-pedidos.html
+Disallow: /audits/
+Disallow: /tests/
+Disallow: /scripts/
+Disallow: /supabase/
+
+# Checkout and payment returns use noindex HTTP headers, not a crawl block.
+# CSS, JavaScript and product images remain crawlable.
+Sitemap: https://www.chirho.com.br/sitemap.xml
