@@ -125,3 +125,22 @@ test("home mobile mantém a grade compacta aprovada sem recriar o carrinho", () 
   assert.match(styles, /\.featured-books-grid \.catalog-product-image\{aspect-ratio:16\/10/);
   assert.match(source, /updateTestCartQuantity\(slug, existingQuantity \+ selectedQuantity\)/);
 });
+
+test("home mobile integra marca, conteúdo e ações ao banner sem trocar os destinos", () => {
+  assert.match(homeHtml, /class="header-cart-link" aria-label="Carrinho"/);
+  assert.match(homeHtml, /<h1><span>Tudo para sua<\/span><em>casa, sua família<\/em><span>e sua fé\.<\/span><\/h1>/);
+  assert.match(homeHtml, /href="#universos" class="btn btn-primary">Comprar agora →<\/a>/);
+  assert.match(homeHtml, /href="#ofertas" class="btn btn-outline">Ver ofertas<\/a>/);
+  assert.match(homeHtml, /banner-home-mobile\.webp/);
+  assert.match(homeHtml, /fetchpriority="high"/);
+
+  const mobileStyles = styles.slice(styles.indexOf("@media(max-width:700px)"), styles.indexOf("@media(max-width:360px)"));
+  assert.match(mobileStyles, /grid-template-areas:\s*"menu brand actions"\s*"search search search"/);
+  assert.match(mobileStyles, /\.brand\{[^}]*justify-self:center/);
+  assert.match(mobileStyles, /\.header-actions \.header-cart-link\{[^}]*display:grid/);
+  assert.match(mobileStyles, /\.hero-copy\{[^}]*grid-area:1\/1/);
+  assert.match(mobileStyles, /\.hero-media\{[^}]*grid-area:1\/1/);
+  assert.match(mobileStyles, /\.hero-media::after\{[\s\S]*?linear-gradient/);
+  assert.match(mobileStyles, /\.hero-media img\{[^}]*height:100%[^}]*object-fit:cover/);
+  assert.match(mobileStyles, /\.hero-benefits\{[^}]*position:absolute[^}]*top:calc\(100% \+ 14px\)/);
+});
