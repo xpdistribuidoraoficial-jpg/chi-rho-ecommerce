@@ -115,15 +115,27 @@ test("controles dos cards permanecem compactos e na mesma linha", () => {
   assert.match(styles, /\.catalog-card-add\{[^}]*width:42px[^}]*height:42px/);
 });
 
-test("home mobile mantém a grade compacta aprovada sem recriar o carrinho", () => {
+test("home mobile mantém universos compactos sem recriar o carrinho", () => {
   assert.match(homeHtml, /class="container universe-grid"/);
   assert.match(homeHtml, /class="universe-card" id="presentes"/);
   assert.match(homeHtml, /class="universe-copy-mobile">Bíblias, livros e EBD\.<\/span>/);
   assert.match(styles, /@media\(max-width:700px\)[\s\S]*?\.universe-grid\{grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
   assert.match(styles, /\.universe-card#infantil\{display:none\}/);
   assert.match(styles, /\.universe-card#presentes\{grid-column:1\/-1/);
-  assert.match(styles, /\.featured-books-grid \.catalog-product-image\{aspect-ratio:16\/10/);
   assert.match(source, /updateTestCartQuantity\(slug, existingQuantity \+ selectedQuantity\)/);
+});
+
+test("listas de produtos usam dois cards compactos por linha no mobile", () => {
+  const mobileCatalogStyles = styles.slice(styles.indexOf("@media(max-width:560px)"));
+
+  assert.match(mobileCatalogStyles, /\.catalog-product-grid\{grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
+  assert.match(mobileCatalogStyles, /\.catalog-product-image,\.featured-books-grid \.catalog-product-image\{[^}]*aspect-ratio:1\/1\.05/);
+  assert.match(mobileCatalogStyles, /\.catalog-product-content h3\{[^}]*-webkit-line-clamp:3/);
+  assert.match(mobileCatalogStyles, /\.catalog-product-content p,\.featured-books-grid \.catalog-product-content>p\{[^}]*-webkit-line-clamp:2/);
+  assert.match(mobileCatalogStyles, /\.catalog-product-cart\{[^}]*grid-template-columns:minmax\(0,1fr\) 38px/);
+  assert.match(mobileCatalogStyles, /\.catalog-card-quantity,\.featured-books-grid \.catalog-card-quantity\{[^}]*grid-template-columns:repeat\(3,minmax\(0,1fr\)\)/);
+  assert.match(mobileCatalogStyles, /@media\(max-width:360px\)[\s\S]*?\.catalog-product-grid\{gap:8px/);
+  assert.match(source, /getProductCardCartMarkup\(product\)/);
 });
 
 test("home mobile integra marca, conteúdo e ações ao banner sem trocar os destinos", () => {
