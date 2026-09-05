@@ -91,7 +91,11 @@
         </div>
 
         <div class="hero-media">
-          <img src="assets/banner-home.png" alt="Casa, família e fé" width="1717" height="916" fetchpriority="high" />
+          <picture>
+            <source media="(max-width: 700px)" srcset="assets/banner-home-mobile.webp" type="image/webp" />
+            <source srcset="assets/banner-home.webp" type="image/webp" />
+            <img src="assets/banner-home.png" alt="Casa, família e fé" width="1717" height="916" fetchpriority="high" />
+          </picture>
         </div>
       </div>
     </section>
@@ -100,26 +104,26 @@
       <div class="section-heading">
         <span>NOSSOS UNIVERSOS</span>
         <h2>Um pouco de tudo, com propósito</h2>
-        <p>Seis universos pensados para a sua casa, sua família e sua fé.</p>
+        <p><span class="universe-copy-desktop">Seis universos pensados para a sua casa, sua família e sua fé.</span><span class="universe-copy-mobile">Categorias para sua casa, sua família e sua fé.</span></p>
       </div>
 
       <div class="container universe-grid">
         <article class="universe-card" id="fe">
           <div class="u-icon">✝</div>
           <h3>Fé</h3>
-          <p>Bíblias, livros, EBD, materiais para igrejas e presentes cristãos.</p>
+          <p><span class="universe-copy-desktop">Bíblias, livros, EBD, materiais para igrejas e presentes cristãos.</span><span class="universe-copy-mobile">Bíblias, livros e EBD.</span></p>
           <a href="catalogo-biblias.html">Ver produtos →</a>
         </article>
         <article class="universe-card" id="casa">
           <div class="u-icon">⌂</div>
           <h3>Casa</h3>
-          <p>Utilidades, organização, cozinha e decoração para o dia a dia.</p>
-          <a href="catalogo-casa.html#catalogo">Ver produtos para Casa →</a>
+          <p><span class="universe-copy-desktop">Utilidades, organização, cozinha e decoração para o dia a dia.</span><span class="universe-copy-mobile">Utilidades e decoração.</span></p>
+          <a href="catalogo-casa.html#catalogo"><span class="universe-copy-desktop">Ver produtos para Casa →</span><span class="universe-copy-mobile">Ver produtos →</span></a>
         </article>
         <article class="universe-card" id="mesa">
           <div class="u-icon">▤</div>
           <h3>Mesa & Banho</h3>
-          <p>Cama, mesa, banho e enxoval para deixar seu lar mais completo.</p>
+          <p><span class="universe-copy-desktop">Cama, mesa, banho e enxoval para deixar seu lar mais completo.</span><span class="universe-copy-mobile">Cama, mesa e banho.</span></p>
           <a href="#produtos">Ver produtos →</a>
         </article>
         <article class="universe-card" id="infantil">
@@ -131,13 +135,13 @@
         <article class="universe-card" id="brinquedos">
           <div class="u-icon">◉</div>
           <h3>Brinquedos</h3>
-          <p>Diversão, aprendizado e imaginação para diferentes idades.</p>
-          <a href="catalogo-infantil.html?categoria=brinquedos-infantis#catalogo">Ver brinquedos →</a>
+          <p><span class="universe-copy-desktop">Diversão, aprendizado e imaginação para diferentes idades.</span><span class="universe-copy-mobile">Diversão para todas as idades.</span></p>
+          <a href="catalogo-infantil.html?categoria=brinquedos-infantis#catalogo"><span class="universe-copy-desktop">Ver brinquedos →</span><span class="universe-copy-mobile">Ver produtos →</span></a>
         </article>
         <article class="universe-card" id="presentes">
           <div class="u-icon">🎁</div>
           <h3>Presentes</h3>
-          <p>Kits, lembranças e opções especiais para diferentes ocasiões.</p>
+          <p><span class="universe-copy-desktop">Kits, lembranças e opções especiais para diferentes ocasiões.</span><span class="universe-copy-mobile">Kits e lembranças especiais.</span></p>
           <a href="#produtos">Ver produtos →</a>
         </article>
       </div>
