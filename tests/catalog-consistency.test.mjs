@@ -8,6 +8,7 @@ import { shippingProducts } from "../data/shipping-products.mjs";
 const projectRoot = new URL("../", import.meta.url);
 const source = fs.readFileSync(new URL("script.js", projectRoot), "utf8");
 const styles = fs.readFileSync(new URL("style.css", projectRoot), "utf8");
+const homeHtml = fs.readFileSync(new URL("index.html", projectRoot), "utf8");
 const catalogEnd = source.indexOf("const toggle");
 assert.notEqual(catalogEnd, -1, "Não foi possível localizar o fim da definição do catálogo.");
 
@@ -112,4 +113,15 @@ test("controles dos cards permanecem compactos e na mesma linha", () => {
   assert.match(styles, /\.catalog-product-cart\{[^}]*display:grid[^}]*grid-template-columns:minmax\(0,108px\) 42px/);
   assert.match(styles, /\.catalog-card-quantity\{[^}]*grid-template-columns:36px 36px 36px/);
   assert.match(styles, /\.catalog-card-add\{[^}]*width:42px[^}]*height:42px/);
+});
+
+test("home mobile mantém a grade compacta aprovada sem recriar o carrinho", () => {
+  assert.match(homeHtml, /class="container universe-grid"/);
+  assert.match(homeHtml, /class="universe-card" id="presentes"/);
+  assert.match(homeHtml, /class="universe-copy-mobile">Bíblias, livros e EBD\.<\/span>/);
+  assert.match(styles, /@media\(max-width:700px\)[\s\S]*?\.universe-grid\{grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
+  assert.match(styles, /\.universe-card#infantil\{display:none\}/);
+  assert.match(styles, /\.universe-card#presentes\{grid-column:1\/-1/);
+  assert.match(styles, /\.featured-books-grid \.catalog-product-image\{aspect-ratio:16\/10/);
+  assert.match(source, /updateTestCartQuantity\(slug, existingQuantity \+ selectedQuantity\)/);
 });

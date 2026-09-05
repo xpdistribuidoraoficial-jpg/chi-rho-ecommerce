@@ -48,6 +48,10 @@ a{text-decoration:none;color:inherit} button,input{font:inherit}
   max-width:2400px;
   margin:0 auto;
   background:url("assets/banner-home.png") 60% center / cover no-repeat;
+  background-image:image-set(
+    url("assets/banner-home.webp") type("image/webp"),
+    url("assets/banner-home.png") type("image/png")
+  );
 }
 
 .hero::after{
@@ -174,6 +178,7 @@ a{text-decoration:none;color:inherit} button,input{font:inherit}
   width:100%;
   height:auto;
 }
+.hero-media picture{display:block}
 
 .section{padding:72px 0}
 .section-heading{text-align:center;max-width:720px;margin:0 auto 34px}
@@ -186,6 +191,7 @@ a{text-decoration:none;color:inherit} button,input{font:inherit}
 .universe-card h3{margin:0 0 8px;color:var(--navy)}
 .universe-card p{margin:0 0 18px;color:var(--muted);line-height:1.55;font-size:13px}
 .universe-card a{margin-top:auto;color:var(--teal);font-size:12px;font-weight:900;text-transform:uppercase}
+.universe-copy-mobile{display:none}
 .trust-strip{background:var(--navy-dark);color:#fff;border-radius:16px;padding:25px 28px;display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
 .trust-strip div{display:flex;flex-direction:column;gap:4px}.trust-strip strong{font-size:14px}.trust-strip span{font-size:12px;color:rgba(255,255,255,.72)}
 .deals-section{background:#fbfdfd}
@@ -360,13 +366,45 @@ a{text-decoration:none;color:inherit} button,input{font:inherit}
     object-fit:contain
   }
 
-  .universe-grid,
   .product-grid,
   .trust-strip,
   .footer-grid{grid-template-columns:1fr}
 
   .section{padding:54px 0}
   .products-title{align-items:center}
+
+  #universos{padding:42px 0}
+  #universos .section-heading{width:min(calc(100% - 32px),520px);margin-bottom:22px}
+  #universos .section-heading h2{font-size:28px;line-height:1.12}
+  #universos .section-heading p{font-size:14px}
+  .universe-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  .universe-card{min-height:174px;padding:16px;border-radius:13px}
+  .u-icon{width:42px;height:42px;margin-bottom:10px;border-radius:11px;font-size:21px}
+  .universe-card h3{margin-bottom:5px;font-size:16px;line-height:1.22}
+  .universe-card p{margin-bottom:12px;font-size:12px;line-height:1.42}
+  .universe-card a{min-height:40px;display:inline-flex;align-items:center;font-size:11px;line-height:1.35}
+  .universe-copy-desktop{display:none}
+  .universe-copy-mobile{display:inline}
+  .universe-card#infantil{display:none}
+  .universe-card#presentes{grid-column:1/-1;min-height:142px}
+
+  .featured-books-grid .catalog-product-image{aspect-ratio:16/10;max-height:220px}
+  .featured-books-grid .catalog-product-image img{object-fit:contain;padding:12px}
+  .featured-books-grid .catalog-product-content>p{display:-webkit-box;overflow:hidden;-webkit-box-orient:vertical;-webkit-line-clamp:2}
+  .featured-books-grid .catalog-card-quantity{height:44px;grid-template-columns:44px 42px 44px}
+  .featured-books-grid .catalog-card-add{width:44px;height:44px}
+}
+
+@media(max-width:360px){
+  .container{width:94%}
+  #universos .section-heading{width:94%}
+  .universe-grid{gap:8px}
+  .universe-card{min-height:164px;padding:12px}
+  .universe-card#presentes{min-height:132px}
+  .u-icon{width:38px;height:38px;margin-bottom:9px;font-size:19px}
+  .universe-card h3{font-size:14px}
+  .universe-card p{font-size:11.5px}
+  .universe-card a{font-size:10.5px}
 }
 
 /* Quem somos */
@@ -533,6 +571,7 @@ a{text-decoration:none;color:inherit} button,input{font:inherit}
 .catalog-card-add:hover:not(:disabled){background:var(--teal-dark);transform:translateY(-1px)}
 .catalog-card-add:disabled{cursor:not-allowed;box-shadow:none;opacity:.38}
 .catalog-card-add.is-added{border-color:#2e8b57;background:#2e8b57;transform:scale(.96)}
+.universe-card a:focus-visible,.catalog-card-quantity button:focus-visible,.catalog-card-add:focus-visible{outline:3px solid rgba(14,126,118,.35);outline-offset:2px}
 .catalog-card-feedback{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
 .catalog-product-view{width:100%;min-height:42px;margin-top:12px;border:1px solid var(--teal);border-radius:9px;background:#fff;color:var(--teal-dark);font-size:14px;font-weight:800;cursor:pointer;transition:.2s ease}
 .catalog-product-view:hover{background:var(--teal);color:#fff}
