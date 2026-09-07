@@ -42,3 +42,15 @@ if (base && typeof catalogProducts !== 'undefined') {
   window.addEventListener('hashchange', update);
   window.addEventListener('load', update);
 }
+
+// Customer account entry: one public destination on desktop and responsive/mobile navigation.
+const activateCustomerPurchasesLink = () => {
+  document.querySelectorAll('a[href="#conta"]').forEach((anchor) => {
+    anchor.href = 'minhas-compras.html';
+    const label = anchor.querySelector('span');
+    if (label) label.textContent = 'Minhas Compras';
+    else anchor.textContent = 'Minhas Compras';
+    anchor.setAttribute('aria-label', 'Minhas Compras');
+  });
+};
+activateCustomerPurchasesLink();
