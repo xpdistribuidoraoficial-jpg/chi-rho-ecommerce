@@ -35,7 +35,18 @@ export const normalizeBrazilianWhatsapp = (value: unknown) => {
   return `55${national}`;
 };
 
+export const normalizeEmail = (value: unknown) => {
+  const email = String(value || "").trim().toLowerCase();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 254) return null;
+  return email;
+};
+
 export const maskedWhatsapp = (canonical: string) => `(**) *****-${canonical.slice(-4)}`;
+export const maskedEmail = (email: string) => {
+  const [local, domain] = email.split("@");
+  const visible = local.slice(0, 2);
+  return `${visible}${"*".repeat(Math.max(3, local.length - 2))}@${domain}`;
+};
 
 export const clientIp = (request: Request) => (
   request.headers.get("x-forwarded-for")?.split(",")[0]?.trim()
@@ -77,8 +88,10 @@ export const serviceRpc = async (name: string, body: Record<string, unknown>) =>
   return response.json().catch(() => null);
 };
 
+export type AuthRateScope = "request_phone" | "request_email" | "request_ip" | "verify_phone" | "verify_email" | "verify_ip";
+
 export const consumeLimit = async (
-  scope: "request_phone" | "request_ip" | "verify_phone" | "verify_ip",
+  scope: AuthRateScope,
   keyHash: string,
   maximumAttempts: number,
   windowSeconds: number,
@@ -100,10 +113,17 @@ export const consumeLimit = async (
   };
 };
 
-export const linkVerifiedCustomer = async (authUserId: string, canonical: string) => (
+export const linkVerifiedCustomerByPhone = async (authUserId: string, canonical: string) => (
   serviceRpc("link_customer_identity_for_auth", {
     requested_auth_user_id: authUserId,
     requested_whatsapp_e164: canonical
+  })
+);
+
+export const linkVerifiedCustomerByEmail = async (authUserId: string, email: string) => (
+  serviceRpc("link_customer_identity_for_email_auth", {
+    requested_auth_user_id: authUserId,
+    requested_email: email
   })
 );
 
