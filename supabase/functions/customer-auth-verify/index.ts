@@ -5,8 +5,8 @@ import {
   clientIp,
   consumeLimit,
   jsonResponse,
-  linkVerifiedCustomer,
-  normalizeBrazilianWhatsapp,
+  linkVerifiedCustomerByEmail,
+  normalizeEmail,
   secureFingerprint,
   serviceRpc
 } from "../_shared/customer-auth.ts";
@@ -20,31 +20,32 @@ Deno.serve(async (request: Request) => {
 
   try {
     const body = await request.json();
-    const canonical = normalizeBrazilianWhatsapp(body?.whatsapp);
+    const email = normalizeEmail(body?.email);
     const token = String(body?.code || "").replace(/\D/g, "");
-    if (!canonical || !/^\d{6,10}$/.test(token)) {
+    if (!email || !/^\d{6,10}$/.test(token)) {
       return jsonResponse({ error: "Não foi possível validar os dados informados." }, 400, origin);
     }
 
-    const [phoneHash, ipHash] = await Promise.all([
-      secureFingerprint("phone", canonical),
+    const [emailHash, ipHash] = await Promise.all([
+      secureFingerprint("email", email),
       secureFingerprint("ip", clientIp(request))
     ]);
-    const [phoneLimit, ipLimit] = await Promise.all([
-      consumeLimit("verify_phone", phoneHash, 5, 900, 0, 1800),
+    const [emailLimit, ipLimit] = await Promise.all([
+      consumeLimit("verify_email", emailHash, 5, 900, 0, 1800),
       consumeLimit("verify_ip", ipHash, 20, 900, 0, 1800)
     ]);
-    if (!phoneLimit.allowed || !ipLimit.allowed) {
+    if (!emailLimit.allowed || !ipLimit.allowed) {
       return jsonResponse({ error: "Não foi possível validar os dados informados." }, 429, origin);
     }
 
     const url = Deno.env.get("SUPABASE_URL");
     const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
     if (!url || !anonKey) throw new Error("AUTH_UNAVAILABLE");
+
     const authResponse = await fetch(`${url}/auth/v1/verify`, {
       method: "POST",
       headers: { apikey: anonKey, "Content-Type": "application/json" },
-      body: JSON.stringify({ phone: `+${canonical}`, token, type: "sms" }),
+      body: JSON.stringify({ email, token, type: "email" }),
       signal: AbortSignal.timeout(12000)
     });
     const session = await authResponse.json().catch(() => ({}));
@@ -52,9 +53,9 @@ Deno.serve(async (request: Request) => {
       return jsonResponse({ error: "Não foi possível validar os dados informados." }, 400, origin);
     }
 
-    await linkVerifiedCustomer(session.user.id, canonical);
-    await serviceRpc("reset_customer_auth_rate_limits", {
-      requested_phone_hash: phoneHash,
+    await linkVerifiedCustomerByEmail(session.user.id, email);
+    await serviceRpc("reset_customer_email_auth_rate_limits", {
+      requested_email_hash: emailHash,
       requested_ip_hash: ipHash
     });
 
@@ -65,7 +66,7 @@ Deno.serve(async (request: Request) => {
     }, 200, origin);
   } catch (error) {
     const code = error instanceof Error ? error.message : "UNKNOWN";
-    console.error("Customer OTP verification failed", code);
+    console.error("Customer email OTP verification failed", code);
     return jsonResponse({ error: "Não foi possível validar os dados informados." }, 503, origin);
   }
 });
