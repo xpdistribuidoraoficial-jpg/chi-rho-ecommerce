@@ -2,9 +2,9 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import {
   allowedOrigin,
   jsonResponse,
-  linkVerifiedCustomer,
-  maskedWhatsapp,
-  normalizeBrazilianWhatsapp
+  linkVerifiedCustomerByEmail,
+  maskedEmail,
+  normalizeEmail
 } from "../_shared/customer-auth.ts";
 
 const userHeaders = (token: string, anonKey: string) => ({
@@ -33,12 +33,12 @@ Deno.serve(async (request: Request) => {
       signal: AbortSignal.timeout(8000)
     });
     const user = await userResponse.json().catch(() => ({}));
-    const canonical = normalizeBrazilianWhatsapp(user?.phone);
-    if (!userResponse.ok || !user?.id || !canonical || !user?.phone_confirmed_at) {
+    const email = normalizeEmail(user?.email);
+    if (!userResponse.ok || !user?.id || !email || !user?.email_confirmed_at) {
       return jsonResponse({ error: "Sessão inválida." }, 401, origin);
     }
 
-    await linkVerifiedCustomer(user.id, canonical);
+    await linkVerifiedCustomerByEmail(user.id, email);
 
     const orderSelect = [
       "id", "code", "customer_name", "created_at", "subtotal", "shipping_price", "discount", "grand_total",
@@ -54,7 +54,7 @@ Deno.serve(async (request: Request) => {
 
     if (!orders.length) {
       return jsonResponse({
-        customer: { firstName: "cliente", whatsapp: maskedWhatsapp(canonical) },
+        customer: { firstName: "cliente", email: maskedEmail(email) },
         orders: []
       }, 200, origin);
     }
@@ -73,7 +73,7 @@ Deno.serve(async (request: Request) => {
 
     const firstName = String(orders[0]?.customer_name || "cliente").trim().split(/\s+/)[0];
     return jsonResponse({
-      customer: { firstName, whatsapp: maskedWhatsapp(canonical) },
+      customer: { firstName, email: maskedEmail(email) },
       orders: orders.map((order: { id: string }) => ({
         ...order,
         items: items.filter((item: { order_id: string }) => item.order_id === order.id),
