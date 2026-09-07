@@ -52,5 +52,22 @@ const activateCustomerPurchasesLink = () => {
     else anchor.textContent = 'Minhas Compras';
     anchor.setAttribute('aria-label', 'Minhas Compras');
   });
+
+  const nav = document.querySelector('.nav-row');
+  if (nav && !nav.querySelector('.customer-purchases-nav')) {
+    const link = document.createElement('a');
+    link.href = 'minhas-compras.html';
+    link.className = 'customer-purchases-nav';
+    link.textContent = 'Minhas Compras';
+    link.setAttribute('aria-label', 'Minhas Compras');
+    nav.appendChild(link);
+  }
+
+  if (!document.querySelector('#customer-purchases-nav-style')) {
+    const style = document.createElement('style');
+    style.id = 'customer-purchases-nav-style';
+    style.textContent = '@media (min-width:901px){.customer-purchases-nav{display:none!important}}';
+    document.head.appendChild(style);
+  }
 };
 activateCustomerPurchasesLink();
