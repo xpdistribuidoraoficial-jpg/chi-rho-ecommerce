@@ -2,18 +2,18 @@ const SUPABASE_URL = 'https://sailabcmcqdzrqhqztqs.supabase.co';
 const PUBLIC_KEY = 'sb_publishable_ipNBmuf0pUOZRzzlpU8kWw_Md1Y5FuE';
 const FUNCTIONS = `${SUPABASE_URL}/functions/v1`;
 const SESSION_KEY = 'chi_rho_customer_access_token';
-const WHATSAPP_KEY = 'chi_rho_customer_pending_whatsapp';
+const EMAIL_KEY = 'chi_rho_customer_pending_email';
 
 const $ = (selector) => document.querySelector(selector);
 const requestForm = $('#request-form');
 const verifyForm = $('#verify-form');
 const ordersSection = $('#orders-section');
-const whatsappInput = $('#whatsapp');
+const emailInput = $('#email');
 const otpInput = $('#otp');
 const requestButton = $('#request-button');
 const verifyButton = $('#verify-button');
 const resendButton = $('#resend-button');
-const changeNumberButton = $('#change-number-button');
+const changeEmailButton = $('#change-email-button');
 const logoutButton = $('#logout-button');
 const notice = $('#availability-message');
 const ordersList = $('#orders-list');
@@ -25,26 +25,10 @@ const showNotice = (message, type = '') => {
 };
 
 const hideNotice = () => { notice.hidden = true; };
-
 const digits = (value) => String(value || '').replace(/\D/g, '');
-const formatWhatsapp = (value) => {
-  let number = digits(value).slice(0, 11);
-  if (number.length > 2) number = `(${number.slice(0, 2)}) ${number.slice(2)}`;
-  if (number.length > 10) {
-    const raw = digits(number);
-    number = `(${raw.slice(0, 2)}) ${raw.slice(2, 7)}-${raw.slice(7, 11)}`;
-  } else if (digits(number).length > 6) {
-    const raw = digits(number);
-    number = `(${raw.slice(0, 2)}) ${raw.slice(2, 6)}-${raw.slice(6, 10)}`;
-  }
-  return number;
-};
-
-const canonicalWhatsapp = (value) => {
-  const raw = digits(value);
-  const national = raw.startsWith('55') && (raw.length === 12 || raw.length === 13) ? raw.slice(2) : raw;
-  if (!/^[1-9]\d[2-9]\d{7,8}$/.test(national)) return null;
-  return `55${national}`;
+const normalizeEmail = (value) => {
+  const email = String(value || '').trim().toLowerCase();
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) && email.length <= 254 ? email : null;
 };
 
 const money = (value) => Number(value || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -52,20 +36,19 @@ const date = (value) => value ? new Date(value).toLocaleDateString('pt-BR') : ''
 const label = (value) => String(value || 'Não informado').replaceAll('_', ' ').replace(/\b\w/g, (letter) => letter.toUpperCase());
 const safe = (value) => String(value ?? '').replace(/[&<>'"]/g, (char) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#39;', '"':'&quot;' }[char]));
 
-whatsappInput.addEventListener('input', () => { whatsappInput.value = formatWhatsapp(whatsappInput.value); });
 otpInput.addEventListener('input', () => { otpInput.value = digits(otpInput.value).slice(0, 10); });
 
-const requestCode = async (whatsapp) => {
-  const canonical = canonicalWhatsapp(whatsapp);
-  if (!canonical) throw new Error('Informe um WhatsApp válido com DDD.');
+const requestCode = async (value) => {
+  const email = normalizeEmail(value);
+  if (!email) throw new Error('Informe um e-mail válido.');
   const response = await fetch(`${FUNCTIONS}/customer-auth-request`, {
     method: 'POST',
     headers: { apikey: PUBLIC_KEY, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ whatsapp: canonical })
+    body: JSON.stringify({ email })
   });
   const body = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(body?.error || 'Não foi possível enviar o código agora.');
-  sessionStorage.setItem(WHATSAPP_KEY, canonical);
+  sessionStorage.setItem(EMAIL_KEY, email);
   return body;
 };
 
@@ -74,8 +57,8 @@ requestForm.addEventListener('submit', async (event) => {
   requestButton.disabled = true;
   hideNotice();
   try {
-    const body = await requestCode(whatsappInput.value);
-    showNotice(body?.message || 'Se os dados estiverem aptos para acesso, enviaremos as instruções pelo WhatsApp.', 'success');
+    const body = await requestCode(emailInput.value);
+    showNotice(body?.message || 'Se os dados estiverem aptos para acesso, enviaremos o código por e-mail.', 'success');
     requestForm.hidden = true;
     verifyForm.hidden = false;
     otpInput.focus();
@@ -90,17 +73,17 @@ verifyForm.addEventListener('submit', async (event) => {
   event.preventDefault();
   verifyButton.disabled = true;
   hideNotice();
-  const whatsapp = sessionStorage.getItem(WHATSAPP_KEY);
+  const email = sessionStorage.getItem(EMAIL_KEY);
   try {
     const response = await fetch(`${FUNCTIONS}/customer-auth-verify`, {
       method: 'POST',
       headers: { apikey: PUBLIC_KEY, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ whatsapp, code: otpInput.value })
+      body: JSON.stringify({ email, code: otpInput.value })
     });
     const body = await response.json().catch(() => ({}));
     if (!response.ok || !body?.accessToken) throw new Error(body?.error || 'Não foi possível validar os dados informados.');
     sessionStorage.setItem(SESSION_KEY, body.accessToken);
-    sessionStorage.removeItem(WHATSAPP_KEY);
+    sessionStorage.removeItem(EMAIL_KEY);
     verifyForm.hidden = true;
     await loadOrders();
   } catch (error) {
@@ -111,12 +94,12 @@ verifyForm.addEventListener('submit', async (event) => {
 });
 
 resendButton.addEventListener('click', async () => {
-  const whatsapp = sessionStorage.getItem(WHATSAPP_KEY);
-  if (!whatsapp) return resetLogin();
+  const email = sessionStorage.getItem(EMAIL_KEY);
+  if (!email) return resetLogin();
   resendButton.disabled = true;
   try {
-    const body = await requestCode(whatsapp);
-    showNotice(body?.message || 'Se os dados estiverem aptos para acesso, enviaremos as instruções pelo WhatsApp.', 'success');
+    const body = await requestCode(email);
+    showNotice(body?.message || 'Se os dados estiverem aptos para acesso, enviaremos o código por e-mail.', 'success');
   } catch (error) {
     showNotice(error.message || 'Aguarde alguns instantes antes de tentar novamente.', 'error');
   } finally {
@@ -124,10 +107,10 @@ resendButton.addEventListener('click', async () => {
   }
 });
 
-changeNumberButton.addEventListener('click', () => resetLogin());
+changeEmailButton.addEventListener('click', () => resetLogin());
 logoutButton.addEventListener('click', () => {
   sessionStorage.removeItem(SESSION_KEY);
-  sessionStorage.removeItem(WHATSAPP_KEY);
+  sessionStorage.removeItem(EMAIL_KEY);
   resetLogin();
 });
 
@@ -136,9 +119,9 @@ function resetLogin() {
   verifyForm.hidden = true;
   requestForm.hidden = false;
   otpInput.value = '';
-  sessionStorage.removeItem(WHATSAPP_KEY);
+  sessionStorage.removeItem(EMAIL_KEY);
   hideNotice();
-  whatsappInput.focus();
+  emailInput.focus();
 }
 
 function renderOrders(payload) {
@@ -193,7 +176,7 @@ async function checkAvailability() {
     const body = await response.json().catch(() => ({}));
     if (!response.ok || body?.available !== true) {
       requestButton.disabled = true;
-      showNotice('O acesso por WhatsApp está sendo preparado e ainda não está disponível. Nenhum pedido pode ser consultado sem autenticação.', 'error');
+      showNotice('O acesso por e-mail ainda não está disponível. Nenhum pedido pode ser consultado sem autenticação.', 'error');
       return false;
     }
     return true;
