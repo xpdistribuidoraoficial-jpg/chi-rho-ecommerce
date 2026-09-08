@@ -43,8 +43,9 @@ if (base && typeof catalogProducts !== 'undefined') {
   window.addEventListener('load', update);
 }
 
-// Public label update only. Keep the current account destination until Minhas Compras is fully released.
-document.querySelectorAll('a[href="#conta"]').forEach((anchor) => {
+// Customer purchases entry: use the released Minhas Compras page.
+document.querySelectorAll('a[href="#conta"], a[aria-label="Minhas Compras"]').forEach((anchor) => {
+  anchor.href = 'minhas-compras.html';
   const label = anchor.querySelector('span');
   if (label) label.textContent = 'Minhas Compras';
   else anchor.textContent = 'Minhas Compras';
