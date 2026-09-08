@@ -33,6 +33,7 @@ const normalizeEmail = (value) => {
 
 const money = (value) => Number(value || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 const date = (value) => value ? new Date(value).toLocaleDateString('pt-BR') : '';
+const dateTime = (value) => value ? new Date(value).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' }) : '';
 const label = (value) => String(value || 'Não informado').replaceAll('_', ' ').replace(/\b\w/g, (letter) => letter.toUpperCase());
 const safe = (value) => String(value ?? '').replace(/[&<>'"]/g, (char) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#39;', '"':'&quot;' }[char]));
 
@@ -131,7 +132,7 @@ function renderOrders(payload) {
   if (!orders.length) {
     const empty = document.createElement('div');
     empty.className = 'empty-state';
-    empty.textContent = 'Nenhuma compra disponível para esta conta no momento.';
+    empty.innerHTML = '<strong>Nenhuma compra encontrada.</strong><span>Use o mesmo e-mail informado no checkout. Se a compra foi recente, aguarde alguns instantes e tente novamente.</span>';
     ordersList.appendChild(empty);
     return;
   }
@@ -140,9 +141,45 @@ function renderOrders(payload) {
     card.className = 'order-card';
     const itemRows = (order.items || []).map((item) => `<div class="order-item"><span>${safe(item.product_name)} × ${Number(item.quantity || 0)}</span><strong>${money(item.line_total)}</strong></div>`).join('');
     const tracking = order.tracking_code
-      ? `<a class="tracking-link" href="${safe(order.tracking_url || '#')}" ${order.tracking_url ? 'target="_blank" rel="noopener noreferrer"' : ''}>Rastreio: ${safe(order.tracking_code)} →</a>`
-      : '';
-    card.innerHTML = `<div class="order-top"><div><div class="order-code">Pedido ${safe(order.code)}</div><div class="order-date">${date(order.created_at)}</div></div></div><div class="status-grid"><div class="status-box"><small>Pagamento</small><strong>${safe(label(order.financial_status))}</strong></div><div class="status-box"><small>Pedido</small><strong>${safe(label(order.operational_status))}</strong></div></div><div class="order-items">${itemRows || '<span>Itens indisponíveis para exibição.</span>'}</div><div class="order-total"><span>Total</span><span>${money(order.grand_total)}</span></div>${tracking}`;
+      ? `<a class="tracking-link" href="${safe(order.tracking_url || '#')}" ${order.tracking_url ? 'target="_blank" rel="noopener noreferrer"' : ''}>Rastrear pedido: ${safe(order.tracking_code)} →</a>`
+      : '<span class="tracking-pending">Rastreio disponível após a postagem.</span>';
+    const delivery = [order.shipping_carrier, order.shipping_service].filter(Boolean).map(label).join(' • ');
+    const destination = [order.city, order.state].filter(Boolean).join(' - ');
+    const history = Array.isArray(order.history) ? order.history : [];
+    const historyRows = history.slice(-5).reverse().map((event) => `
+      <li>
+        <span>${safe(label(event.status))}</span>
+        <time>${safe(dateTime(event.created_at))}</time>
+        ${event.note ? `<small>${safe(event.note)}</small>` : ''}
+      </li>`).join('');
+    card.innerHTML = `
+      <div class="order-top">
+        <div>
+          <div class="order-code">Pedido ${safe(order.code)}</div>
+          <div class="order-date">Realizado em ${date(order.created_at)}</div>
+        </div>
+        <span class="order-total-chip">${money(order.grand_total)}</span>
+      </div>
+      <div class="status-grid">
+        <div class="status-box"><small>Pagamento</small><strong>${safe(label(order.financial_status))}</strong></div>
+        <div class="status-box"><small>Pedido</small><strong>${safe(label(order.operational_status))}</strong></div>
+      </div>
+      <div class="order-summary-grid">
+        ${order.payment_method ? `<div><small>Forma de pagamento</small><strong>${safe(label(order.payment_method))}</strong></div>` : ''}
+        ${delivery ? `<div><small>Entrega</small><strong>${safe(delivery)}</strong></div>` : ''}
+        ${destination ? `<div><small>Destino</small><strong>${safe(destination)}</strong></div>` : ''}
+        ${order.shipped_at ? `<div><small>Postado em</small><strong>${safe(date(order.shipped_at))}</strong></div>` : ''}
+      </div>
+      <div class="order-items">${itemRows || '<span>Itens indisponíveis para exibição.</span>'}</div>
+      <div class="order-values">
+        <div><span>Subtotal</span><strong>${money(order.subtotal)}</strong></div>
+        ${Number(order.shipping_price || 0) > 0 ? `<div><span>Frete</span><strong>${money(order.shipping_price)}</strong></div>` : ''}
+        ${Number(order.discount || 0) > 0 ? `<div><span>Desconto</span><strong>- ${money(order.discount)}</strong></div>` : ''}
+        <div class="order-total"><span>Total</span><span>${money(order.grand_total)}</span></div>
+      </div>
+      <div class="tracking-area">${tracking}</div>
+      ${historyRows ? `<details class="order-history"><summary>Acompanhar histórico do pedido</summary><ol>${historyRows}</ol></details>` : ''}
+    `;
     ordersList.appendChild(card);
   }
 }
