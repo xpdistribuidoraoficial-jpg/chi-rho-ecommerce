@@ -7,6 +7,44 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
+  <style>
+    @media (max-width:700px){
+      .catalog-hero-casa{
+        position:relative;
+        overflow:hidden;
+        isolation:isolate;
+      }
+      .catalog-hero-casa .catalog-hero-grid{
+        position:relative;
+        z-index:2;
+      }
+      .catalog-hero-casa-mobile{
+        display:block!important;
+        position:absolute!important;
+        inset:0!important;
+        z-index:0!important;
+        width:100%!important;
+        height:100%!important;
+        margin:0!important;
+        max-width:none!important;
+        object-fit:cover!important;
+        object-position:64% center!important;
+        border-radius:0!important;
+      }
+      .catalog-hero-casa::after{
+        content:"";
+        position:absolute;
+        inset:0;
+        z-index:1;
+        pointer-events:none;
+        background:linear-gradient(90deg,rgba(255,255,255,.80) 0%,rgba(255,255,255,.68) 42%,rgba(255,255,255,.28) 72%,rgba(255,255,255,.08) 100%);
+      }
+      .catalog-hero-casa .catalog-hero-note{
+        background:rgba(255,255,255,.88);
+        backdrop-filter:blur(3px);
+      }
+    }
+  </style>
   <title>Casa: cozinha e utilidades domésticas | CHI RHO</title>
   <meta name="description" content="Explore as utilidades para cozinha e casa da CHI RHO. Confira detalhes, imagens e preços de produtos para facilitar sua rotina." />
   <meta name="robots" content="index, follow, max-image-preview:large" />
