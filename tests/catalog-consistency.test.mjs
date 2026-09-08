@@ -9,6 +9,7 @@ const projectRoot = new URL("../", import.meta.url);
 const source = fs.readFileSync(new URL("script.js", projectRoot), "utf8");
 const styles = fs.readFileSync(new URL("style.css", projectRoot), "utf8");
 const homeHtml = fs.readFileSync(new URL("index.html", projectRoot), "utf8");
+const casaHtml = fs.readFileSync(new URL("catalogo-casa.html", projectRoot), "utf8");
 const catalogEnd = source.indexOf("const toggle");
 assert.notEqual(catalogEnd, -1, "Não foi possível localizar o fim da definição do catálogo.");
 
@@ -155,4 +156,17 @@ test("home mobile integra marca, conteúdo e ações ao banner sem trocar os des
   assert.match(mobileStyles, /\.hero-media::after\{[\s\S]*?linear-gradient/);
   assert.match(mobileStyles, /\.hero-media img\{[^}]*height:100%[^}]*object-fit:cover/);
   assert.match(mobileStyles, /\.hero-benefits\{[^}]*position:absolute[^}]*top:calc\(100% \+ 14px\)/);
+});
+
+test("Casa mobile integra texto, imagem e aviso no mesmo banner", () => {
+  const mobileStyles = styles.slice(styles.indexOf("@media(max-width:700px)"));
+
+  assert.match(casaHtml, /<section class="catalog-hero catalog-hero-casa">/);
+  assert.match(casaHtml, /<strong>Catálogo em expansão<\/strong>/);
+  assert.doesNotMatch(casaHtml, /<style>[\s\S]*catalog-hero-casa/);
+  assert.match(mobileStyles, /\.catalog-hero-casa\{[^}]*min-height:420px[^}]*banner-casa\.webp[^}]*cover no-repeat/);
+  assert.match(mobileStyles, /\.catalog-hero-casa-copy\{[^}]*max-width:72%/);
+  assert.match(mobileStyles, /\.catalog-hero-casa \.catalog-hero-note\{[^}]*display:grid[^}]*background:rgba\(255,255,255,\.94\)/);
+  assert.match(mobileStyles, /\.catalog-hero-casa-mobile\{display:none\}/);
+  assert.match(mobileStyles, /@media\(max-width:340px\)[\s\S]*?min-height:405px/);
 });
