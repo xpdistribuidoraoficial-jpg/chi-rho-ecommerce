@@ -25,7 +25,6 @@ if (base && typeof catalogProducts !== 'undefined') {
     const values = { 'meta[name="description"]': meta.description, 'meta[property="og:title"]': meta.title, 'meta[property="og:description"]': meta.description, 'meta[property="og:url"]': meta.canonical, 'meta[property="og:image"]': meta.image, 'meta[property="og:image:alt"]': meta.name };
     for (const [selector, value] of Object.entries(values)) document.querySelector(selector)?.setAttribute('content', value);
     document.querySelector('link[rel="canonical"]')?.setAttribute('href', meta.canonical);
-    // Preview noindex, if present in the original response, must not be relaxed.
     const robots = document.querySelector('meta[name="robots"]');
     if (robots && location.hostname === 'www.chirho.com.br') robots.content = meta.noindex ? 'noindex, follow' : 'index, follow, max-image-preview:large';
     const schema = document.querySelector('#chi-rho-schema');
@@ -43,9 +42,9 @@ if (base && typeof catalogProducts !== 'undefined') {
   window.addEventListener('load', update);
 }
 
-// Public label only. Keep the existing destination until Minhas Compras is fully released.
+// Customer purchases entry.
 document.querySelectorAll('a[href="#conta"], a[aria-label="Minhas Compras"]').forEach((anchor) => {
-  anchor.href = '#conta';
+  anchor.href = 'minhas-compras.html';
   const label = anchor.querySelector('span');
   if (label) label.textContent = 'Minhas Compras';
   else anchor.textContent = 'Minhas Compras';
