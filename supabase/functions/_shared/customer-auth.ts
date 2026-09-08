@@ -7,7 +7,7 @@ const ALLOWED_ORIGINS = new Set([
   "http://localhost:3000",
   "http://127.0.0.1:3000"
 ]);
-const VERCEL_PREVIEW_ORIGIN = /^https:\/\/chi-rho-ecommerce(?:-[a-z0-9-]+)?\.vercel\.app$/i;
+const VERCEL_PREVIEW_ORIGIN = /^https:\/\/chi-rho-ecomme(?:rce)?(?:-[a-z0-9-]+)?\.vercel\.app$/i;
 
 export const allowedOrigin = (origin: string) => (
   ALLOWED_ORIGINS.has(origin) || VERCEL_PREVIEW_ORIGIN.test(origin)
