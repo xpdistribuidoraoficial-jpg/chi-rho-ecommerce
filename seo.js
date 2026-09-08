@@ -42,3 +42,11 @@ if (base && typeof catalogProducts !== 'undefined') {
   window.addEventListener('hashchange', update);
   window.addEventListener('load', update);
 }
+
+// Public label update only. Keep the current account destination until Minhas Compras is fully released.
+document.querySelectorAll('a[href="#conta"]').forEach((anchor) => {
+  const label = anchor.querySelector('span');
+  if (label) label.textContent = 'Minhas Compras';
+  else anchor.textContent = 'Minhas Compras';
+  anchor.setAttribute('aria-label', 'Minhas Compras');
+});
