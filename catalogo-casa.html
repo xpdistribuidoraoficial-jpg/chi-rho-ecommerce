@@ -7,67 +7,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
-  <style>
-    .catalog-hero-casa-bg{display:none}
-    @media (max-width:700px){
-      .catalog-hero-casa{
-        position:relative!important;
-        min-height:500px!important;
-        padding:0!important;
-        display:grid!important;
-        align-items:center!important;
-        overflow:hidden!important;
-        background:#eef5f3!important;
-      }
-      .catalog-hero-casa-bg{
-        display:block!important;
-        position:absolute!important;
-        inset:0!important;
-        z-index:0!important;
-        width:100%!important;
-        height:100%!important;
-        object-fit:cover!important;
-        object-position:62% center!important;
-      }
-      .catalog-hero-casa::before{
-        content:""!important;
-        display:block!important;
-        position:absolute!important;
-        inset:0!important;
-        z-index:1!important;
-        background:linear-gradient(90deg,rgba(248,251,250,.94) 0%,rgba(248,251,250,.82) 35%,rgba(248,251,250,.46) 58%,rgba(248,251,250,.08) 82%,rgba(248,251,250,0) 100%)!important;
-        pointer-events:none!important;
-      }
-      .catalog-hero-casa .catalog-hero-grid{
-        position:relative!important;
-        z-index:2!important;
-        width:min(430px,92%)!important;
-        min-height:500px!important;
-        margin:0 auto!important;
-        padding:28px 0!important;
-        display:flex!important;
-        flex-direction:column!important;
-        align-items:flex-start!important;
-        justify-content:center!important;
-        gap:0!important;
-      }
-      .catalog-hero-casa-copy{width:100%!important;padding:0!important}
-      .catalog-hero-casa .catalog-hero-grid>div:first-child>span{font-size:10px!important;letter-spacing:.11em!important}
-      .catalog-hero-casa h1{max-width:80%!important;margin:8px 0 12px!important;font-size:clamp(30px,8.4vw,36px)!important;line-height:1.07!important;text-shadow:0 1px 0 rgba(255,255,255,.82)!important}
-      .catalog-hero-casa .catalog-hero-grid>div:first-child>p{max-width:74%!important;margin:0!important;font-size:14px!important;line-height:1.5!important;color:#345361!important;text-shadow:0 1px 0 rgba(255,255,255,.82)!important}
-      .catalog-hero-casa .catalog-hero-note{width:min(88%,340px)!important;max-width:340px!important;margin:22px 0 0!important;padding:15px 16px!important;align-self:flex-start!important;background:rgba(255,255,255,.84)!important;border-color:rgba(210,230,227,.9)!important;backdrop-filter:blur(5px)!important;box-shadow:0 10px 28px rgba(5,46,70,.08)!important}
-      .catalog-hero-casa .catalog-hero-note strong{font-size:13px!important}
-      .catalog-hero-casa .catalog-hero-note p{font-size:10.5px!important;line-height:1.45!important}
-      .catalog-hero-casa-mobile{display:none!important}
-    }
-    @media (max-width:360px){
-      .catalog-hero-casa,.catalog-hero-casa .catalog-hero-grid{min-height:470px!important}
-      .catalog-hero-casa-bg{object-position:64% center!important}
-      .catalog-hero-casa h1{max-width:82%!important;font-size:29px!important}
-      .catalog-hero-casa .catalog-hero-grid>div:first-child>p{max-width:77%!important;font-size:13px!important}
-      .catalog-hero-casa .catalog-hero-note{width:90%!important;margin-top:18px!important}
-    }
-  </style>
   <title>Casa: cozinha e utilidades domésticas | CHI RHO</title>
   <meta name="description" content="Explore as utilidades para cozinha e casa da CHI RHO. Confira detalhes, imagens e preços de produtos para facilitar sua rotina." />
   <meta name="robots" content="index, follow, max-image-preview:large" />
@@ -84,29 +23,187 @@
   <script type="application/ld+json" id="chi-rho-schema">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://www.chirho.com.br/#organization","name":"CHI RHO","url":"https://www.chirho.com.br/","logo":"https://www.chirho.com.br/assets/logo-chi-rho.png"},{"@type":"WebSite","@id":"https://www.chirho.com.br/#website","name":"CHI RHO","url":"https://www.chirho.com.br/","inLanguage":"pt-BR","publisher":{"@id":"https://www.chirho.com.br/#organization"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Início","item":"https://www.chirho.com.br/"},{"@type":"ListItem","position":2,"name":"Casa","item":"https://www.chirho.com.br/catalogo-casa.html"}]}]}</script>
 </head>
 <body class="catalog-page" data-default-category="casa">
-  <div class="topbar"><div class="container topbar-grid"><span>🚚 Entrega para todo o Brasil</span><span>🛡 Compra segura</span><span>🎧 Atendimento humanizado</span><span>🤝 Atendimento para igrejas e lojistas</span></div></div>
+  <div class="topbar">
+    <div class="container topbar-grid">
+      <span>🚚 Entrega para todo o Brasil</span>
+      <span>🛡 Compra segura</span>
+      <span>🎧 Atendimento humanizado</span>
+      <span>🤝 Atendimento para igrejas e lojistas</span>
+    </div>
+  </div>
+
   <header class="header">
     <div class="container header-row">
-      <a href="index.html#inicio" class="brand"><img src="assets/logo-chi-rho.png" alt="Chi Rho" /><div><strong>CHI RHO</strong><small>CASA • FAMÍLIA • FÉ</small></div></a>
-      <form class="search"><input type="search" name="q" placeholder="Buscar utilidades para Casa..." aria-label="Buscar no catálogo" /><button aria-label="Buscar">⌕</button></form>
-      <div class="header-actions"><a href="index.html#favoritos">♡<span>Favoritos</span></a><a href="index.html#conta">♙<span>Minha conta</span></a><a href="index.html#carrinho">🛒<span>Carrinho</span></a></div>
+      <a href="index.html#inicio" class="brand">
+        <img src="assets/logo-chi-rho.png" alt="Chi Rho" />
+        <div>
+          <strong>CHI RHO</strong>
+          <small>CASA • FAMÍLIA • FÉ</small>
+        </div>
+      </a>
+
+      <form class="search">
+        <input type="search" name="q" placeholder="Buscar utilidades para Casa..." aria-label="Buscar no catálogo" />
+        <button aria-label="Buscar">⌕</button>
+      </form>
+
+      <div class="header-actions">
+        <a href="index.html#favoritos">♡<span>Favoritos</span></a>
+        <a href="index.html#conta">♙<span>Minha conta</span></a>
+        <a href="index.html#carrinho">🛒<span>Carrinho</span></a>
+      </div>
+
       <button class="menu-toggle" aria-label="Abrir menu">☰</button>
     </div>
-    <nav class="nav"><div class="container nav-row"><a href="index.html#universos" class="all-cats">☰ Todas as Categorias</a><a href="catalogo-biblias.html#catalogo">Fé</a><a href="#catalogo" aria-current="page">Casa</a><a href="index.html#mesa">Mesa & Banho</a><a href="catalogo-infantil.html#catalogo">Infantil</a><a href="catalogo-infantil.html?categoria=brinquedos-infantis#catalogo">Brinquedos</a><a href="index.html#presentes">Presentes</a><a href="index.html#ofertas" class="offer-link">Ofertas</a></div></nav>
+
+    <nav class="nav">
+      <div class="container nav-row">
+        <a href="index.html#universos" class="all-cats">☰ Todas as Categorias</a>
+        <a href="catalogo-biblias.html#catalogo">Fé</a>
+        <a href="#catalogo" aria-current="page">Casa</a>
+        <a href="index.html#mesa">Mesa & Banho</a>
+        <a href="catalogo-infantil.html#catalogo">Infantil</a>
+        <a href="catalogo-infantil.html?categoria=brinquedos-infantis#catalogo">Brinquedos</a>
+        <a href="index.html#presentes">Presentes</a>
+        <a href="index.html#ofertas" class="offer-link">Ofertas</a>
+      </div>
+    </nav>
   </header>
+
   <main>
     <section class="catalog-hero catalog-hero-casa">
-      <img class="catalog-hero-casa-bg" src="assets/banner-casa.webp" alt="" aria-hidden="true" />
       <div class="container catalog-hero-grid">
-        <div class="catalog-hero-casa-copy"><span>CASA • COZINHA E UTILIDADES</span><h1>Praticidade e cuidado para todos os dias.</h1><p>Produtos selecionados para facilitar a rotina, apoiar o preparo das refeições e tornar o lar mais funcional.</p></div>
-        <div class="catalog-hero-note"><strong>Catálogo em expansão</strong><p>Preços e disponibilidade serão apresentados assim que os dados comerciais forem cadastrados.</p></div>
+        <div class="catalog-hero-casa-copy">
+          <span>CASA • COZINHA E UTILIDADES</span>
+          <h1>Praticidade e cuidado para todos os dias.</h1>
+          <p>Produtos selecionados para facilitar a rotina, apoiar o preparo das refeições e tornar o lar mais funcional.</p>
+        </div>
+        <div class="catalog-hero-note">
+          <strong>Catálogo em expansão</strong>
+          <p>Preços e disponibilidade serão apresentados assim que os dados comerciais forem cadastrados.</p>
+        </div>
+      </div>
+      <img class="catalog-hero-casa-mobile" src="assets/banner-casa.webp" alt="Itens para casa, cozinha, mesa e banho em um ambiente claro e acolhedor" />
+    </section>
+
+    <section class="catalog-main" id="catalogo">
+      <div class="container">
+        <div class="catalog-main-heading">
+          <div>
+            <span>CATÁLOGO CASA CHI RHO</span>
+            <h2 id="catalog-title">Casa</h2>
+            <p id="catalog-result-count">2 produtos selecionados</p>
+          </div>
+        </div>
+
+        <div class="catalog-filters" role="group" aria-label="Filtrar catálogo de Casa por categoria">
+          <button type="button" class="catalog-filter is-active" data-filter="casa">Toda a Casa</button>
+          <button type="button" class="catalog-filter" data-filter="cozinha">Cozinha</button>
+          <button type="button" class="catalog-filter" data-filter="utilidades-domesticas">Utilidades domésticas</button>
+        </div>
+
+        <div class="catalog-product-grid catalog-all-grid" id="catalog-products" aria-live="polite"></div>
       </div>
     </section>
-    <section class="catalog-main" id="catalogo"><div class="container"><div class="catalog-main-heading"><div><span>CATÁLOGO CASA CHI RHO</span><h2 id="catalog-title">Casa</h2><p id="catalog-result-count">2 produtos selecionados</p></div></div><div class="catalog-filters" role="group" aria-label="Filtrar catálogo de Casa por categoria"><button type="button" class="catalog-filter is-active" data-filter="casa">Toda a Casa</button><button type="button" class="catalog-filter" data-filter="cozinha">Cozinha</button><button type="button" class="catalog-filter" data-filter="utilidades-domesticas">Utilidades domésticas</button></div><div class="catalog-product-grid catalog-all-grid" id="catalog-products" aria-live="polite"></div></div></section>
-    <section class="container catalog-support"><div><span>PRECISA DE AJUDA?</span><h2>Escolha de acordo com a sua rotina.</h2><p>Considere o espaço disponível, a finalidade do produto e a frequência de uso para escolher a opção mais adequada para sua casa.</p></div><a href="index.html#contato" class="btn btn-primary">Igrejas e lojistas →</a></section>
-    <dialog class="product-dialog" id="product-dialog" aria-labelledby="product-dialog-title"><button class="product-dialog-close" type="button" aria-label="Fechar visualização" data-close-dialog>×</button><div class="product-dialog-grid"><div class="product-dialog-media"><img id="product-dialog-image" src="" alt="" /><span class="product-dialog-badge" id="product-dialog-badge" hidden>Mais vendido</span></div><div class="product-dialog-copy"><span class="product-category-label" id="product-dialog-category"></span><h2 id="product-dialog-title"></h2><p id="product-dialog-description"></p><div id="product-dialog-simple-content"><strong id="product-dialog-simple-status">Preço em breve</strong><small>Consulte disponibilidade antes de concluir sua escolha.</small><a href="#catalogo" class="btn btn-primary">Ver catálogo de Casa →</a></div><div id="product-dialog-book-content" hidden><dl class="product-dialog-details" aria-label="Informações do produto"><div data-product-detail><dt data-product-detail-label></dt><dd data-product-detail-value></dd></div><div data-product-detail><dt data-product-detail-label></dt><dd data-product-detail-value></dd></div><div data-product-detail><dt data-product-detail-label></dt><dd data-product-detail-value></dd></div><div data-product-detail><dt data-product-detail-label></dt><dd data-product-detail-value></dd></div></dl><section class="product-dialog-purchase" aria-label="Área de compra"><span class="product-dialog-price-label">Preço</span><strong id="product-dialog-status">Preço em breve</strong><small id="product-dialog-availability">Preço e disponibilidade ainda não cadastrados.</small><div class="product-dialog-purchase-fields"><div class="product-dialog-quantity"><span>Quantidade</span><div><button type="button" aria-label="Diminuir quantidade" data-quantity-action="decrease" disabled>−</button><output id="product-dialog-quantity" aria-live="polite">1</output><button type="button" aria-label="Aumentar quantidade" data-quantity-action="increase" disabled>+</button></div></div><label class="product-dialog-shipping"><span>Calcular frete</span><span class="product-dialog-shipping-field"><input id="product-dialog-postcode" type="text" inputmode="numeric" autocomplete="postal-code" placeholder="Digite o CEP" aria-label="CEP" disabled /><button type="button" disabled>Calcular</button></span></label></div><div class="product-dialog-actions"><button class="btn btn-secondary" id="product-dialog-add-cart" type="button" disabled>Adicionar ao carrinho</button><button class="btn btn-primary" id="product-dialog-buy-now" type="button" disabled>Comprar agora</button></div><p class="product-dialog-activation-note">A compra será liberada após o cadastro do preço, estoque, frete e checkout.</p></section></div></div></div></dialog>
+
+    <section class="container catalog-support">
+      <div>
+        <span>PRECISA DE AJUDA?</span>
+        <h2>Escolha de acordo com a sua rotina.</h2>
+        <p>Considere o espaço disponível, a finalidade do produto e a frequência de uso para escolher a opção mais adequada para sua casa.</p>
+      </div>
+      <a href="index.html#contato" class="btn btn-primary">Igrejas e lojistas →</a>
+    </section>
+
+    <dialog class="product-dialog" id="product-dialog" aria-labelledby="product-dialog-title">
+      <button class="product-dialog-close" type="button" aria-label="Fechar visualização" data-close-dialog>×</button>
+      <div class="product-dialog-grid">
+        <div class="product-dialog-media">
+          <img id="product-dialog-image" src="" alt="" />
+          <span class="product-dialog-badge" id="product-dialog-badge" hidden>Mais vendido</span>
+        </div>
+        <div class="product-dialog-copy">
+          <span class="product-category-label" id="product-dialog-category"></span>
+          <h2 id="product-dialog-title"></h2>
+          <p id="product-dialog-description"></p>
+
+          <div id="product-dialog-simple-content">
+            <strong id="product-dialog-simple-status">Preço em breve</strong>
+            <small>Consulte disponibilidade antes de concluir sua escolha.</small>
+            <a href="#catalogo" class="btn btn-primary">Ver catálogo de Casa →</a>
+          </div>
+
+          <div id="product-dialog-book-content" hidden>
+            <dl class="product-dialog-details" aria-label="Informações do produto">
+              <div data-product-detail><dt data-product-detail-label></dt><dd data-product-detail-value></dd></div>
+              <div data-product-detail><dt data-product-detail-label></dt><dd data-product-detail-value></dd></div>
+              <div data-product-detail><dt data-product-detail-label></dt><dd data-product-detail-value></dd></div>
+              <div data-product-detail><dt data-product-detail-label></dt><dd data-product-detail-value></dd></div>
+            </dl>
+
+            <section class="product-dialog-purchase" aria-label="Área de compra">
+              <span class="product-dialog-price-label">Preço</span>
+              <strong id="product-dialog-status">Preço em breve</strong>
+              <small id="product-dialog-availability">Preço e disponibilidade ainda não cadastrados.</small>
+              <div class="product-dialog-purchase-fields">
+                <div class="product-dialog-quantity">
+                  <span>Quantidade</span>
+                  <div>
+                    <button type="button" aria-label="Diminuir quantidade" data-quantity-action="decrease" disabled>−</button>
+                    <output id="product-dialog-quantity" aria-live="polite">1</output>
+                    <button type="button" aria-label="Aumentar quantidade" data-quantity-action="increase" disabled>+</button>
+                  </div>
+                </div>
+                <label class="product-dialog-shipping">
+                  <span>Calcular frete</span>
+                  <span class="product-dialog-shipping-field">
+                    <input id="product-dialog-postcode" type="text" inputmode="numeric" autocomplete="postal-code" placeholder="Digite o CEP" aria-label="CEP" disabled />
+                    <button type="button" disabled>Calcular</button>
+                  </span>
+                </label>
+              </div>
+              <div class="product-dialog-actions">
+                <button class="btn btn-secondary" id="product-dialog-add-cart" type="button" disabled>Adicionar ao carrinho</button>
+                <button class="btn btn-primary" id="product-dialog-buy-now" type="button" disabled>Comprar agora</button>
+              </div>
+              <p class="product-dialog-activation-note">A compra será liberada após o cadastro do preço, estoque, frete e checkout.</p>
+            </section>
+          </div>
+        </div>
+      </div>
+    </dialog>
+
   </main>
-  <footer class="footer"><div class="container footer-grid"><div class="footer-brand"><img src="assets/logo-chi-rho.png" alt="Chi Rho" /><div><strong>CHI RHO</strong><span>CASA • FAMÍLIA • FÉ</span></div></div><div><strong>Institucional</strong><a href="quem-somos.html">Quem somos</a><a href="index.html#contato">Contato</a><a href="index.html#contato">Atendimento</a></div><div><strong>Categorias</strong><a href="catalogo-biblias.html#catalogo">Fé</a><a href="catalogo-infantil.html#catalogo">Infantil</a><a href="#catalogo">Casa</a><a href="catalogo-infantil.html?categoria=brinquedos-infantis#catalogo">Brinquedos</a></div><div><strong>Segurança</strong><span>Dados comerciais e políticas serão adicionados após definição final.</span></div></div></footer>
+
+  <footer class="footer">
+    <div class="container footer-grid">
+      <div class="footer-brand">
+        <img src="assets/logo-chi-rho.png" alt="Chi Rho" />
+        <div>
+          <strong>CHI RHO</strong>
+          <span>CASA • FAMÍLIA • FÉ</span>
+        </div>
+      </div>
+      <div>
+        <strong>Institucional</strong>
+        <a href="quem-somos.html">Quem somos</a>
+        <a href="index.html#contato">Contato</a>
+        <a href="index.html#contato">Atendimento</a>
+      </div>
+      <div>
+        <strong>Categorias</strong>
+        <a href="catalogo-biblias.html#catalogo">Fé</a>
+        <a href="catalogo-infantil.html#catalogo">Infantil</a>
+        <a href="#catalogo">Casa</a>
+        <a href="catalogo-infantil.html?categoria=brinquedos-infantis#catalogo">Brinquedos</a>
+      </div>
+      <div>
+        <strong>Segurança</strong>
+        <span>Dados comerciais e políticas serão adicionados após definição final.</span>
+      </div>
+    </div>
+  </footer>
+
   <script src="script.js"></script>
   <script type="module" src="seo.js"></script>
 </body>
