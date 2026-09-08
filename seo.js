@@ -42,9 +42,9 @@ if (base && typeof catalogProducts !== 'undefined') {
   window.addEventListener('load', update);
 }
 
-// Customer purchases entry.
-document.querySelectorAll('a[href="#conta"], a[aria-label="Minhas Compras"]').forEach((anchor) => {
-  anchor.href = 'minhas-compras.html';
+// Customer purchases entry. Any public header account icon now opens the customer portal.
+document.querySelectorAll('a[href$="#conta"], a[aria-label="Minhas Compras"]').forEach((anchor) => {
+  anchor.href = 'https://www.chirho.com.br/minhas-compras.html';
   const label = anchor.querySelector('span');
   if (label) label.textContent = 'Minhas Compras';
   else anchor.textContent = 'Minhas Compras';
