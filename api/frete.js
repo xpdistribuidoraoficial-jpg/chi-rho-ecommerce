@@ -11,7 +11,7 @@ const jsonResponse = (body, status = 200) => Response.json(body, {
 const onlyDigits = (value) => String(value || "").replace(/\D/g, "");
 
 const getValidatedItems = (requestedItems) => {
-  if (!Array.isArray(requestedItems) || requestedItems.length === 0 || requestedItems.length > 10) {
+  if (!Array.isArray(requestedItems) || requestedItems.length === 0 || requestedItems.length > 30) {
     throw new Error("INVALID_ITEMS");
   }
 
