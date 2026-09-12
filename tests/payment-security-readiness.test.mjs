@@ -38,7 +38,9 @@ test("preferência fica bloqueada antes da chamada externa sem as três credenci
   assert.ok(source.includes("external_reference:order.code"));
   assert.ok(source.includes('"X-Idempotency-Key":order.id'));
   assert.ok(source.includes('MERCADO_PAGO_TEST_MODE'));
-  assert.ok(source.includes('code:"PAYMENT_TEST_ONLY"'));
+  assert.ok(source.includes('const SITE_ORIGIN="https://www.chirho.com.br"'));
+  assert.ok(source.includes('const ROOT_ORIGIN="https://chirho.com.br"'));
+  assert.ok(source.includes("const available=configured"));
   assert.ok(source.includes('expiration_date_to:reservationExpiry.toISOString()'));
   assert.ok(source.includes('date_of_expiration:reservationExpiry.toISOString()'));
   assert.ok(source.includes('extend_test_payment_reservation'));
@@ -93,7 +95,7 @@ test("reserva ampliada para Pix existe somente no modo de teste", () => {
   assert.ok(source.includes("to service_role"));
 });
 
-test("Preview da Chi Rho é permitido sem liberar pagamento no domínio público", () => {
+test("domínio oficial e previews são permitidos sem trocar a seleção do sandbox", () => {
   for (const path of [
     "supabase/functions/create-casa-order/index.ts",
     "supabase/functions/public-order-status/index.ts",
@@ -102,7 +104,13 @@ test("Preview da Chi Rho é permitido sem liberar pagamento no domínio público
     assert.ok(read(path).includes("VERCEL_PREVIEW_ORIGIN"), `Preview ausente: ${path}`);
   }
   const preference = read("supabase/functions/mercadopago-create-preference/index.ts");
-  assert.ok(preference.includes("testMode&&origin===SITE_ORIGIN"));
+  assert.ok(preference.includes('const SITE_ORIGIN="https://www.chirho.com.br"'));
+  assert.ok(preference.includes('const ROOT_ORIGIN="https://chirho.com.br"'));
+  assert.ok(preference.includes("testMode?preference.sandbox_init_point:preference.init_point"));
+  assert.ok(!preference.includes("PAYMENT_TEST_ONLY"));
+  assert.ok(!preference.includes("https://chi-rho-ecommerce.vercel.app"));
+  assert.ok(!read("supabase/functions/public-order-status/index.ts").includes("https://chi-rho-ecommerce.vercel.app"));
+  assert.ok(!read("api/mercadopago/create-preference.js").includes("https://chi-rho-ecommerce.vercel.app"));
 });
 
 test("página de sucesso não aprova pagamento pela URL", () => {

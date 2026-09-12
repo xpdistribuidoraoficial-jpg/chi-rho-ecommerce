@@ -1,9 +1,10 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 
-const SITE_ORIGIN="https://chi-rho-ecommerce.vercel.app";
+const SITE_ORIGIN="https://www.chirho.com.br";
+const ROOT_ORIGIN="https://chirho.com.br";
 const PUBLIC_KEY="sb_publishable_ipNBmuf0pUOZRzzlpU8kWw_Md1Y5FuE";
-const ALLOWED_ORIGINS=new Set([SITE_ORIGIN,"http://localhost:3000","http://127.0.0.1:3000"]);
-const VERCEL_PREVIEW_ORIGIN=/^https:\/\/chi-rho-ecommerce(?:-[a-z0-9-]+)?\.vercel\.app$/i;
+const ALLOWED_ORIGINS=new Set([SITE_ORIGIN,ROOT_ORIGIN,"http://localhost:3000","http://127.0.0.1:3000"]);
+const VERCEL_PREVIEW_ORIGIN=/^https:\/\/chi-rho-ecommerce-[a-z0-9-]+\.vercel\.app$/i;
 const isAllowedOrigin=(origin:string)=>ALLOWED_ORIGINS.has(origin)||VERCEL_PREVIEW_ORIGIN.test(origin);
 const json=(body:unknown,status=200,origin=SITE_ORIGIN)=>new Response(JSON.stringify(body),{status,headers:{
   "Access-Control-Allow-Origin":origin,"Access-Control-Allow-Headers":"apikey, content-type",
@@ -22,16 +23,13 @@ Deno.serve(async(request)=>{
   const accessToken=Deno.env.get("MERCADO_PAGO_ACCESS_TOKEN")?.trim();
   const publicKey=Deno.env.get("MERCADO_PAGO_PUBLIC_KEY")?.trim();
   const webhookSecret=Deno.env.get("MERCADO_PAGO_WEBHOOK_SECRET")?.trim();
-  // Proteção operacional: credenciais de teste ficam restritas a Preview/Development.
-  // A passagem para produção exige autorização e MERCADO_PAGO_TEST_MODE=false.
+  // O modo do provedor depende somente do secret controlado no backend.
+  // Enquanto estiver em teste, inclusive no domínio oficial, somente o sandbox é devolvido.
   const testMode=Deno.env.get("MERCADO_PAGO_TEST_MODE")!=="false";
   const configured=Boolean(accessToken&&publicKey&&webhookSecret);
-  const available=configured&&(!testMode||origin!==SITE_ORIGIN);
+  const available=configured;
   if(request.method==="GET") return json({available,provider:"mercado_pago",mode:testMode?"test":"production"},200,origin);
   if(request.method!=="POST") return json({error:"Método não permitido."},405,origin);
-  if(testMode&&origin===SITE_ORIGIN) return json({
-    error:"O pagamento de teste está disponível somente no ambiente de Preview.",code:"PAYMENT_TEST_ONLY"
-  },503,origin);
   if(!configured) return json({
     error:"O pagamento pelo Mercado Pago ainda está sendo configurado. Seu pedido permanece reservado por tempo limitado.",
     code:"PAYMENT_NOT_CONFIGURED"

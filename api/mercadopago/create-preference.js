@@ -14,7 +14,7 @@ export default {
       if(body.length>5000)return output({error:"Pedido inválido."},413);
     }
     try{
-      const response=await fetch(TARGET,{method:request.method,headers:{apikey:PUBLIC_KEY,"Content-Type":"application/json",Origin:origin||"https://chi-rho-ecommerce.vercel.app"},
+      const response=await fetch(TARGET,{method:request.method,headers:{apikey:PUBLIC_KEY,"Content-Type":"application/json",Origin:origin||"https://www.chirho.com.br"},
         body,signal:AbortSignal.timeout(18000)});
       return new Response(await response.text(),{status:response.status,headers:{"Cache-Control":"no-store","Content-Type":"application/json; charset=utf-8"}});
     }catch{return output({error:"Pagamento temporariamente indisponível."},503);}
