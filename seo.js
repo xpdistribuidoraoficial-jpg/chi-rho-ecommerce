@@ -94,13 +94,28 @@ if (!document.querySelector('#chi-rho-mobile-purchases-style')) {
   document.head.appendChild(mobilePurchasesStyle);
 }
 
+// Header search is global: every public page searches the complete active catalog, not only the current category.
+document.addEventListener('submit', (event) => {
+  const form = event.target instanceof Element ? event.target.closest('.search') : null;
+  if (!form) return;
+  const query = form.querySelector('input[type="search"]')?.value.trim();
+  if (!query) return;
+  event.preventDefault();
+  event.stopImmediatePropagation();
+  location.href = `catalogo-biblias.html?categoria=todas&q=${encodeURIComponent(query)}#catalogo`;
+}, true);
+
 // Favorites are stored locally in the shopper's browser and do not affect cart, checkout or inventory.
 const FAVORITES_STORAGE_KEY = 'chi-rho-favorites-v1';
+const activeFavoriteSlugs = typeof catalogProducts !== 'undefined' && typeof isProductActive === 'function'
+  ? new Set(catalogProducts.filter(isProductActive).map((product) => product.slug))
+  : null;
 
 const loadFavorites = () => {
   try {
     const stored = JSON.parse(localStorage.getItem(FAVORITES_STORAGE_KEY) || '[]');
-    return new Set(Array.isArray(stored) ? stored.filter((slug) => typeof slug === 'string') : []);
+    const slugs = Array.isArray(stored) ? stored.filter((slug) => typeof slug === 'string') : [];
+    return new Set(activeFavoriteSlugs ? slugs.filter((slug) => activeFavoriteSlugs.has(slug)) : slugs);
   } catch {
     return new Set();
   }
@@ -115,6 +130,9 @@ const saveFavorites = () => {
     // Favorites continue to work during the current page even if storage is unavailable.
   }
 };
+
+// Remove stale slugs left by products that were unpublished or removed from the catalog.
+if (activeFavoriteSlugs) saveFavorites();
 
 const favoriteHeart = `
   <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -132,7 +150,7 @@ const updateFavoriteButton = (button) => {
 };
 
 const updateFavoriteHeader = () => {
-  document.querySelectorAll('a[href="#favoritos"], a[data-favorites-link]').forEach((link) => {
+  document.querySelectorAll('a[href$="#favoritos"], a[data-favorites-link]').forEach((link) => {
     link.dataset.favoritesLink = 'true';
     let badge = link.querySelector('.favorites-count');
     if (!badge) {
@@ -213,7 +231,7 @@ document.addEventListener('click', (event) => {
     return;
   }
 
-  const favoritesLink = event.target.closest('a[href="#favoritos"], a[data-favorites-link]');
+  const favoritesLink = event.target.closest('a[href$="#favoritos"], a[data-favorites-link]');
   if (favoritesLink) {
     event.preventDefault();
     const catalog = document.querySelector('#catalog-products');
