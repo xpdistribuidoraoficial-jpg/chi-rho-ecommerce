@@ -1,3 +1,5 @@
+import './site-readiness.mjs';
+
 const REMOVED_TOY_SLUG = 'brinquedo-kit-caminhoes-basculantes';
 const REPLACEMENT_TOY_SLUG = 'brinquedo-caminhao-bombeiro-escada';
 
