@@ -14,12 +14,17 @@ const readConsent = () => {
 
 const saveConsent = (analytics) => {
   const value = { version: CONSENT_VERSION, analytics: Boolean(analytics), updatedAt: new Date().toISOString() };
-  try {
-    localStorage.setItem(CONSENT_KEY, JSON.stringify(value));
-  } catch {
-    // Consent remains valid for this page load even if localStorage is unavailable.
-  }
+  try { localStorage.setItem(CONSENT_KEY, JSON.stringify(value)); } catch {}
   return value;
+};
+
+const ensureStyles = () => {
+  if (document.querySelector('link[data-cookie-consent-styles]')) return;
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href = '/cookie-consent.css';
+  link.dataset.cookieConsentStyles = 'true';
+  document.head.appendChild(link);
 };
 
 const ensureGtag = () => {
@@ -41,6 +46,7 @@ const setDefaultConsent = () => {
 const loadGoogleAnalytics = () => {
   if (document.querySelector(`script[data-ga4-id="${GA_MEASUREMENT_ID}"]`)) return;
   ensureGtag();
+  window[`ga-disable-${GA_MEASUREMENT_ID}`] = false;
   window.gtag('consent', 'update', {
     analytics_storage: 'granted',
     ad_storage: 'denied',
@@ -61,6 +67,13 @@ const loadGoogleAnalytics = () => {
   document.head.appendChild(script);
 };
 
+const expireAnalyticsCookies = () => {
+  document.cookie.split(';').map((item) => item.split('=')[0].trim()).filter((name) => name === '_ga' || name.startsWith('_ga_')).forEach((name) => {
+    document.cookie = `${name}=; Max-Age=0; path=/; SameSite=Lax`;
+    document.cookie = `${name}=; Max-Age=0; path=/; domain=.chirho.com.br; SameSite=Lax`;
+  });
+};
+
 const disableAnalytics = () => {
   ensureGtag();
   window.gtag('consent', 'update', {
@@ -70,13 +83,13 @@ const disableAnalytics = () => {
     ad_personalization: 'denied'
   });
   window[`ga-disable-${GA_MEASUREMENT_ID}`] = true;
+  expireAnalyticsCookies();
 };
 
 const closeBanner = () => document.querySelector('.cookie-consent')?.remove();
 
 const applyConsent = (analytics, { persist = true } = {}) => {
   if (persist) saveConsent(analytics);
-  window[`ga-disable-${GA_MEASUREMENT_ID}`] = !analytics;
   if (analytics) loadGoogleAnalytics();
   else disableAnalytics();
   closeBanner();
@@ -97,7 +110,7 @@ const createPreferencesDialog = () => {
         <p>Os recursos essenciais permanecem ativos para o funcionamento da loja. Você pode escolher se permite a medição de audiência pelo Google Analytics.</p>
       </div>
       <label class="cookie-preference-row">
-        <span><strong>Necessários</strong><small>Usados para recursos essenciais, segurança, sessão e preferências da loja.</small></span>
+        <span><strong>Necessários</strong><small>Usados para recursos essenciais, segurança, sessão, carrinho e preferências da loja.</small></span>
         <input type="checkbox" checked disabled aria-label="Cookies necessários sempre ativos" />
       </label>
       <label class="cookie-preference-row">
@@ -105,7 +118,7 @@ const createPreferencesDialog = () => {
         <input id="cookie-analytics-toggle" type="checkbox" />
       </label>
       <div class="cookie-preferences-actions">
-        <button type="button" class="cookie-secondary" data-cookie-cancel>Cancelar</button>
+        <button type="button" class="cookie-secondary" data-cookie-necessary>Somente necessários</button>
         <button type="button" class="cookie-primary" data-cookie-save>Salvar preferências</button>
       </div>
     </form>`;
@@ -114,7 +127,10 @@ const createPreferencesDialog = () => {
   dialog.addEventListener('click', (event) => {
     if (event.target === dialog) dialog.close();
   });
-  dialog.querySelector('[data-cookie-cancel]')?.addEventListener('click', () => dialog.close());
+  dialog.querySelector('[data-cookie-necessary]')?.addEventListener('click', () => {
+    applyConsent(false);
+    dialog.close();
+  });
   dialog.querySelector('[data-cookie-save]')?.addEventListener('click', () => {
     const analytics = Boolean(dialog.querySelector('#cookie-analytics-toggle')?.checked);
     applyConsent(analytics);
@@ -136,22 +152,46 @@ const createBanner = () => {
   if (document.querySelector('.cookie-consent')) return;
   const banner = document.createElement('section');
   banner.className = 'cookie-consent';
-  banner.setAttribute('role', 'dialog');
+  banner.setAttribute('role', 'region');
   banner.setAttribute('aria-label', 'Preferências de privacidade e cookies');
   banner.innerHTML = `
     <div class="cookie-consent-copy">
       <strong>Sua privacidade importa</strong>
-      <p>Usamos recursos necessários para a loja funcionar. Com sua autorização, usamos Google Analytics para entender visitas e melhorar a experiência. <a href="/politica-de-privacidade.html">Política de Privacidade</a>.</p>
+      <p>Usamos recursos necessários para a loja funcionar. Com sua autorização, usamos Google Analytics para entender visitas e melhorar a experiência. <a href="/politica-de-privacidade.html">Saiba mais</a>.</p>
     </div>
     <div class="cookie-consent-actions">
-      <button type="button" class="cookie-text" data-cookie-preferences>Preferências</button>
       <button type="button" class="cookie-secondary" data-cookie-necessary>Somente necessários</button>
-      <button type="button" class="cookie-primary" data-cookie-accept>Aceitar Analytics</button>
+      <button type="button" class="cookie-text" data-cookie-preferences>Preferências</button>
+      <button type="button" class="cookie-primary" data-cookie-accept>Aceitar todos</button>
     </div>`;
   document.body.appendChild(banner);
   banner.querySelector('[data-cookie-preferences]')?.addEventListener('click', openPreferences);
   banner.querySelector('[data-cookie-necessary]')?.addEventListener('click', () => applyConsent(false));
   banner.querySelector('[data-cookie-accept]')?.addEventListener('click', () => applyConsent(true));
+};
+
+const ensureFooterPreferences = () => {
+  const policies = document.querySelector('.footer-policies');
+  if (!policies || policies.querySelector('[data-cookie-settings]')) return;
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'footer-cookie-settings';
+  button.dataset.cookieSettings = 'true';
+  button.textContent = 'Preferências de cookies';
+  policies.appendChild(button);
+};
+
+const ensurePrivacyDisclosure = () => {
+  if (!/\/politica-de-privacidade\.html$/.test(location.pathname)) return;
+  const card = document.querySelector('.legal-card');
+  if (!card || card.querySelector('.analytics-privacy-disclosure')) return;
+  const section = document.createElement('section');
+  section.className = 'analytics-privacy-disclosure';
+  section.innerHTML = `
+    <h2>Cookies e Google Analytics</h2>
+    <p>A CHI RHO utiliza tecnologias estritamente necessárias para o funcionamento do site. O Google Analytics 4, identificado pelo fluxo <strong>${GA_MEASUREMENT_ID}</strong>, somente é carregado quando o visitante autoriza cookies analíticos.</p>
+    <p>O Analytics é usado para compreender acessos, páginas visitadas, origem de tráfego e interação com o site. A integração está configurada sem sinais do Google para personalização de anúncios. O visitante pode recusar ou alterar sua preferência a qualquer momento pelo link “Preferências de cookies” no rodapé.</p>`;
+  card.appendChild(section);
 };
 
 const bindPreferenceLinks = () => {
@@ -164,14 +204,20 @@ const bindPreferenceLinks = () => {
 };
 
 const init = () => {
+  ensureStyles();
   setDefaultConsent();
   bindPreferenceLinks();
+  ensureFooterPreferences();
+  ensurePrivacyDisclosure();
+
   const stored = readConsent();
-  if (stored) {
-    applyConsent(stored.analytics, { persist: false });
-    return;
-  }
-  createBanner();
+  if (stored) applyConsent(stored.analytics, { persist: false });
+  else createBanner();
+
+  window.addEventListener('load', () => {
+    ensureFooterPreferences();
+    ensurePrivacyDisclosure();
+  }, { once: true });
 };
 
 if (typeof window !== 'undefined' && typeof document !== 'undefined') {
