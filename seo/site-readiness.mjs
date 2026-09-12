@@ -1,3 +1,5 @@
+import { COMPANY, COMPANY_ADDRESS_DISPLAY } from './company.mjs';
+
 const LEGAL_LINKS = [
   ['Política de Privacidade', '/politica-de-privacidade.html'],
   ['Termos de Uso', '/termos-de-uso.html'],
@@ -95,6 +97,45 @@ const ensureLegalFooterLinks = () => {
   });
 };
 
+const ensureCompanyIdentity = () => {
+  document.querySelectorAll('.legal-card').forEach((card) => {
+    if (card.querySelector('.legal-company-identity')) return;
+    const section = document.createElement('section');
+    section.className = 'legal-company-identity';
+    section.setAttribute('aria-label', 'Identificação do fornecedor');
+
+    const heading = document.createElement('h2');
+    heading.textContent = 'Identificação do fornecedor';
+    section.appendChild(heading);
+
+    [
+      ['Razão social', COMPANY.legalName],
+      ['CNPJ', COMPANY.cnpj],
+      ['Responsável', COMPANY.responsible],
+      ['Endereço', COMPANY_ADDRESS_DISPLAY],
+      ['Atendimento', COMPANY.phoneDisplay]
+    ].forEach(([label, value]) => {
+      const paragraph = document.createElement('p');
+      const strong = document.createElement('strong');
+      strong.textContent = `${label}: `;
+      paragraph.append(strong, document.createTextNode(value));
+      section.appendChild(paragraph);
+    });
+
+    const updated = card.querySelector('.legal-updated');
+    if (updated) updated.after(section);
+    else card.prepend(section);
+  });
+
+  const footer = document.querySelector('.footer');
+  const grid = footer?.querySelector('.footer-grid');
+  if (!footer || !grid || footer.querySelector('.footer-company-identity')) return;
+  const companyLine = document.createElement('div');
+  companyLine.className = 'footer-company-identity';
+  companyLine.textContent = `${COMPANY.legalName} • CNPJ ${COMPANY.cnpj} • ${COMPANY_ADDRESS_DISPLAY} • Atendimento ${COMPANY.phoneDisplay}`;
+  grid.insertAdjacentElement('afterend', companyLine);
+};
+
 const removeRetiredProducts = () => {
   const directProduct = new URLSearchParams(location.search).get('produto');
   if (directProduct && RETIRED_PRODUCT_SLUGS.has(directProduct)) {
@@ -125,6 +166,7 @@ const run = () => {
   enhanceMenuAccessibility();
   enhanceImages();
   ensureLegalFooterLinks();
+  ensureCompanyIdentity();
   removeRetiredProducts();
 };
 
@@ -134,6 +176,7 @@ if (typeof window !== 'undefined' && typeof document !== 'undefined') {
   window.addEventListener('load', run, { once: true });
   const observer = new MutationObserver(() => {
     enhanceImages();
+    ensureCompanyIdentity();
     removeRetiredProducts();
   });
   document.addEventListener('DOMContentLoaded', () => {
