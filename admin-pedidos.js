@@ -15,7 +15,7 @@ const passwordButton=document.querySelector("[data-admin-password]"),passwordDia
 const passwordForm=document.querySelector("[data-password-form]"),passwordStatus=document.querySelector("[data-password-status]");
 const loginStatus=document.querySelector("[data-admin-login-status]"),status=document.querySelector("[data-admin-status]");
 const tbody=document.querySelector("[data-admin-orders]"),empty=document.querySelector("[data-admin-empty]");
-const dialog=document.querySelector("[data-order-dialog]");let activeFilter={},refreshPromise=null;
+const dialog=document.querySelector("[data-order-dialog]");let activeFilter={},refreshPromise=null,ordersRequestSequence=0;
 let labelCapability={available:false,message:"A emissão aguarda a homologação do Partner Token da Frenet."};
 const getSession=()=>{try{return JSON.parse(sessionStorage.getItem(SESSION_KEY)||"null");}catch{return null;}};
 const saveSession=session=>{const expiresAt=Number(session.expires_at)||Math.floor(Date.now()/1000)+Number(session.expires_in||3600);
@@ -49,9 +49,10 @@ const renderOrders=orders=>{tbody.replaceChildren();empty.hidden=orders.length>0
       label(order.financial_status),label(order.operational_status)].forEach((value,index)=>{const cell=node("td",index>5?"admin-state":"",value);
       if(index===0)cell.classList.add("admin-order-code");row.append(cell);});
     const open=()=>loadDetail(order.id);row.addEventListener("click",open);row.addEventListener("keydown",event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();open();}});tbody.append(row);});};
-const loadOrders=async()=>{status.textContent="Carregando…";const params=new URLSearchParams(activeFilter);try{const [data]=await Promise.all([request(`?${params}`),loadLabelCapability()]);
+const loadOrders=async()=>{const requestSequence=++ordersRequestSequence;status.textContent="Carregando…";const params=new URLSearchParams(activeFilter);try{const [data]=await Promise.all([request(`?${params}`),loadLabelCapability()]);
+  if(requestSequence!==ordersRequestSequence)return;
   renderOrders(data.orders||[]);document.querySelector("[data-admin-summary]").textContent=`${data.orders?.length||0} pedidos neste filtro`;
-  document.querySelector("[data-admin-user]").textContent=data.admin?.displayName||data.admin?.email||"Administrador";status.textContent="";}catch(error){status.textContent=error.message==="AUTH_REQUIRED"?"Sua sessão expirou. Entre novamente.":error.message;}};
+  document.querySelector("[data-admin-user]").textContent=data.admin?.displayName||data.admin?.email||"Administrador";status.textContent="";}catch(error){if(requestSequence!==ordersRequestSequence)return;status.textContent=error.message==="AUTH_REQUIRED"?"Sua sessão expirou. Entre novamente.":error.message;}};
 const field=(title,value)=>{const wrapper=node("div","admin-detail-field");wrapper.append(node("span","",title),node("strong","",value||"—"));return wrapper;};
 const section=title=>{const element=node("section","admin-detail-section");element.append(node("h3","",title));return element;};
 const button=(text,className,action)=>{const item=node("button",className,text);item.type="button";item.onclick=action;return item;};
