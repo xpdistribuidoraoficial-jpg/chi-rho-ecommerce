@@ -52,65 +52,43 @@ document.querySelectorAll('a[href$="#conta"], a[aria-label="Minhas Compras"]').f
   anchor.setAttribute('aria-label', 'Minhas Compras');
 });
 
-// Mobile shortcuts: customer purchases is kept immediately beside the cart.
+// Mobile shortcut: inject Minhas Compras inside the existing header actions, immediately before the cart.
 document.querySelectorAll('.header-row').forEach((headerRow) => {
-  headerRow.querySelector('.mobile-purchases-link')?.remove();
-  if (headerRow.querySelector('.mobile-header-actions')) return;
-
-  const originalCart = headerRow.querySelector('.header-cart-link, a[href$="#carrinho"]');
-  const cartHref = originalCart?.getAttribute('href') || 'index.html#carrinho';
-
-  const actions = document.createElement('div');
-  actions.className = 'mobile-header-actions';
-
+  headerRow.querySelector('.mobile-header-actions')?.remove();
+  const headerActions = headerRow.querySelector('.header-actions');
+  if (!headerActions || headerActions.querySelector('.mobile-purchases-link')) return;
+  const cartLink = headerActions.querySelector('.header-cart-link, a[href$="#carrinho"]');
   const purchasesLink = document.createElement('a');
   purchasesLink.className = 'mobile-purchases-link';
   purchasesLink.href = CUSTOMER_PURCHASES_URL;
   purchasesLink.setAttribute('aria-label', 'Minhas Compras');
   purchasesLink.innerHTML = '<span aria-hidden="true">♙</span><small>Minhas Compras</small>';
-
-  const cartLink = document.createElement('a');
-  cartLink.className = 'mobile-cart-shortcut';
-  cartLink.href = cartHref;
-  cartLink.setAttribute('aria-label', 'Carrinho');
-  cartLink.innerHTML = '<span aria-hidden="true">🛒</span><small>Carrinho</small>';
-
-  actions.append(purchasesLink, cartLink);
-  headerRow.appendChild(actions);
+  if (cartLink) headerActions.insertBefore(purchasesLink, cartLink);
+  else headerActions.appendChild(purchasesLink);
 });
 
 if (!document.querySelector('#chi-rho-mobile-purchases-style')) {
   const mobilePurchasesStyle = document.createElement('style');
   mobilePurchasesStyle.id = 'chi-rho-mobile-purchases-style';
   mobilePurchasesStyle.textContent = `
-    .mobile-header-actions{display:none}
+    .mobile-purchases-link{display:none!important}
     @media (max-width:700px){
-      .header-row{grid-template-columns:44px minmax(0,1fr) auto!important}
-      .mobile-header-actions{
-        grid-area:actions;
-        display:flex;
-        align-items:center;
-        justify-content:flex-end;
-        justify-self:end;
-        gap:4px;
+      .header-row{grid-template-columns:44px minmax(0,1fr) 92px!important}
+      .header-actions{display:flex!important;align-items:center!important;justify-content:flex-end!important;gap:4px!important}
+      .header-actions .mobile-purchases-link{
+        display:flex!important;
+        width:44px!important;
+        height:44px!important;
+        flex-direction:column!important;
+        align-items:center!important;
+        justify-content:center!important;
+        color:var(--navy)!important;
+        line-height:1!important;
+        text-decoration:none!important;
       }
-      .mobile-purchases-link,
-      .mobile-cart-shortcut{
-        display:flex;
-        width:44px;
-        min-width:44px;
-        min-height:48px;
-        flex-direction:column;
-        align-items:center;
-        justify-content:center;
-        color:var(--navy);
-        line-height:1;
-        text-decoration:none;
-      }
-      .mobile-purchases-link>span,
-      .mobile-cart-shortcut>span{font-size:23px;line-height:1}
-      .mobile-purchases-link>small,
-      .mobile-cart-shortcut>small{margin-top:4px;font-size:7px;font-weight:800;line-height:1.05;white-space:nowrap}
+      .header-actions .mobile-purchases-link>span{display:block!important;margin:0!important;font-size:22px!important;line-height:1!important}
+      .header-actions .mobile-purchases-link>small{display:none!important}
+      .header-actions .header-cart-link{width:44px!important;height:44px!important;display:grid!important;place-items:center!important}
     }
   `;
   document.head.appendChild(mobilePurchasesStyle);
