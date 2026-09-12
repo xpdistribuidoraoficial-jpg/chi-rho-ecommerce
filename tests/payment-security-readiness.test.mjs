@@ -99,10 +99,16 @@ test("domínio oficial e previews são permitidos sem trocar a seleção do sand
   for (const path of [
     "supabase/functions/create-casa-order/index.ts",
     "supabase/functions/public-order-status/index.ts",
-    "supabase/functions/mercadopago-create-preference/index.ts"
+    "supabase/functions/mercadopago-create-preference/index.ts",
+    "supabase/functions/admin-orders/index.ts",
+    "supabase/functions/admin-shipping-label/index.ts"
   ]) {
     assert.ok(read(path).includes("VERCEL_PREVIEW_ORIGIN"), `Preview ausente: ${path}`);
   }
+  for (const path of [
+    "supabase/functions/admin-orders/index.ts",
+    "supabase/functions/admin-shipping-label/index.ts"
+  ]) assert.ok(read(path).includes('const SITE_ORIGIN="https://www.chirho.com.br"'), `Domínio oficial ausente: ${path}`);
   const preference = read("supabase/functions/mercadopago-create-preference/index.ts");
   assert.ok(preference.includes('const SITE_ORIGIN="https://www.chirho.com.br"'));
   assert.ok(preference.includes('const ROOT_ORIGIN="https://chirho.com.br"'));
@@ -111,6 +117,8 @@ test("domínio oficial e previews são permitidos sem trocar a seleção do sand
   assert.ok(!preference.includes("https://chi-rho-ecommerce.vercel.app"));
   assert.ok(!read("supabase/functions/public-order-status/index.ts").includes("https://chi-rho-ecommerce.vercel.app"));
   assert.ok(!read("api/mercadopago/create-preference.js").includes("https://chi-rho-ecommerce.vercel.app"));
+  assert.ok(!read("supabase/functions/admin-orders/index.ts").includes("https://chi-rho-ecommerce.vercel.app"));
+  assert.ok(!read("supabase/functions/admin-shipping-label/index.ts").includes("https://chi-rho-ecommerce.vercel.app"));
 });
 
 test("página de sucesso não aprova pagamento pela URL", () => {

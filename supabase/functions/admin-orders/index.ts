@@ -1,8 +1,11 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 
-const SITE_ORIGIN="https://chi-rho-ecommerce.vercel.app";
+const SITE_ORIGIN="https://www.chirho.com.br";
+const ROOT_ORIGIN="https://chirho.com.br";
 const PUBLIC_KEY="sb_publishable_ipNBmuf0pUOZRzzlpU8kWw_Md1Y5FuE";
-const ALLOWED_ORIGINS=new Set([SITE_ORIGIN,"http://localhost:3000","http://127.0.0.1:3000"]);
+const ALLOWED_ORIGINS=new Set([SITE_ORIGIN,ROOT_ORIGIN,"http://localhost:3000","http://127.0.0.1:3000"]);
+const VERCEL_PREVIEW_ORIGIN=/^https:\/\/chi-rho-ecommerce-[a-z0-9-]+\.vercel\.app$/i;
+const isAllowedOrigin=(origin:string)=>ALLOWED_ORIGINS.has(origin)||VERCEL_PREVIEW_ORIGIN.test(origin);
 const response=(body:unknown,status=200,origin=SITE_ORIGIN)=>new Response(status===204?null:JSON.stringify(body),{
   status,headers:{"Access-Control-Allow-Origin":origin,"Access-Control-Allow-Headers":"authorization, apikey, content-type",
     "Access-Control-Allow-Methods":"GET, PATCH, OPTIONS","Cache-Control":"no-store",
@@ -29,7 +32,7 @@ const getAdmin=async(request:Request,url:string,serviceKey:string)=>{
 
 Deno.serve(async(request)=>{
   const origin=request.headers.get("origin")||SITE_ORIGIN;
-  if(!ALLOWED_ORIGINS.has(origin)) return response({error:"Origem não autorizada."},403);
+  if(!isAllowedOrigin(origin)) return response({error:"Origem não autorizada."},403);
   if(request.method==="OPTIONS") return response({},204,origin);
   const url=Deno.env.get("SUPABASE_URL"),serviceKey=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
   if(!url||!serviceKey) return response({error:"Painel temporariamente indisponível."},503,origin);
