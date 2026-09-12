@@ -5,6 +5,12 @@ const LEGAL_LINKS = [
   ['Política de Entrega', '/politica-de-entrega.html']
 ];
 
+const RETIRED_PRODUCT_SLUGS = new Set([
+  'biblia-arc-harpa',
+  'biblia-king-james-estudo-holman',
+  'cute-jesus-and-disciples'
+]);
+
 const ensureStyles = () => {
   if (document.querySelector('link[data-readiness-styles]')) return;
   const link = document.createElement('link');
@@ -44,7 +50,6 @@ const enhanceMenuAccessibility = () => {
     });
   }
 
-  // Legal pages do not load the large catalog script, so they need their own menu toggle.
   const hasCatalogScript = Boolean(document.querySelector('script[src$="script.js"]'));
   if (!hasCatalogScript && !toggle.dataset.readinessToggleBound) {
     toggle.dataset.readinessToggleBound = 'true';
@@ -90,16 +95,49 @@ const ensureLegalFooterLinks = () => {
   });
 };
 
+const removeRetiredProducts = () => {
+  const directProduct = new URLSearchParams(location.search).get('produto');
+  if (directProduct && RETIRED_PRODUCT_SLUGS.has(directProduct)) {
+    location.replace('/catalogo-biblias.html#catalogo');
+    return;
+  }
+
+  let changed = false;
+  RETIRED_PRODUCT_SLUGS.forEach((slug) => {
+    document.getElementById(slug)?.remove();
+    document.querySelectorAll(`a[href*="produto=${encodeURIComponent(slug)}"]`).forEach((link) => {
+      const card = link.closest('.catalog-product-card');
+      if (card) card.remove();
+      else link.remove();
+      changed = true;
+    });
+  });
+  if (changed) {
+    const grid = document.querySelector('#catalog-products');
+    const count = document.querySelector('#catalog-result-count');
+    if (grid && count) count.textContent = `${grid.querySelectorAll('.catalog-product-card').length} produtos selecionados`;
+  }
+};
+
 const run = () => {
   ensureStyles();
   ensureMainAndSkipLink();
   enhanceMenuAccessibility();
   enhanceImages();
   ensureLegalFooterLinks();
+  removeRetiredProducts();
 };
 
 if (typeof window !== 'undefined' && typeof document !== 'undefined') {
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run, { once: true });
   else run();
   window.addEventListener('load', run, { once: true });
+  const observer = new MutationObserver(() => {
+    enhanceImages();
+    removeRetiredProducts();
+  });
+  document.addEventListener('DOMContentLoaded', () => {
+    const main = document.querySelector('main');
+    if (main) observer.observe(main, { childList: true, subtree: true });
+  }, { once: true });
 }
