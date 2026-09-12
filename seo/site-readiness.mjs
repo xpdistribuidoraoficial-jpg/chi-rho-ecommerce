@@ -70,30 +70,69 @@ const enhanceImages = () => {
   });
 };
 
-const ensureLegalFooterLinks = () => {
-  const grid = document.querySelector('.footer .footer-grid');
-  if (!grid || grid.querySelector('.footer-policies')) return;
-  const block = document.createElement('div');
-  block.className = 'footer-policies';
-  const title = document.createElement('strong');
-  title.textContent = 'Políticas';
-  block.appendChild(title);
-  LEGAL_LINKS.forEach(([label, href]) => {
-    const link = document.createElement('a');
-    link.href = href;
-    link.textContent = label;
-    block.appendChild(link);
-  });
-  grid.appendChild(block);
+const makeFooterLink = (label, href) => {
+  const link = document.createElement('a');
+  link.href = href;
+  link.textContent = label;
+  return link;
+};
 
+const makeFooterHeading = (label) => {
+  const heading = document.createElement('strong');
+  heading.textContent = label;
+  return heading;
+};
+
+const footerColumnHeading = (column) => column?.querySelector?.(':scope > strong')?.textContent?.trim() || '';
+
+const ensureFooterLayout = () => {
+  const grid = document.querySelector('.footer .footer-grid');
+  if (!grid) return;
+
+  const columns = [...grid.children];
+  const brand = grid.querySelector(':scope > .footer-brand') || columns[0] || null;
+  let institutional = columns.find((column) => footerColumnHeading(column) === 'Institucional') || null;
+  let categories = columns.find((column) => footerColumnHeading(column) === 'Categorias') || null;
+  let policies = grid.querySelector(':scope > .footer-policies');
+  const security = columns.find((column) => footerColumnHeading(column) === 'Segurança') || null;
+
+  if (!institutional) institutional = document.createElement('div');
+  institutional.classList.add('footer-institutional');
+  institutional.replaceChildren(
+    makeFooterHeading('Institucional'),
+    makeFooterLink('Quem somos', '/quem-somos.html'),
+    makeFooterLink('Contato', '/#contato'),
+    makeFooterLink('Minhas Compras', '/minhas-compras.html')
+  );
+
+  if (!categories) categories = document.createElement('div');
+  categories.classList.add('footer-categories');
+  categories.replaceChildren(
+    makeFooterHeading('Categorias'),
+    makeFooterLink('Fé', '/catalogo-biblias.html'),
+    makeFooterLink('Casa', '/catalogo-casa.html#catalogo'),
+    makeFooterLink('Infantil', '/catalogo-infantil.html#catalogo')
+  );
+
+  if (!policies) {
+    policies = security || document.createElement('div');
+    policies.classList.add('footer-policies');
+  }
+  policies.replaceChildren(makeFooterHeading('Políticas'));
+  LEGAL_LINKS.forEach(([label, href]) => policies.appendChild(makeFooterLink(label, href)));
+  const securityNote = document.createElement('span');
+  securityNote.className = 'footer-security-note';
+  securityNote.textContent = 'Compra protegida, privacidade e políticas de atendimento.';
+  policies.appendChild(securityNote);
+
+  if (security && security !== policies) security.remove();
+  grid.querySelectorAll(':scope > .footer-policies').forEach((column) => {
+    if (column !== policies) column.remove();
+  });
+
+  [brand, institutional, categories, policies].filter(Boolean).forEach((column) => grid.appendChild(column));
   [...grid.children].forEach((column) => {
-    const heading = column.querySelector?.(':scope > strong');
-    if (heading?.textContent?.trim() === 'Segurança') {
-      const note = column.querySelector(':scope > span');
-      if (note && /políticas serão adicionados|dados comerciais/i.test(note.textContent || '')) {
-        note.textContent = 'Compra protegida, privacidade e políticas de atendimento.';
-      }
-    }
+    if (![brand, institutional, categories, policies].includes(column)) column.remove();
   });
 };
 
@@ -165,7 +204,7 @@ const run = () => {
   ensureMainAndSkipLink();
   enhanceMenuAccessibility();
   enhanceImages();
-  ensureLegalFooterLinks();
+  ensureFooterLayout();
   ensureCompanyIdentity();
   removeRetiredProducts();
 };
