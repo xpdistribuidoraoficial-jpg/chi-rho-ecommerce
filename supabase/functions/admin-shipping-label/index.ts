@@ -1,8 +1,11 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 
-const SITE_ORIGIN="https://chi-rho-ecommerce.vercel.app";
+const SITE_ORIGIN="https://www.chirho.com.br";
+const ROOT_ORIGIN="https://chirho.com.br";
 const PUBLIC_KEY="sb_publishable_ipNBmuf0pUOZRzzlpU8kWw_Md1Y5FuE";
-const ALLOWED_ORIGINS=new Set([SITE_ORIGIN,"http://localhost:3000","http://127.0.0.1:3000"]);
+const ALLOWED_ORIGINS=new Set([SITE_ORIGIN,ROOT_ORIGIN,"http://localhost:3000","http://127.0.0.1:3000"]);
+const VERCEL_PREVIEW_ORIGIN=/^https:\/\/chi-rho-ecommerce-[a-z0-9-]+\.vercel\.app$/i;
+const isAllowedOrigin=(origin:string)=>ALLOWED_ORIGINS.has(origin)||VERCEL_PREVIEW_ORIGIN.test(origin);
 const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const response=(body:unknown,status=200,origin=SITE_ORIGIN)=>new Response(JSON.stringify(body),{status,headers:{
   "Access-Control-Allow-Origin":origin,"Access-Control-Allow-Headers":"authorization, apikey, content-type",
@@ -32,7 +35,7 @@ const getAdmin=async(request:Request,url:string,serviceKey:string)=>{
 
 Deno.serve(async(request)=>{
   const origin=request.headers.get("origin")||SITE_ORIGIN;
-  if(!ALLOWED_ORIGINS.has(origin)) return response({error:"Origem não autorizada."},403,SITE_ORIGIN);
+  if(!isAllowedOrigin(origin)) return response({error:"Origem não autorizada."},403,SITE_ORIGIN);
   if(request.method==="OPTIONS") return response({},204,origin);
   if(request.method!=="GET"&&request.method!=="POST") return response({error:"Método não permitido."},405,origin);
   const url=Deno.env.get("SUPABASE_URL"),serviceKey=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
