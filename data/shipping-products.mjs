@@ -1,28 +1,43 @@
-export const shippingProducts = Object.freeze({
-  "casa-balanca-digital-cozinha-10kg": Object.freeze({
-    sku: "CASA-BALANCA-10KG",
-    name: "Balança Digital de Cozinha 10 kg",
-    image: "assets/products/casa-balanca-digital-cozinha-10kg-frente.webp",
-    category: "Cozinha",
-    price: 29.90,
-    stock: 5,
-    weight: 0.36,
-    length: 24.5,
-    width: 19,
-    height: 4.4,
-    fragile: false
-  }),
-  "casa-bomba-eletrica-garrafa-agua": Object.freeze({
-    sku: "CASA-BOMBA-AGUA-USB",
-    name: "Bomba Elétrica USB para Garrafão de Água",
-    image: "assets/products/casa-bomba-eletrica-garrafa-agua-frente.webp",
-    category: "Utilidades Domésticas",
-    price: 32.90,
-    stock: 5,
-    weight: 0.40,
-    length: 14,
-    width: 8,
-    height: 9,
-    fragile: false
-  })
-});
+const INVENTORY_ENDPOINT = "https://sailabcmcqdzrqhqztqs.supabase.co/functions/v1/inventory-status";
+const INVENTORY_PUBLIC_KEY = "sb_publishable_ipNBmuf0pUOZRzzlpU8kWw_Md1Y5FuE";
+
+let inventory = [];
+try {
+  const response = await fetch(INVENTORY_ENDPOINT, {
+    headers: { apikey: INVENTORY_PUBLIC_KEY },
+    signal: AbortSignal.timeout(8000)
+  });
+  const data = await response.json();
+  if (response.ok && Array.isArray(data.inventory)) inventory = data.inventory;
+} catch {
+  inventory = [];
+}
+
+const validNumber = (value) => Number.isFinite(Number(value)) && Number(value) > 0;
+
+export const shippingProducts = Object.freeze(Object.fromEntries(
+  inventory
+    .filter((item) => (
+      typeof item?.slug === "string"
+      && typeof item?.name === "string"
+      && validNumber(item?.unitPrice)
+      && Number.isInteger(item?.available)
+      && validNumber(item?.weight)
+      && validNumber(item?.length)
+      && validNumber(item?.width)
+      && validNumber(item?.height)
+    ))
+    .map((item) => [item.slug, Object.freeze({
+      sku: item.sku || `CHR-${item.slug.slice(0, 24).toUpperCase()}`,
+      name: item.name,
+      image: item.imageUrl || "assets/logo-chi-rho.png",
+      category: item.category || "Catálogo CHI RHO",
+      price: Number(item.unitPrice),
+      stock: Math.max(0, item.available),
+      weight: Number(item.weight),
+      length: Number(item.length),
+      width: Number(item.width),
+      height: Number(item.height),
+      fragile: item.fragile === true
+    })])
+));
