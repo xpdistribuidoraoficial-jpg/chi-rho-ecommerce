@@ -1,5 +1,6 @@
 // Read-only SEO projection. Never changes catalog, prices or inventory.
 import { shippingProducts } from '../data/shipping-products.mjs';
+import './homepage-merchandising.mjs';
 
 export const SITE = 'https://www.chirho.com.br';
 export const pages = {
