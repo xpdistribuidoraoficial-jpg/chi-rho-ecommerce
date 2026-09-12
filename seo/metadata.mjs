@@ -1,6 +1,8 @@
 // Read-only SEO projection. Never changes catalog, prices or inventory.
 import { shippingProducts } from '../data/shipping-products.mjs';
+import { COMPANY } from './company.mjs';
 import './homepage-merchandising.mjs';
+import './site-readiness.mjs';
 
 export const SITE = 'https://www.chirho.com.br';
 export const pages = {
@@ -78,7 +80,24 @@ export function getMetadata(file, params = new URLSearchParams(), products = [])
   }
   const image = product ? new URL(product.imagem, SITE).href : `${SITE}/assets/logo-chi-rho.png`;
   const graph = [
-    { '@type': 'Organization', '@id': `${SITE}/#organization`, name: 'CHI RHO', url: `${SITE}/`, logo: `${SITE}/assets/logo-chi-rho.png` },
+    {
+      '@type': 'Organization',
+      '@id': `${SITE}/#organization`,
+      name: COMPANY.brandName,
+      legalName: COMPANY.legalName,
+      taxID: COMPANY.cnpj,
+      url: `${SITE}/`,
+      logo: `${SITE}/assets/logo-chi-rho.png`,
+      telephone: COMPANY.phone,
+      address: {
+        '@type': 'PostalAddress',
+        streetAddress: COMPANY.address.streetAddress,
+        addressLocality: COMPANY.address.addressLocality,
+        addressRegion: COMPANY.address.addressRegion,
+        postalCode: COMPANY.address.postalCode,
+        addressCountry: COMPANY.address.addressCountry
+      }
+    },
     { '@type': 'WebSite', '@id': `${SITE}/#website`, name: 'CHI RHO', url: `${SITE}/`, inLanguage: 'pt-BR', publisher: { '@id': `${SITE}/#organization` } }
   ];
   if (trail.length > 1 && status === 200) graph.push({ '@type': 'BreadcrumbList', itemListElement: trail.filter((item, i, list) => list.findIndex((other) => other.url === item.url) === i).map((item, i) => ({ '@type': 'ListItem', position: i + 1, name: item.name, item: item.url })) });
