@@ -6,7 +6,7 @@
   },
   "headers": [
     {
-      "source": "/:internal(checkout|pagamento-sucesso|pagamento-pendente|pagamento-falhou|admin-pedidos).html",
+      "source": "/:internal(checkout|pagamento-sucesso|pagamento-pendente|pagamento-falhou|admin-pedidos|minhas-compras).html",
       "headers": [{ "key": "X-Robots-Tag", "value": "noindex, nofollow" }]
     },
     {
