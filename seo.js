@@ -43,13 +43,50 @@ if (base && typeof catalogProducts !== 'undefined') {
 }
 
 // Customer purchases entry. Any public header account icon now opens the customer portal.
+const CUSTOMER_PURCHASES_URL = 'https://www.chirho.com.br/minhas-compras.html';
 document.querySelectorAll('a[href$="#conta"], a[aria-label="Minhas Compras"]').forEach((anchor) => {
-  anchor.href = 'https://www.chirho.com.br/minhas-compras.html';
+  anchor.href = CUSTOMER_PURCHASES_URL;
   const label = anchor.querySelector('span');
   if (label) label.textContent = 'Minhas Compras';
   else anchor.textContent = 'Minhas Compras';
   anchor.setAttribute('aria-label', 'Minhas Compras');
 });
+
+// Mobile header shortcut for customer purchases. It is injected only as presentation and does not touch auth or checkout.
+document.querySelectorAll('.header-row').forEach((headerRow) => {
+  if (headerRow.querySelector('.mobile-purchases-link')) return;
+  const link = document.createElement('a');
+  link.className = 'mobile-purchases-link';
+  link.href = CUSTOMER_PURCHASES_URL;
+  link.setAttribute('aria-label', 'Minhas Compras');
+  link.innerHTML = '<span aria-hidden="true">♙</span><small>Minhas Compras</small>';
+  headerRow.appendChild(link);
+});
+
+if (!document.querySelector('#chi-rho-mobile-purchases-style')) {
+  const mobilePurchasesStyle = document.createElement('style');
+  mobilePurchasesStyle.id = 'chi-rho-mobile-purchases-style';
+  mobilePurchasesStyle.textContent = `
+    .mobile-purchases-link{display:none}
+    @media (max-width:700px){
+      .mobile-purchases-link{
+        grid-area:actions;
+        display:flex;
+        flex-direction:column;
+        align-items:center;
+        justify-content:center;
+        justify-self:end;
+        min-width:44px;
+        color:var(--navy);
+        line-height:1;
+        text-decoration:none;
+      }
+      .mobile-purchases-link>span{font-size:24px;line-height:1}
+      .mobile-purchases-link>small{margin-top:4px;font-size:8px;font-weight:800;line-height:1.05;white-space:nowrap}
+    }
+  `;
+  document.head.appendChild(mobilePurchasesStyle);
+}
 
 // Favorites are stored locally in the shopper's browser and do not affect cart, checkout or inventory.
 const FAVORITES_STORAGE_KEY = 'chi-rho-favorites-v1';
