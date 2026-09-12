@@ -13,6 +13,9 @@ const RETIRED_PRODUCT_SLUGS = new Set([
   'cute-jesus-and-disciples'
 ]);
 
+const SEARCH_URL = '/catalogo-biblias.html';
+const FAVORITES_URL = '/catalogo-biblias.html?favoritos=1#catalogo';
+
 const ensureStyles = () => {
   if (document.querySelector('link[data-readiness-styles]')) return;
   const link = document.createElement('link');
@@ -68,6 +71,55 @@ const enhanceImages = () => {
     if (!image.hasAttribute('loading')) image.loading = 'lazy';
     if (!image.hasAttribute('decoding')) image.decoding = 'async';
   });
+};
+
+const ensureHeaderUtilities = () => {
+  document.querySelectorAll('form.search').forEach((form) => {
+    form.action = `${SEARCH_URL}#catalogo`;
+    form.method = 'get';
+    const input = form.querySelector('input[type="search"]');
+    if (input) {
+      input.name = 'q';
+      if (!input.hasAttribute('aria-label')) input.setAttribute('aria-label', 'Buscar produtos e categorias');
+    }
+    const button = form.querySelector('button');
+    if (button) button.type = 'submit';
+  });
+
+  document.querySelectorAll('a[href$="#favoritos"], a[data-favorites-link]').forEach((link) => {
+    link.href = FAVORITES_URL;
+    link.dataset.favoritesLink = 'true';
+    link.setAttribute('aria-label', 'Favoritos');
+  });
+};
+
+const bindHeaderUtilities = () => {
+  if (document.documentElement.dataset.headerUtilitiesBound === 'true') return;
+  document.documentElement.dataset.headerUtilitiesBound = 'true';
+
+  document.addEventListener('submit', (event) => {
+    const form = event.target instanceof Element ? event.target.closest('form.search') : null;
+    if (!form) return;
+    const input = form.querySelector('input[type="search"]');
+    const query = input?.value.trim() || '';
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    if (!query) {
+      input?.focus();
+      return;
+    }
+    location.assign(`${SEARCH_URL}?categoria=todas&q=${encodeURIComponent(query)}#catalogo`);
+  }, true);
+
+  document.addEventListener('click', (event) => {
+    const link = event.target instanceof Element
+      ? event.target.closest('a[href$="#favoritos"], a[data-favorites-link]')
+      : null;
+    if (!link) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    location.assign(FAVORITES_URL);
+  }, true);
 };
 
 const makeFooterLink = (label, href) => {
@@ -204,17 +256,20 @@ const run = () => {
   ensureMainAndSkipLink();
   enhanceMenuAccessibility();
   enhanceImages();
+  ensureHeaderUtilities();
   ensureFooterLayout();
   ensureCompanyIdentity();
   removeRetiredProducts();
 };
 
 if (typeof window !== 'undefined' && typeof document !== 'undefined') {
+  bindHeaderUtilities();
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run, { once: true });
   else run();
   window.addEventListener('load', run, { once: true });
   const observer = new MutationObserver(() => {
     enhanceImages();
+    ensureHeaderUtilities();
     ensureCompanyIdentity();
     removeRetiredProducts();
   });
