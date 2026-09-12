@@ -1,31 +1,17 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 
 const SITE_ORIGIN = "https://chi-rho-ecommerce.vercel.app";
+const OFFICIAL_SITE_ORIGIN = "https://www.chirho.com.br";
 const PUBLIC_CHECKOUT_KEY = "sb_publishable_ipNBmuf0pUOZRzzlpU8kWw_Md1Y5FuE";
 const ALLOWED_ORIGINS = new Set([
   SITE_ORIGIN,
+  OFFICIAL_SITE_ORIGIN,
+  "https://chirho.com.br",
   "http://localhost:3000",
   "http://127.0.0.1:3000"
 ]);
 const VERCEL_PREVIEW_ORIGIN = /^https:\/\/chi-rho-ecommerce(?:-[a-z0-9-]+)?\.vercel\.app$/i;
 const isAllowedOrigin = (origin: string) => ALLOWED_ORIGINS.has(origin) || VERCEL_PREVIEW_ORIGIN.test(origin);
-
-const PRODUCTS = Object.freeze({
-  "casa-balanca-digital-cozinha-10kg": Object.freeze({
-    sku: "CASA-BALANCA-10KG",
-    name: "Balança Digital de Cozinha 10 kg",
-    category: "Cozinha",
-    price: 29.90,
-    stock: 5
-  }),
-  "casa-bomba-eletrica-garrafa-agua": Object.freeze({
-    sku: "CASA-BOMBA-AGUA-USB",
-    name: "Bomba Elétrica USB para Garrafão de Água",
-    category: "Utilidades Domésticas",
-    price: 32.90,
-    stock: 5
-  })
-});
 
 const jsonResponse = (body: unknown, status = 200, origin = SITE_ORIGIN) => new Response(
   status === 204 ? null : JSON.stringify(body),
@@ -47,6 +33,8 @@ const cleanText = (value: unknown, maxLength: number) => String(value || "").tri
 const roundMoney = (value: number) => Number(value.toFixed(2));
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const slugPattern = /^[a-z0-9][a-z0-9-]{0,119}$/;
+
 const validTaxId = (value: string) => {
   if (!/^\d{11}$|^\d{14}$/.test(value) || /^(\d)\1+$/.test(value)) return false;
   const digit = (base: string, factors: number[]) => {
@@ -64,8 +52,8 @@ const validTaxId = (value: string) => {
   return value.endsWith(`${first}${second}`);
 };
 
-const validateItems = (requestedItems: unknown) => {
-  if (!Array.isArray(requestedItems) || requestedItems.length === 0 || requestedItems.length > 2) {
+const getReleasedItems = async (requestedItems: unknown) => {
+  if (!Array.isArray(requestedItems) || requestedItems.length === 0 || requestedItems.length > 30) {
     throw new Error("INVALID_ITEMS");
   }
 
@@ -73,22 +61,38 @@ const validateItems = (requestedItems: unknown) => {
   for (const requestedItem of requestedItems) {
     const slug = cleanText(requestedItem?.slug, 120);
     const quantity = Number(requestedItem?.quantity);
-    const product = PRODUCTS[slug as keyof typeof PRODUCTS];
-    if (!product || !Number.isInteger(quantity) || quantity < 1) throw new Error("INVALID_ITEMS");
-
-    const accumulated = (quantities.get(slug) || 0) + quantity;
-    if (accumulated > product.stock) throw new Error("OUT_OF_STOCK");
-    quantities.set(slug, accumulated);
+    if (!slugPattern.test(slug) || !Number.isInteger(quantity) || quantity < 1 || quantity > 99) {
+      throw new Error("INVALID_ITEMS");
+    }
+    quantities.set(slug, (quantities.get(slug) || 0) + quantity);
   }
+  if (quantities.size > 30) throw new Error("INVALID_ITEMS");
+
+  const supabaseUrl = Deno.env.get("SUPABASE_URL");
+  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  if (!supabaseUrl || !serviceRoleKey) throw new Error("DATABASE_UNAVAILABLE");
+
+  const select = "product_slug,sku,product_name,category,unit_price,stock_available";
+  const inventoryResponse = await fetch(`${supabaseUrl}/rest/v1/inventory?select=${select}&order=product_slug`, {
+    headers: { apikey: serviceRoleKey, Authorization: `Bearer ${serviceRoleKey}` },
+    signal: AbortSignal.timeout(10000)
+  });
+  if (!inventoryResponse.ok) throw new Error("DATABASE_UNAVAILABLE");
+  const inventoryRows = await inventoryResponse.json();
+  const inventory = new Map(inventoryRows.map((row: any) => [row.product_slug, row]));
 
   return [...quantities].map(([slug, quantity]) => {
-    const product = PRODUCTS[slug as keyof typeof PRODUCTS];
+    const product: any = inventory.get(slug);
+    const price = Number(product?.unit_price);
+    const available = Number(product?.stock_available);
+    if (!product || !Number.isFinite(price) || price <= 0) throw new Error("INVALID_ITEMS");
+    if (!Number.isInteger(available) || available < quantity) throw new Error("OUT_OF_STOCK");
     return {
       slug,
-      sku: product.sku,
-      name: product.name,
-      category: product.category,
-      unit_price: product.price,
+      sku: cleanText(product.sku, 120),
+      name: cleanText(product.product_name, 220),
+      category: cleanText(product.category || "Catálogo CHI RHO", 120),
+      unit_price: roundMoney(price),
       quantity
     };
   });
@@ -182,13 +186,12 @@ Deno.serve(async (request: Request) => {
   if (request.method === "OPTIONS") return jsonResponse({}, 204, origin);
   if (request.method !== "POST") return jsonResponse({ error: "Método não permitido." }, 405, origin);
 
-  const providedApiKey = request.headers.get("apikey");
-  if (providedApiKey !== PUBLIC_CHECKOUT_KEY) {
+  if (request.headers.get("apikey") !== PUBLIC_CHECKOUT_KEY) {
     return jsonResponse({ error: "Requisição não autorizada." }, 401, origin);
   }
 
   const contentLength = Number(request.headers.get("content-length") || 0);
-  if (contentLength > 30000) return jsonResponse({ error: "Pedido inválido." }, 413, origin);
+  if (contentLength > 50000) return jsonResponse({ error: "Pedido inválido." }, 413, origin);
 
   let body: any;
   try {
@@ -203,7 +206,7 @@ Deno.serve(async (request: Request) => {
 
     const customer = validateContact(body);
     const address = validateAddress(body);
-    const items = validateItems(body?.items);
+    const items = await getReleasedItems(body?.items);
     const subtotal = roundMoney(items.reduce((total, item) => total + item.unit_price * item.quantity, 0));
     const shipping = await getVerifiedShipping(body, items, address.postal_code);
 
@@ -214,8 +217,8 @@ Deno.serve(async (request: Request) => {
     const databaseResponse = await fetch(`${supabaseUrl}/rest/v1/rpc/create_checkout_order_v2`, {
       method: "POST",
       headers: {
-        "apikey": serviceRoleKey,
-        "Authorization": `Bearer ${serviceRoleKey}`,
+        apikey: serviceRoleKey,
+        Authorization: `Bearer ${serviceRoleKey}`,
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
@@ -256,7 +259,7 @@ Deno.serve(async (request: Request) => {
     const code = error instanceof Error ? error.message : "UNKNOWN";
     console.error("Order creation failed", code);
     const messages: Record<string, string> = {
-      INVALID_ITEMS: "O pedido aceita somente os produtos de Casa liberados para teste.",
+      INVALID_ITEMS: "Um ou mais produtos não estão liberados para compra.",
       OUT_OF_STOCK: "A quantidade solicitada é maior que o estoque disponível.",
       INVALID_CUSTOMER: "Confira o nome, o e-mail e o WhatsApp.",
       INVALID_ADDRESS: "Confira o endereço de entrega.",
