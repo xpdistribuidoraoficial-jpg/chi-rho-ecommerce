@@ -28,10 +28,30 @@ const applyHomepageToySelection = () => {
   }
 };
 
+const cleanDuplicateTopNavigation = () => {
+  try {
+    if (typeof document === 'undefined') return;
+    document
+      .querySelectorAll('.nav-row a[href*="categoria=brinquedos-infantis"]')
+      .forEach((link) => link.remove());
+  } catch {
+    // A limpeza visual do menu não deve bloquear a navegação principal.
+  }
+};
+
 if (typeof window !== 'undefined' && typeof document !== 'undefined') {
   applyHomepageToySelection();
+  cleanDuplicateTopNavigation();
+
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', applyHomepageToySelection, { once: true });
+    document.addEventListener('DOMContentLoaded', () => {
+      applyHomepageToySelection();
+      cleanDuplicateTopNavigation();
+    }, { once: true });
   }
-  window.addEventListener('load', applyHomepageToySelection, { once: true });
+
+  window.addEventListener('load', () => {
+    applyHomepageToySelection();
+    cleanDuplicateTopNavigation();
+  }, { once: true });
 }
