@@ -1,3 +1,4 @@
+import './analytics-consent.mjs';
 import { COMPANY, COMPANY_ADDRESS_DISPLAY } from './company.mjs';
 
 const LEGAL_LINKS = [
@@ -172,6 +173,12 @@ const ensureFooterLayout = () => {
   }
   policies.replaceChildren(makeFooterHeading('Políticas'));
   LEGAL_LINKS.forEach(([label, href]) => policies.appendChild(makeFooterLink(label, href)));
+  const cookieSettings = document.createElement('button');
+  cookieSettings.type = 'button';
+  cookieSettings.className = 'footer-cookie-settings';
+  cookieSettings.dataset.cookieSettings = 'true';
+  cookieSettings.textContent = 'Preferências de cookies';
+  policies.appendChild(cookieSettings);
   const securityNote = document.createElement('span');
   securityNote.className = 'footer-security-note';
   securityNote.textContent = 'Compra protegida, privacidade e políticas de atendimento.';
