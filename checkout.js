@@ -358,8 +358,8 @@ document.querySelector("#checkout-form")?.addEventListener("submit", async (even
     submitButton.textContent = "Pedido registrado";
     const pilotNote = document.querySelector(".checkout-pilot-note p");
     const pilotTitle = document.createElement("strong");
-    pilotTitle.textContent = "Pedido salvo no banco.";
-    pilotNote.replaceChildren(pilotTitle, ` Código ${result.order.code}. O pagamento só será iniciado pelo botão seguro abaixo.`);
+    pilotTitle.textContent = "Pedido registrado com segurança.";
+    pilotNote.replaceChildren(pilotTitle, ` Código ${result.order.code}. Agora finalize o pagamento pelo botão abaixo.`);
     paymentButton.hidden = false;
     paymentButton.disabled = !paymentAvailable;
     paymentButton.textContent = paymentAvailable ? "Finalizar pagamento" : "Pagamento em configuração";
@@ -370,6 +370,6 @@ document.querySelector("#checkout-form")?.addEventListener("submit", async (even
       : error.message;
     status.className = "checkout-form-status is-error";
     submitButton.disabled = false;
-    submitButton.textContent = "Registrar pedido de teste";
+    submitButton.textContent = "Registrar pedido e continuar";
   }
 });
