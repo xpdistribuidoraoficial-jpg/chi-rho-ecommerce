@@ -1,11 +1,7 @@
 import fs from 'node:fs';
 import vm from 'node:vm';
 
-const RETIRED_PRODUCT_SLUGS = new Set([
-  'biblia-arc-harpa',
-  'biblia-king-james-estudo-holman',
-  'cute-jesus-and-disciples'
-]);
+const RETIRED_PRODUCT_SLUGS = new Set([]);
 
 // Reuse the exact existing catalog and its runtime commercial overrides. No second price list.
 const source = fs.readFileSync(new URL('../script.js', import.meta.url), 'utf8');
