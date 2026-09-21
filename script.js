@@ -2175,18 +2175,7 @@ catalogProducts.forEach((product) => {
   }
 });
 
-const inactiveCatalogSlugs = new Set([
-  "brinquedo-kit-caminhoes-basculantes",
-  "ate-que-nada-mais-importe",
-  "cartas-de-um-diabo-a-seu-aprendiz",
-  "cristianismo-puro-e-simples",
-  "uma-vida-com-propositos",
-  "manso-e-humilde",
-  "o-deus-que-destroi-sonhos",
-  "oi-deus-sou-eu-de-novo",
-  "uma-mulher-segundo-o-coracao-de-deus",
-  "ego-transformado"
-]);
+const inactiveCatalogSlugs = new Set([]);
 
 const isProductActive = (product) => !inactiveCatalogSlugs.has(product.slug);
 
