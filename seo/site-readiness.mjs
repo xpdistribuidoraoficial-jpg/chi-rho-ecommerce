@@ -8,11 +8,7 @@ const LEGAL_LINKS = [
   ['Política de Entrega', '/politica-de-entrega.html']
 ];
 
-const RETIRED_PRODUCT_SLUGS = new Set([
-  'biblia-arc-harpa',
-  'biblia-king-james-estudo-holman',
-  'cute-jesus-and-disciples'
-]);
+const RETIRED_PRODUCT_SLUGS = new Set([]);
 
 const SEARCH_URL = '/catalogo-biblias.html';
 const FAVORITES_URL = '/catalogo-biblias.html?favoritos=1#catalogo';
