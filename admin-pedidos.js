@@ -58,7 +58,7 @@ const loadLabelCapability=async()=>{try{const data=await apiRequest(LABEL_ENDPOI
 const renderOrders=orders=>{tbody.replaceChildren();empty.hidden=orders.length>0;
   orders.forEach(order=>{const row=node("tr");row.tabIndex=0;row.setAttribute("role","button");
     [order.code,date(order.created_at),order.customer_name,order.customer_whatsapp,order.attribution_channel||"—",order.attribution_device||"—",String(order.item_count),money(order.grand_total),
-      label(order.financial_status),label(order.operational_status)].forEach((value,index)=>{const cell=node("td",index>7?"admin-state":"",value);
+      label(order.financial_status),(order.shipping_carrier_code==="PICKUP_VENDOR"&&order.operational_status==="pronto_para_envio"?"Aguardando retirada":order.shipping_carrier_code==="PICKUP_VENDOR"&&order.operational_status==="entregue"?"Retirado pelo cliente":label(order.operational_status))].forEach((value,index)=>{const cell=node("td",index>7?"admin-state":"",value);
       if(index===0)cell.classList.add("admin-order-code");row.append(cell);});
     const open=()=>loadDetail(order.id);row.addEventListener("click",open);row.addEventListener("keydown",event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();open();}});tbody.append(row);});};
 const loadOrders=async()=>{const requestSequence=++ordersRequestSequence;status.textContent="Carregando…";const params=new URLSearchParams(activeFilter);try{const [data]=await Promise.all([request(`?${params}`),loadLabelCapability()]);
