@@ -2472,12 +2472,13 @@ const requestShippingQuote = async (cep, itens) => {
   return data;
 };
 
+const PICKUP_VENDOR_POSTCODE = "25525660";
 const PICKUP_VENDOR_SERVICE = Object.freeze({
   carrier: "Retirada com o vendedor",
   carrierCode: "PICKUP_VENDOR",
   description: "Retirar com o vendedor",
   serviceCode: "PICKUP_VENDOR",
-  deliveryTime: "Retirada a combinar",
+  deliveryTime: "Retirada a combinar após a confirmação do pagamento",
   price: 0
 });
 
@@ -2823,12 +2824,12 @@ testCartDialog.innerHTML = `
     <div class="test-cart-items" aria-live="polite"></div>
     <footer class="test-cart-footer">
       <section class="test-cart-shipping" aria-labelledby="test-cart-shipping-title">
-        <label id="test-cart-shipping-title" for="test-cart-postcode">Calcule o frete</label>
+        <label id="test-cart-shipping-title" for="test-cart-postcode">Entrega ou retirada</label>
         <div class="test-cart-shipping-field">
           <input id="test-cart-postcode" data-postcode-input inputmode="numeric" autocomplete="postal-code" maxlength="9" placeholder="00000-000" />
           <button type="button" data-cart-shipping-calculate>Calcular</button>
         </div>
-        <p class="shipping-status" data-cart-shipping-status aria-live="polite">Informe o CEP de entrega.</p>
+        <p class="shipping-status" data-cart-shipping-status aria-live="polite">Escolha retirada grátis ou informe o CEP para receber no endereço.</p>
         <div class="shipping-options test-cart-shipping-options"></div>
       </section>
       <div class="test-cart-summary">
@@ -2874,17 +2875,50 @@ const renderCartTotals = () => {
   const shippingPrice = selectedCartShipping?.price || 0;
   testCartDialog.querySelector("[data-cart-subtotal]").textContent = formatCurrency(testCartSubtotal);
   testCartDialog.querySelector("[data-cart-shipping-price]").textContent = selectedCartShipping
-    ? formatCurrency(shippingPrice)
-    : "Calcule pelo CEP";
+    ? (selectedCartShipping.carrierCode === "PICKUP_VENDOR" ? "Grátis" : formatCurrency(shippingPrice))
+    : "Escolha entrega ou retirada";
   testCartDialog.querySelector("[data-cart-total]").textContent = formatCurrency(testCartSubtotal + shippingPrice);
   const checkoutButton = testCartDialog.querySelector("[data-cart-checkout]");
   if (checkoutButton) checkoutButton.disabled = testCartSubtotal <= 0 || !selectedCartShipping;
 };
 
-const resetCartShipping = (message = "Informe o CEP de entrega.") => {
-  clearCartShipping();
-  testCartDialog.querySelector(".test-cart-shipping-options").replaceChildren();
+const selectCartShipping = (service, selectedOption, postcode = "") => {
+  const options = testCartDialog.querySelector(".test-cart-shipping-options");
+  selectedCartShipping = service;
+  selectedCartPostcode = service?.carrierCode === "PICKUP_VENDOR"
+    ? PICKUP_VENDOR_POSTCODE
+    : onlyDigits(postcode);
+  saveCartShipping();
+  options.querySelectorAll(".shipping-option").forEach((option) => {
+    option.classList.toggle("is-selected", option === selectedOption);
+  });
+  const status = testCartDialog.querySelector("[data-cart-shipping-status]");
+  status.textContent = service?.carrierCode === "PICKUP_VENDOR"
+    ? "Retirada grátis selecionada. Não é necessário informar CEP."
+    : `Entrega selecionada: ${service.carrier} • ${service.description}.`;
+  renderCartTotals();
+};
+
+const renderPickupBeforePostcode = (message = "Escolha retirada grátis ou informe o CEP para receber no endereço.") => {
+  const options = testCartDialog.querySelector(".test-cart-shipping-options");
+  const postcodeInput = testCartDialog.querySelector("#test-cart-postcode");
+  renderShippingServices(options, [PICKUP_VENDOR_SERVICE], {
+    selectable: true,
+    onSelect: (service, selectedOption) => selectCartShipping(service, selectedOption)
+  });
   testCartDialog.querySelector("[data-cart-shipping-status]").textContent = message;
+  if (selectedCartShipping?.carrierCode === "PICKUP_VENDOR") {
+    options.querySelector(".shipping-option")?.classList.add("is-selected");
+    const radio = options.querySelector('input[type="radio"]');
+    if (radio) radio.checked = true;
+  } else if (selectedCartShipping && selectedCartPostcode) {
+    postcodeInput.value = formatPostcode(selectedCartPostcode);
+  }
+};
+
+const resetCartShipping = (message = "Escolha retirada grátis ou informe o CEP para receber no endereço.") => {
+  clearCartShipping();
+  renderPickupBeforePostcode(message);
   renderCartTotals();
 };
 
@@ -2911,15 +2945,7 @@ const calculateCartShipping = async () => {
     status.textContent = "Escolha uma modalidade de entrega:";
     renderShippingServices(options, withPickupOption(quote.services), {
       selectable: true,
-      onSelect: (service, selectedOption) => {
-        selectedCartShipping = service;
-        selectedCartPostcode = onlyDigits(postcodeInput.value);
-        saveCartShipping();
-        options.querySelectorAll(".shipping-option").forEach((option) => {
-          option.classList.toggle("is-selected", option === selectedOption);
-        });
-        renderCartTotals();
-      }
+      onSelect: (service, selectedOption) => selectCartShipping(service, selectedOption, postcodeInput.value)
     });
   } catch (error) {
     status.textContent = error.message;
@@ -3015,10 +3041,17 @@ const renderTestCart = () => {
   const shippingStatus = testCartDialog.querySelector("[data-cart-shipping-status]");
   postcodeInput.disabled = validItems.length === 0;
   calculateButton.disabled = validItems.length === 0;
-  if (validItems.length === 0) resetCartShipping("Adicione um produto antes de calcular o frete.");
-  if (validItems.length > 0 && selectedCartShipping && selectedCartPostcode) {
+  if (validItems.length === 0) {
+    clearCartShipping();
+    testCartDialog.querySelector(".test-cart-shipping-options").replaceChildren();
+    shippingStatus.textContent = "Adicione um produto antes de escolher a entrega.";
+  } else if (selectedCartShipping?.carrierCode === "PICKUP_VENDOR") {
+    renderPickupBeforePostcode("Retirada grátis selecionada. Não é necessário informar CEP.");
+  } else if (selectedCartShipping && selectedCartPostcode) {
     postcodeInput.value = formatPostcode(selectedCartPostcode);
-    shippingStatus.textContent = `Frete selecionado: ${selectedCartShipping.carrier} • ${selectedCartShipping.description}.`;
+    shippingStatus.textContent = `Entrega selecionada: ${selectedCartShipping.carrier} • ${selectedCartShipping.description}.`;
+  } else {
+    renderPickupBeforePostcode();
   }
   renderCartTotals();
 };
