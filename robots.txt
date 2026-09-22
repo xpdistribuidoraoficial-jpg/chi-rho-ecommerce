@@ -1,8 +1,8 @@
 User-agent: *
 Allow: /
 Disallow: /api/
-Disallow: /admin-pedidos.html
-Disallow: /admin-estoque.html
+Disallow: /xpdistribuidora.html
+Disallow: /xpdistribuidora-estoque.html
 Disallow: /audits/
 Disallow: /tests/
 Disallow: /scripts/
