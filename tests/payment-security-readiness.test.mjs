@@ -167,3 +167,27 @@ test("entradas públicas e administrativas mantêm viewport e breakpoints respon
   }
   assert.ok(adminStyles.includes("max-width:720px"));
 });
+
+test("retirada presencial não depende de CEP nem endereço de entrega", () => {
+  const cart = read("script.js");
+  const checkout = read("checkout.js");
+  const order = read("supabase/functions/create-casa-order/index.ts");
+  const preference = read("supabase/functions/mercadopago-create-preference/index.ts");
+  const purchases = read("minhas-compras.js");
+  assert.ok(cart.includes('carrierCode: "PICKUP_VENDOR"'));
+  assert.ok(cart.includes("renderPickupBeforePostcode"));
+  assert.ok(cart.includes("Não é necessário informar CEP"));
+  assert.ok(checkout.includes('isPickupOrder'));
+  assert.ok(checkout.includes('address: isPickupOrder ? null'));
+  assert.ok(order.includes('cleanText(selected?.carrierCode, 80) === "PICKUP_VENDOR"'));
+  assert.ok(order.indexOf('cleanText(selected?.carrierCode, 80) === "PICKUP_VENDOR"') < order.indexOf('onlyDigits(body?.shipping?.cep) !== postcode'));
+  assert.ok(preference.includes('order.shipping_carrier_code==="PICKUP_VENDOR"?undefined'));
+  assert.ok(purchases.includes("Retirada presencial"));
+});
+
+test("criação de pedidos exige documento válido e limita tentativas abusivas", () => {
+  const source = read("supabase/functions/create-casa-order/index.ts");
+  assert.ok(source.includes("!validTaxId(taxId)"));
+  assert.ok(source.includes("checkout_rate_limit_allowed"));
+  assert.ok(source.includes('code === "RATE_LIMITED" ? 429'));
+});
