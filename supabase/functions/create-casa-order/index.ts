@@ -145,6 +145,18 @@ const getVerifiedShipping = async (body: any, items: Array<{ slug: string; quant
   const selected = body?.shipping?.service;
   if (!selected || onlyDigits(body?.shipping?.cep) !== postcode) throw new Error("INVALID_SHIPPING");
 
+  if (cleanText(selected?.carrierCode, 80) === "PICKUP_VENDOR") {
+    return {
+      carrier: "Retirada com o vendedor",
+      carrier_code: "PICKUP_VENDOR",
+      service: "Retirar com o vendedor",
+      service_code: "PICKUP_VENDOR",
+      delivery_time: "Retirada a combinar",
+      price: 0,
+      quoted_at: new Date().toISOString()
+    };
+  }
+
   const quoteResponse = await fetch(`${SITE_ORIGIN}/api/frete`, {
     method: "POST",
     headers: {
@@ -209,6 +221,17 @@ Deno.serve(async (request: Request) => {
     const items = await getReleasedItems(body?.items);
     const subtotal = roundMoney(items.reduce((total, item) => total + item.unit_price * item.quantity, 0));
     const shipping = await getVerifiedShipping(body, items, address.postal_code);
+    const attribution = {
+      channel: cleanText(body?.attribution?.channel, 80),
+      source: cleanText(body?.attribution?.source, 100),
+      medium: cleanText(body?.attribution?.medium, 100),
+      campaign: cleanText(body?.attribution?.campaign, 160),
+      content: cleanText(body?.attribution?.content, 160),
+      term: cleanText(body?.attribution?.term, 160),
+      referrer: cleanText(body?.attribution?.referrer, 500),
+      landing_path: cleanText(body?.attribution?.landing_path, 500),
+      device: cleanText(body?.attribution?.device, 40)
+    };
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
@@ -228,7 +251,8 @@ Deno.serve(async (request: Request) => {
           address,
           shipping,
           subtotal,
-          items
+          items,
+          attribution
         }
       }),
       signal: AbortSignal.timeout(10000)
