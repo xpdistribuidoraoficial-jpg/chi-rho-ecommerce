@@ -155,7 +155,7 @@ test("entradas públicas e administrativas mantêm viewport e breakpoints respon
     "pagamento-sucesso.html",
     "pagamento-pendente.html",
     "pagamento-falhou.html",
-    "admin-pedidos.html"
+    "xpdistribuidora.html"
   ]) {
     assert.match(read(page), /<meta\s+name="viewport"\s+content="width=device-width,\s*initial-scale=1(?:\.0)?"/i, `Viewport ausente: ${page}`);
   }
