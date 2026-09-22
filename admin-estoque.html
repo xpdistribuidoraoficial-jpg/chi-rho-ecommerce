@@ -1,0 +1,34 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Estoque | Administração Chi Rho</title><meta name="robots" content="noindex,nofollow"><meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; connect-src 'self' https://sailabcmcqdzrqhqztqs.supabase.co; base-uri 'self'; form-action 'self'">
+<link rel="stylesheet" href="style.css"><link rel="stylesheet" href="admin.css"></head>
+<body class="admin-page"><header class="admin-header"><div class="container admin-header-row">
+  <a class="brand" href="index.html"><img src="assets/logo-chi-rho.png" alt="Chi Rho"><span><strong>CHI RHO</strong><small>ADMINISTRAÇÃO</small></span></a>
+  <div class="admin-session"><a class="admin-nav-link" href="admin-pedidos.html">Pedidos</a><span data-admin-user></span><button class="admin-signout" type="button" data-admin-signout hidden>Sair</button></div>
+</div></header>
+<main class="container admin-main">
+  <section class="admin-login" data-admin-login><span>ÁREA RESTRITA</span><h1>Gestão de estoque</h1>
+    <p>Entre com um usuário administrativo autorizado para consultar e alterar as quantidades disponíveis no site.</p>
+    <form data-admin-login-form><label>E-mail<input name="email" type="email" autocomplete="username" required></label>
+      <label>Senha<input name="password" type="password" autocomplete="current-password" required></label>
+      <button class="btn btn-primary" type="submit">Entrar no painel</button><p class="admin-status" data-admin-login-status></p></form>
+  </section>
+  <section data-admin-dashboard hidden>
+    <div class="admin-title"><div><span>OPERAÇÃO CHI RHO</span><h1>Estoque</h1><p data-admin-summary>Carregando produtos…</p></div>
+      <button class="btn btn-secondary" type="button" data-inventory-refresh>Atualizar</button></div>
+    <div class="inventory-toolbar">
+      <label class="inventory-search"><span>Buscar</span><input type="search" placeholder="Produto, SKU ou categoria" data-inventory-search></label>
+      <label class="inventory-category"><span>Categoria</span><select data-inventory-category><option value="">Todas as categorias</option></select></label>
+      <label class="inventory-stock-filter"><span>Exibir</span><select data-inventory-stock-filter><option value="all">Todos</option><option value="available">Com estoque</option><option value="zero">Sem estoque</option></select></label>
+    </div>
+    <div class="inventory-summary-cards">
+      <article><span>Produtos</span><strong data-count-products>0</strong></article>
+      <article><span>Unidades totais</span><strong data-count-total>0</strong></article>
+      <article><span>Reservadas</span><strong data-count-reserved>0</strong></article>
+      <article><span>Disponíveis</span><strong data-count-available>0</strong></article>
+    </div>
+    <div class="admin-table-wrap"><table class="admin-orders-table inventory-table"><thead><tr><th>Produto</th><th>Categoria</th><th>SKU</th><th>Preço</th><th>Reservado</th><th>Disponível</th><th>Estoque total</th><th>Ação</th></tr></thead>
+      <tbody data-inventory-items></tbody></table><div class="admin-empty" data-inventory-empty hidden>Nenhum produto encontrado.</div></div>
+    <p class="admin-status" data-inventory-status aria-live="polite"></p>
+  </section>
+</main>
+<script type="module" src="admin-estoque.js"></script></body></html>
