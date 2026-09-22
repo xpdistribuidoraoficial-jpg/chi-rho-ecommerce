@@ -64,6 +64,7 @@ const formatWhatsapp = (value) => {
 const formatDeliveryTime = (value) => {
   const deliveryTime = String(value || "").trim();
   if (!deliveryTime) return "Prazo a confirmar";
+  if (/retirada/i.test(deliveryTime)) return deliveryTime;
   if (/dia/i.test(deliveryTime)) return deliveryTime;
   return `${deliveryTime} ${deliveryTime === "1" ? "dia útil" : "dias úteis"}`;
 };
@@ -190,9 +191,12 @@ if (cart.length === 0 || !shipping) {
   const deliveryLabel = document.createElement("span");
   const deliveryService = document.createElement("strong");
   const deliveryTime = document.createElement("small");
-  deliveryLabel.textContent = "ENTREGA SELECIONADA";
+  const isPickup = shipping.service.carrierCode === "PICKUP_VENDOR";
+  deliveryLabel.textContent = isPickup ? "RETIRADA SELECIONADA" : "ENTREGA SELECIONADA";
   deliveryService.textContent = `${shipping.service.carrier} • ${shipping.service.description}`;
-  deliveryTime.textContent = `${formatDeliveryTime(shipping.service.deliveryTime)} para o CEP ${formatPostcode(shipping.cep)}`;
+  deliveryTime.textContent = isPickup
+    ? "Retirada a combinar com o vendedor após a confirmação do pagamento."
+    : `${formatDeliveryTime(shipping.service.deliveryTime)} para o CEP ${formatPostcode(shipping.cep)}`;
   delivery.replaceChildren(deliveryLabel, deliveryService, deliveryTime);
   document.querySelector("[data-checkout-postcode]").value = formatPostcode(shipping.cep);
   document.querySelector("[data-checkout-subtotal]").textContent = formatCurrency(subtotal);
