@@ -2948,7 +2948,7 @@ const calculateCartShipping = async () => {
       onSelect: (service, selectedOption) => selectCartShipping(service, selectedOption, postcodeInput.value)
     });
   } catch (error) {
-    status.textContent = error.message;
+    renderPickupBeforePostcode(`${error.message} Você ainda pode selecionar Retirar com o vendedor.`);
   } finally {
     calculateButton.disabled = false;
   }
