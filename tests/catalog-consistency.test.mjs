@@ -68,21 +68,20 @@ test("catálogo mantém pendências comerciais fora do checkout", () => {
   );
 
   assert.equal(catalogProducts.length, 73);
-  assert.equal(activeProducts.length, 63);
+  assert.equal(activeProducts.length, 73);
   assert.equal(orderableProducts.length, 2);
-  assert.equal(missingPrice.length, 4);
+  assert.equal(missingPrice.length, 14);
   assert.equal(zeroPrice.length, 0);
   assert.equal(duplicateSlugs.length, 0);
 });
 
-test("kit de basculantes é retirado da vitrine sem apagar seu registro", () => {
+test("catálogo base preserva registros e a projeção comercial trata substituições", () => {
   const slug = "brinquedo-kit-caminhoes-basculantes";
   assert.ok(catalogProducts.some((product) => product.slug === slug));
-  assert.ok(inactiveCatalogSlugs.has(slug));
-  assert.ok(!activeProducts.some((product) => product.slug === slug));
-  assert.equal(activeProducts.filter((product) => product.brinquedo).length, 11);
+  assert.equal(inactiveCatalogSlugs.size, 0);
+  assert.ok(activeProducts.some((product) => product.slug === slug));
+  assert.equal(activeProducts.filter((product) => product.brinquedo).length, 12);
   assert.equal(activeProducts.filter((product) => product.brinquedo && product.precoOriginal).length, 10);
-  assert.ok(source.includes('catalogProducts.find((item) => item.slug === slug && isProductActive(item))'));
   assert.ok(source.includes('product.slug === initialProductSlug && isProductActive(product)'));
 });
 
@@ -158,15 +157,15 @@ test("home mobile integra marca, conteúdo e ações ao banner sem trocar os des
   assert.match(mobileStyles, /\.hero-benefits\{[^}]*position:absolute[^}]*top:calc\(100% \+ 14px\)/);
 });
 
-test("Casa mobile integra texto, imagem e aviso no mesmo banner", () => {
+test("Casa mobile mantém banner sem aviso de catálogo em expansão", () => {
   const mobileStyles = styles.slice(styles.indexOf("@media(max-width:700px)"));
 
   assert.match(casaHtml, /<section class="catalog-hero catalog-hero-casa">/);
-  assert.match(casaHtml, /<strong>Catálogo em expansão<\/strong>/);
+  assert.doesNotMatch(casaHtml, /Catálogo em expansão/);
   assert.doesNotMatch(casaHtml, /<style>[\s\S]*catalog-hero-casa/);
   assert.match(mobileStyles, /\.catalog-hero-casa\{[^}]*min-height:420px[^}]*banner-casa\.webp[^}]*cover no-repeat/);
   assert.match(mobileStyles, /\.catalog-hero-casa-copy\{[^}]*max-width:72%/);
-  assert.match(mobileStyles, /\.catalog-hero-casa \.catalog-hero-note\{[^}]*display:grid[^}]*background:rgba\(255,255,255,\.94\)/);
+  assert.doesNotMatch(casaHtml, /catalog-hero-note/);
   assert.match(mobileStyles, /\.catalog-hero-casa-mobile\{display:none\}/);
   assert.match(mobileStyles, /@media\(max-width:340px\)[\s\S]*?min-height:405px/);
 });
