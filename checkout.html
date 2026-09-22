@@ -34,14 +34,14 @@
     <div class="container">
       <nav class="checkout-steps" aria-label="Etapas da compra">
         <span class="is-complete"><b>1</b>Carrinho</span>
-        <span class="is-active" aria-current="step"><b>2</b>Identificação e entrega</span>
+        <span class="is-active" aria-current="step"><b>2</b>Identificação e recebimento</span>
         <span><b>3</b>Pagamento</span>
       </nav>
 
       <div class="checkout-heading">
         <div>
           <span>FECHAMENTO DO PEDIDO</span>
-          <h1>Revise seus dados e a entrega.</h1>
+          <h1>Revise seus dados e como deseja receber.</h1>
           <p>Preencha as informações abaixo para concluir seu pedido. Na próxima etapa, você será direcionado ao Mercado Pago para escolher a forma de pagamento.</p>
         </div>
         <a href="catalogo-casa.html#catalogo">← Continuar comprando</a>
@@ -54,7 +54,7 @@
 
       <div class="checkout-empty" data-checkout-empty hidden>
         <strong>Seu carrinho ainda não está pronto para finalizar.</strong>
-        <p>Adicione um produto e selecione o frete antes de acessar o checkout.</p>
+        <p>Adicione um produto e escolha entrega ou retirada antes de acessar o checkout.</p>
         <a class="btn btn-primary" href="catalogo-casa.html#catalogo">Voltar ao catálogo</a>
       </div>
 
@@ -84,12 +84,12 @@
               <label class="checkout-field">
                 <span>CPF ou CNPJ</span>
                 <input name="taxId" inputmode="numeric" autocomplete="off" required placeholder="Somente números" maxlength="18" data-tax-id-input />
-                <small>Necessário para faturamento e emissão da etiqueta de envio.</small>
+                <small>Necessário para faturamento do pedido.</small>
               </label>
             </div>
           </section>
 
-          <section class="checkout-card" aria-labelledby="checkout-address-title">
+          <section class="checkout-card" aria-labelledby="checkout-address-title" data-checkout-address-card>
             <header class="checkout-card-heading">
               <span>2</span>
               <div>
@@ -179,7 +179,7 @@
 
           <label class="checkout-confirmation">
             <input type="checkbox" required />
-            <span>Confirmo que revisei os dados, o endereço, os produtos e o frete deste pedido.</span>
+            <span data-checkout-confirmation-text>Confirmo que revisei os dados, o endereço, os produtos e o frete deste pedido.</span>
           </label>
 
           <button class="btn btn-primary checkout-submit" type="submit">Registrar pedido e continuar</button>
