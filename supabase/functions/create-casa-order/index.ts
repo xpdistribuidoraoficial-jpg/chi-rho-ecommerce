@@ -114,7 +114,7 @@ const validateContact = (body: any) => {
   const phone = onlyDigits(body?.customer?.phone || body?.customer?.whatsapp).slice(0, 11);
   const taxId = onlyDigits(body?.customer?.taxId).slice(0, 14);
   if (name.length < 3 || !emailPattern.test(email) || !/^\d{10,11}$/.test(whatsapp)
-    || !/^\d{10,11}$/.test(phone) || (taxId && !validTaxId(taxId))) {
+    || !/^\d{10,11}$/.test(phone) || !validTaxId(taxId)) {
     throw new Error("INVALID_CUSTOMER");
   }
   return {
@@ -249,6 +249,25 @@ Deno.serve(async (request: Request) => {
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
     if (!supabaseUrl || !serviceRoleKey) throw new Error("DATABASE_UNAVAILABLE");
 
+    const rateLimitResponse = await fetch(`${supabaseUrl}/rest/v1/rpc/checkout_rate_limit_allowed`, {
+      method: "POST",
+      headers: {
+        apikey: serviceRoleKey,
+        Authorization: `Bearer ${serviceRoleKey}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        target_email: customer.email,
+        target_whatsapp: customer.whatsapp,
+        target_tax_id: customer.tax_id,
+        target_client_request_id: clientRequestId
+      }),
+      signal: AbortSignal.timeout(8000)
+    });
+    const rateLimitAllowed = rateLimitResponse.ok ? await rateLimitResponse.json() : null;
+    if (!rateLimitResponse.ok) throw new Error("DATABASE_UNAVAILABLE");
+    if (rateLimitAllowed !== true) throw new Error("RATE_LIMITED");
+
     const databaseResponse = await fetch(`${supabaseUrl}/rest/v1/rpc/create_checkout_order_v2`, {
       method: "POST",
       headers: {
@@ -303,9 +322,10 @@ Deno.serve(async (request: Request) => {
       SHIPPING_UNAVAILABLE: "Não foi possível confirmar o frete neste momento.",
       INVALID_REQUEST_ID: "Não foi possível identificar esta tentativa de pedido.",
       DATABASE_UNAVAILABLE: "O banco de pedidos está temporariamente indisponível.",
-      DATABASE_ERROR: "Não foi possível registrar o pedido neste momento."
+      DATABASE_ERROR: "Não foi possível registrar o pedido neste momento.",
+      RATE_LIMITED: "Há muitas tentativas de pedido recentes com estes dados. Aguarde alguns minutos antes de tentar novamente."
     };
-    const status = code.startsWith("INVALID") || code === "OUT_OF_STOCK" ? 400 : 503;
+    const status = code === "RATE_LIMITED" ? 429 : code.startsWith("INVALID") || code === "OUT_OF_STOCK" ? 400 : 503;
     return jsonResponse({ error: messages[code] || "Não foi possível registrar o pedido." }, status, origin);
   }
 });
