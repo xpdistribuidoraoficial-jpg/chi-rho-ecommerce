@@ -151,6 +151,7 @@ const fillAddressByPostcode = async (form, postcode) => {
 
 const cart = loadCart();
 const shipping = loadShipping();
+const isPickupOrder = shipping?.service?.carrierCode === "PICKUP_VENDOR";
 const emptyState = document.querySelector("[data-checkout-empty]");
 const checkoutContent = document.querySelector("[data-checkout-content]");
 
@@ -198,12 +199,26 @@ if (cart.length === 0 || !shipping) {
     ? "Retirada a combinar com o vendedor após a confirmação do pagamento."
     : `${formatDeliveryTime(shipping.service.deliveryTime)} para o CEP ${formatPostcode(shipping.cep)}`;
   delivery.replaceChildren(deliveryLabel, deliveryService, deliveryTime);
-  document.querySelector("[data-checkout-postcode]").value = formatPostcode(shipping.cep);
-  document.querySelector("[data-checkout-subtotal]").textContent = formatCurrency(subtotal);
-  document.querySelector("[data-checkout-shipping-price]").textContent = formatCurrency(shipping.service.price);
-  document.querySelector("[data-checkout-total]").textContent = formatCurrency(total);
+  const checkoutForm = document.querySelector("#checkout-form");
+  const addressCard = document.querySelector("[data-checkout-address-card]");
+  const confirmationText = document.querySelector("[data-checkout-confirmation-text]");
+  const postcodeField = document.querySelector("[data-checkout-postcode]");
 
-  fillAddressByPostcode(document.querySelector("#checkout-form"), shipping.cep);
+  if (isPickupOrder) {
+    if (addressCard) addressCard.hidden = true;
+    checkoutForm?.querySelectorAll('[name="street"],[name="number"],[name="district"],[name="city"],[name="state"]').forEach((field) => {
+      field.required = false;
+    });
+    if (postcodeField) postcodeField.value = "";
+    if (confirmationText) confirmationText.textContent = "Confirmo que revisei meus dados, os produtos e a opção de retirada deste pedido.";
+  } else {
+    if (postcodeField) postcodeField.value = formatPostcode(shipping.cep);
+    fillAddressByPostcode(checkoutForm, shipping.cep);
+  }
+
+  document.querySelector("[data-checkout-subtotal]").textContent = formatCurrency(subtotal);
+  document.querySelector("[data-checkout-shipping-price]").textContent = isPickupOrder ? "Grátis" : formatCurrency(shipping.service.price);
+  document.querySelector("[data-checkout-total]").textContent = formatCurrency(total);
 }
 
 document.querySelector("[data-whatsapp-input]")?.addEventListener("input", (event) => {
@@ -296,7 +311,7 @@ document.querySelector("#checkout-form")?.addEventListener("submit", async (even
       taxId,
       whatsappMarketing: form.elements.whatsappMarketing.checked
     },
-    address: {
+    address: isPickupOrder ? null : {
       postcode: form.elements.postcode.value,
       street: form.elements.street.value,
       number: form.elements.number.value,
@@ -312,7 +327,9 @@ document.querySelector("#checkout-form")?.addEventListener("submit", async (even
 
   submitButton.disabled = true;
   submitButton.textContent = "Registrando pedido…";
-  status.textContent = "Confirmando o frete e salvando o pedido com segurança…";
+  status.textContent = isPickupOrder
+    ? "Confirmando a retirada e salvando o pedido com segurança…"
+    : "Confirmando o frete e salvando o pedido com segurança…";
   status.className = "checkout-form-status";
 
   try {
@@ -349,7 +366,8 @@ document.querySelector("#checkout-form")?.addEventListener("submit", async (even
             service: shipping.service.description,
             deliveryTime: shipping.service.deliveryTime
           },
-          address: payload.address
+          address: payload.address,
+          pickup: isPickupOrder
         }
       }));
     } catch {
