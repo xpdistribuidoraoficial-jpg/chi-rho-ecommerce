@@ -45,12 +45,13 @@ Deno.serve(async(request)=>{
     const id=safe(requestUrl.searchParams.get("id"),36);
     if(!/^[0-9a-f-]{36}$/i.test(id)) return response({error:"Pedido inválido."},400,origin);
     const orderSelect="id,code,customer_name,customer_email,customer_whatsapp,customer_phone,tax_id,postal_code,street,address_number,complement,district,city,state,shipping_carrier,shipping_carrier_code,shipping_service,shipping_service_code,shipping_delivery_time,shipping_price,shipping_quote_id,subtotal,discount,grand_total,financial_status,operational_status,payment_method,payment_external_id,tracking_code,tracking_url,label_url,shipping_label_provider,shipping_label_id,label_status,label_created_at,label_valid_through,declaration_url,shipped_at,reservation_expires_at,cancellation_reason,pickup_signature_path,pickup_confirmed_at,pickup_confirmed_by,pickup_receiver_name,attribution_channel,attribution_source,attribution_medium,attribution_campaign,attribution_content,attribution_term,attribution_referrer,attribution_landing_path,attribution_device,created_at,updated_at";
-    const [orderResult,itemsResult,historyResult,paymentHistoryResult,inventoryResult]=await Promise.all([
+    const [orderResult,itemsResult,historyResult,paymentHistoryResult,inventoryResult,auditResult]=await Promise.all([
       fetch(`${url}/rest/v1/orders?id=eq.${id}&select=${orderSelect}&limit=1`,{headers}),
       fetch(`${url}/rest/v1/order_items?order_id=eq.${id}&select=id,product_slug,sku,product_name,image_url,unit_price,quantity,line_total&order=id`,{headers}),
       fetch(`${url}/rest/v1/order_status_history?order_id=eq.${id}&select=previous_status,status,status_type,note,created_at&order=created_at`,{headers}),
       fetch(`${url}/rest/v1/payment_events?order_id=eq.${id}&select=event_type,mapped_status,processed,error_code,created_at&order=created_at`,{headers}),
-      fetch(`${url}/rest/v1/inventory?select=product_slug,stock_total,stock_reserved,stock_available&order=product_slug`,{headers})
+      fetch(`${url}/rest/v1/inventory?select=product_slug,stock_total,stock_reserved,stock_available&order=product_slug`,{headers}),
+      fetch(`${url}/rest/v1/admin_audit_log?order_id=eq.${id}&select=id,admin_user_id,action,note,created_at&order=created_at`,{headers})
     ]);
     const orders=orderResult.ok?await orderResult.json():[];
     if(!orders[0]) return response({error:"Pedido não encontrado."},404,origin);
@@ -58,7 +59,23 @@ Deno.serve(async(request)=>{
     const stock=new Map(inventory.map((item:any)=>[item.product_slug,item]));
     const operationalHistory=historyResult.ok?await historyResult.json():[];
     const paymentHistory=paymentHistoryResult.ok?await paymentHistoryResult.json():[];
-    const history=[...operationalHistory,...paymentHistory.filter((event:any)=>event.mapped_status).map((event:any)=>({
+    const auditEntries=auditResult.ok?await auditResult.json():[];
+    const auditAdminIds=[...new Set(auditEntries.map((entry:any)=>entry.admin_user_id).filter((id:any)=>uuid.test(String(id))))];
+    let auditAdminNames=new Map<string,string>();
+    if(auditAdminIds.length){
+      const adminNamesResponse=await fetch(`${url}/rest/v1/admin_users?user_id=in.(${auditAdminIds.join(",")})&select=user_id,display_name`,{headers,signal:AbortSignal.timeout(8000)});
+      const adminRows=adminNamesResponse.ok?await adminNamesResponse.json():[];
+      auditAdminNames=new Map(adminRows.map((row:any)=>[row.user_id,row.display_name||"Administrador"]));
+    }
+    const auditHistory=auditEntries.map((entry:any)=>({
+      previous_status:null,
+      status:entry.action,
+      status_type:"admin",
+      note:entry.note||null,
+      actor_name:auditAdminNames.get(entry.admin_user_id)||"Administrador",
+      created_at:entry.created_at
+    }));
+    const history=[...operationalHistory,...auditHistory,...paymentHistory.filter((event:any)=>event.mapped_status).map((event:any)=>({
       previous_status:null,status:event.mapped_status,status_type:"financial",
       note:event.processed?`Evento ${event.event_type} processado.`:`Evento ${event.event_type} não processado${event.error_code?` (${event.error_code})`:""}.`,
       created_at:event.created_at
