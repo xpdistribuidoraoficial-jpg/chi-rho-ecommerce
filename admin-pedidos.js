@@ -127,6 +127,7 @@ const loadDetail=async id=>{if(!dialog.open)dialog.showModal();const content=doc
     (data.history||[]).forEach(entry=>{const item=node("li"),head=node("div"),type=entry.status_type==="financial"?"Pagamento":"Operação";
       head.append(node("strong","",`${type}: ${label(entry.status)}`),node("time","",date(entry.created_at)));item.append(head);
       if(entry.previous_status)item.append(node("span","",`Anterior: ${label(entry.previous_status)}`));
+      if(entry.actor_name)item.append(node("small","",`Responsável: ${entry.actor_name}`));
       if(entry.note)item.append(node("small","",entry.note));timeline.append(item);});
     if(!timeline.children.length)timeline.append(node("li","admin-history-empty","Nenhuma alteração registrada."));history.append(timeline);
     const actions=section("Ações administrativas"),buttons=node("div","admin-actions");
