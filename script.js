@@ -2214,7 +2214,7 @@ const formatProductPrice = (value) =>
 const getProductStatus = (product) =>
   typeof product.preco === "number"
     ? formatProductPrice(product.preco)
-    : product.statusPreco || "Preço em breve";
+    : product.statusPreco || "Consulte disponibilidade";
 
 const getProductPriceMarkup = (product) => {
   if (typeof product.preco !== "number") {
@@ -2687,9 +2687,9 @@ const openProductDialog = (slug, { syncUrl = true } = {}) => {
   setProductDialogText(
     ".product-dialog-activation-note",
     canUseTestCart
-      ? "Carrinho piloto e cálculo de frete pela Frenet ativos. O pagamento ainda não está disponível."
-      : "A compra será liberada após o cadastro do preço, estoque, frete e checkout.",
-    "Checkout em preparação."
+      ? "Compra disponível. Escolha entrega para seu CEP ou retirada com o vendedor."
+      : "Produto indisponível para compra no momento.",
+    "Consulte disponibilidade."
   );
 
   if (productDialogQuantity) productDialogQuantity.textContent = "1";
@@ -2816,7 +2816,7 @@ testCartDialog.innerHTML = `
   <div class="test-cart-layout">
     <header class="test-cart-header">
       <div>
-        <span>Carrinho piloto</span>
+        <span>SEU CARRINHO</span>
         <h2 id="test-cart-title">Seu carrinho</h2>
       </div>
       <button type="button" data-cart-close aria-label="Fechar carrinho">×</button>
