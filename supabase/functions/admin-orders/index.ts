@@ -72,7 +72,7 @@ Deno.serve(async(request)=>{
     let filters="";
     if(financial) filters+=`&financial_status=eq.${encodeURIComponent(financial)}`;
     if(operational) filters+=`&operational_status=eq.${encodeURIComponent(operational)}`;
-    const select="id,code,customer_name,customer_whatsapp,grand_total,financial_status,operational_status,created_at";
+    const select="id,code,customer_name,customer_whatsapp,grand_total,financial_status,operational_status,attribution_channel,attribution_device,created_at";
     const ordersResponse=await fetch(`${url}/rest/v1/orders?select=${select}${filters}&order=created_at.desc&limit=100`,{headers});
     const orders=ordersResponse.ok?await ordersResponse.json():[];
     if(!ordersResponse.ok){console.error("Admin orders list failed",ordersResponse.status);return response({error:"Não foi possível carregar os pedidos."},503,origin);}
