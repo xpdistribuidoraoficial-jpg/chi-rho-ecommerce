@@ -65,6 +65,17 @@ const loadDetail=async id=>{if(!dialog.open)dialog.showModal();const content=doc
     const client=section("Cliente"),clientGrid=node("div","admin-detail-grid");
     clientGrid.append(field("Nome",order.customer_name),field("WhatsApp",order.customer_whatsapp),field("Telefone",order.customer_phone),
       field("E-mail",order.customer_email),field("CPF/CNPJ",order.tax_id),field("Endereço",`${order.street}, ${order.address_number}${order.complement?` — ${order.complement}`:""} • ${order.district} • ${order.city}/${order.state} • ${order.postal_code}`));client.append(clientGrid);
+    const origin=section("Origem da compra"),originGrid=node("div","admin-detail-grid");
+    const originChannel=order.attribution_channel||"Não registrado";
+    const campaign=[order.attribution_source,order.attribution_medium,order.attribution_campaign].filter(Boolean).join(" • ")||"—";
+    originGrid.append(
+      field("Canal",originChannel),
+      field("Dispositivo",order.attribution_device||"—"),
+      field("Campanha / origem",campaign),
+      field("Página de entrada",order.attribution_landing_path||"—"),
+      field("Referência externa",order.attribution_referrer||"—"),
+      field("Detalhe",order.attribution_content||order.attribution_term||"—")
+    );origin.append(originGrid);
     const products=section("Produtos");(data.items||[]).forEach(item=>{const card=node("article","admin-detail-item");
       const image=node("img");image.src=item.image_url||"";image.alt="";const copy=node("div");copy.append(node("strong","",item.product_name),node("span","",`${item.sku} • ${item.quantity} un.`),
         node("span","",`${money(item.unit_price)} por unidade`),
@@ -101,7 +112,7 @@ const loadDetail=async id=>{if(!dialog.open)dialog.showModal();const content=doc
       buttons.append(button("Marcar como entregue","btn btn-primary",()=>updateOrder(order.id,"entregue")));
     }
     if(!buttons.children.length)buttons.append(node("p","admin-action-note",order.financial_status==="aguardando_pagamento"?"Aguarde a confirmação real do pagamento para iniciar a separação.":"Nenhuma ação disponível para o estado atual."));
-    actions.append(buttons);content.append(client,products,shipping,payment,progress,history,actions);
+    actions.append(buttons);content.append(client,origin,products,shipping,payment,progress,history,actions);
   }catch(error){content.replaceChildren(node("p","admin-status",error.message));}};
 const updateOrder=async(orderId,newStatus)=>{status.textContent="Atualizando pedido…";try{await request("",{method:"PATCH",body:JSON.stringify({orderId,status:newStatus})});
   await Promise.all([loadOrders(),loadDetail(orderId)]);status.textContent="Pedido atualizado.";}catch(error){status.textContent=error.message;}};
