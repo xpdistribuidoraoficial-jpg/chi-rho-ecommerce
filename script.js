@@ -2983,7 +2983,7 @@ const updateTestCartQuantity = (slug, requestedQuantity) => {
   }
 
   saveTestCart();
-  resetCartShipping("Carrinho alterado. Calcule o frete novamente.");
+  resetCartShipping("Carrinho alterado. Escolha novamente entrega ou retirada.");
   renderTestCart();
   return quantity;
 };
