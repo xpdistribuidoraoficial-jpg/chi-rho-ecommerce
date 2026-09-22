@@ -6,7 +6,7 @@
   },
   "headers": [
     {
-      "source": "/:internal(checkout|pagamento-sucesso|pagamento-pendente|pagamento-falhou|admin-pedidos|minhas-compras).html",
+      "source": "/:internal(checkout|pagamento-sucesso|pagamento-pendente|pagamento-falhou|admin-pedidos|admin-estoque|minhas-compras).html",
       "headers": [{ "key": "X-Robots-Tag", "value": "noindex, nofollow" }]
     },
     {
@@ -20,7 +20,7 @@
       ]
     },
     {
-      "source": "/admin-pedidos.html",
+      "source": "/:admin(admin-pedidos|admin-estoque).html",
       "headers": [
         { "key": "Cache-Control", "value": "no-store" },
         { "key": "X-Content-Type-Options", "value": "nosniff" },
