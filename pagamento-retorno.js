@@ -16,8 +16,14 @@ const render=(order,snapshot)=>{container.replaceChildren();const summary=elemen
     const copy=element("div");copy.append(element("strong","",item.product_name),element("span","",`${item.quantity} un. • ${item.sku}`));row.append(image,copy,element("b","",money(item.line_total)));items.append(row);});summary.append(items);
   const totals=element("dl","payment-order-totals");[["Produtos",snapshot?.subtotal],["Frete",snapshot?.shippingPrice],["Total",snapshot?.total]].forEach(([name,value])=>{
     const row=element("div");row.append(element("dt","",name),element("dd","",money(value)));totals.append(row);});summary.append(totals);
-  const delivery=element("div","payment-order-delivery");const shipping=snapshot?.shipping||{},address=snapshot?.address||{};delivery.append(element("strong","","Entrega"),element("span","",`${shipping.carrier||"—"} • ${shipping.service||"—"}`),
-    element("small","",`${address.street||""}, ${address.number||""}${address.complement?` — ${address.complement}`:""} • ${address.district||""} • ${address.city||""}/${address.state||""} • ${address.postcode||""}`));summary.append(delivery);container.append(summary);
+  const delivery=element("div","payment-order-delivery");const shipping=snapshot?.shipping||{},address=snapshot?.address||{},isPickup=snapshot?.pickup===true;
+  delivery.append(
+    element("strong","",isPickup?"Retirada":"Entrega"),
+    element("span","",`${shipping.carrier||"—"} • ${shipping.service||"—"}`),
+    element("small","",isPickup
+      ?"Retirada com o vendedor em Rua Bento Siqueira, 668, LT 6, CS 7, São João de Meriti/RJ. Aguarde a confirmação do pagamento."
+      : `${address.street||""}, ${address.number||""}${address.complement?` — ${address.complement}`:""} • ${address.district||""} • ${address.city||""}/${address.state||""} • ${address.postcode||""}`)
+  );summary.append(delivery);container.append(summary);
   status.textContent=`Situação atual: ${label(order.financialStatus)}.`;status.className=`payment-return-status ${order.financialStatus==="pago"?"is-success":order.financialStatus==="aguardando_pagamento"?"is-pending":"is-failure"}`;};
 const load=async()=>{const last=getLastOrder();if(!last?.code||!last?.publicToken){status.textContent="Não encontramos o identificador seguro deste pedido nesta sessão. A equipe poderá localizá-lo pelo código enviado no atendimento.";status.className="payment-return-status is-pending";return;}
   status.textContent="Consultando a situação real do pedido…";try{const response=await fetch(ENDPOINT,{method:"POST",headers:{apikey:PUBLIC_KEY,"Content-Type":"application/json"},body:JSON.stringify({code:last.code,publicToken:last.publicToken})});
