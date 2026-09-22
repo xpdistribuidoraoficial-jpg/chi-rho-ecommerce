@@ -11,7 +11,7 @@ export function renderPage(html, meta) {
   if (meta.product) {
     const p = meta.product;
     // Text alternative to the existing JS dialog, not a second buying flow.
-    const content = `<noscript><section class="container"><h2>${escapeHtml(p.nome)}</h2><img src="${escapeHtml(p.imagem)}" alt="${escapeHtml(p.nome)}" width="300" /><p>${escapeHtml(p.descricao)}</p>${typeof p.preco === 'number' ? `<p>${p.preco.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>` : '<p>Preço em breve</p>'}<p>Ative o JavaScript para visualizar a galeria e os controles do produto.</p></section></noscript>`;
+    const content = `<noscript><section class="container"><h2>${escapeHtml(p.nome)}</h2><img src="${escapeHtml(p.imagem)}" alt="${escapeHtml(p.nome)}" width="300" /><p>${escapeHtml(p.descricao)}</p>${typeof p.preco === 'number' ? `<p>${p.preco.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>` : '<p>Consulte disponibilidade</p>'}<p>Ative o JavaScript para visualizar a galeria e os controles do produto.</p></section></noscript>`;
     html = html.replace('</main>', `${content}\n</main>`);
   }
   return html;
