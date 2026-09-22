@@ -8,7 +8,7 @@ const VERCEL_PREVIEW_ORIGIN=/^https:\/\/chi-rho-ecommerce-[a-z0-9-]+\.vercel\.ap
 const isAllowedOrigin=(origin:string)=>ALLOWED_ORIGINS.has(origin)||VERCEL_PREVIEW_ORIGIN.test(origin);
 const response=(body:unknown,status=200,origin=SITE_ORIGIN)=>new Response(status===204?null:JSON.stringify(body),{
   status,headers:{"Access-Control-Allow-Origin":origin,"Access-Control-Allow-Headers":"authorization, apikey, content-type",
-    "Access-Control-Allow-Methods":"GET, PATCH, OPTIONS","Cache-Control":"no-store",
+    "Access-Control-Allow-Methods":"GET, PATCH, POST, OPTIONS","Cache-Control":"no-store",
     "Content-Type":"application/json; charset=utf-8","Vary":"Origin"}
 });
 const safe=(value:unknown,max:number)=>String(value||"").trim().slice(0,max);
@@ -44,7 +44,7 @@ Deno.serve(async(request)=>{
   if(request.method==="GET"&&requestUrl.searchParams.get("action")==="detail"){
     const id=safe(requestUrl.searchParams.get("id"),36);
     if(!/^[0-9a-f-]{36}$/i.test(id)) return response({error:"Pedido inválido."},400,origin);
-    const orderSelect="id,code,customer_name,customer_email,customer_whatsapp,customer_phone,tax_id,postal_code,street,address_number,complement,district,city,state,shipping_carrier,shipping_carrier_code,shipping_service,shipping_service_code,shipping_delivery_time,shipping_price,shipping_quote_id,subtotal,discount,grand_total,financial_status,operational_status,payment_method,payment_external_id,tracking_code,tracking_url,label_url,shipping_label_provider,shipping_label_id,label_status,label_created_at,label_valid_through,declaration_url,shipped_at,reservation_expires_at,cancellation_reason,attribution_channel,attribution_source,attribution_medium,attribution_campaign,attribution_content,attribution_term,attribution_referrer,attribution_landing_path,attribution_device,created_at,updated_at";
+    const orderSelect="id,code,customer_name,customer_email,customer_whatsapp,customer_phone,tax_id,postal_code,street,address_number,complement,district,city,state,shipping_carrier,shipping_carrier_code,shipping_service,shipping_service_code,shipping_delivery_time,shipping_price,shipping_quote_id,subtotal,discount,grand_total,financial_status,operational_status,payment_method,payment_external_id,tracking_code,tracking_url,label_url,shipping_label_provider,shipping_label_id,label_status,label_created_at,label_valid_through,declaration_url,shipped_at,reservation_expires_at,cancellation_reason,pickup_signature_path,pickup_confirmed_at,pickup_confirmed_by,pickup_receiver_name,attribution_channel,attribution_source,attribution_medium,attribution_campaign,attribution_content,attribution_term,attribution_referrer,attribution_landing_path,attribution_device,created_at,updated_at";
     const [orderResult,itemsResult,historyResult,paymentHistoryResult,inventoryResult]=await Promise.all([
       fetch(`${url}/rest/v1/orders?id=eq.${id}&select=${orderSelect}&limit=1`,{headers}),
       fetch(`${url}/rest/v1/order_items?order_id=eq.${id}&select=id,product_slug,sku,product_name,image_url,unit_price,quantity,line_total&order=id`,{headers}),
@@ -63,7 +63,18 @@ Deno.serve(async(request)=>{
       note:event.processed?`Evento ${event.event_type} processado.`:`Evento ${event.event_type} não processado${event.error_code?` (${event.error_code})`:""}.`,
       created_at:event.created_at
     }))].sort((left:any,right:any)=>String(left.created_at).localeCompare(String(right.created_at)));
-    return response({order:orders[0],items:items.map((item:any)=>({...item,inventory:stock.get(item.product_slug)||null})),history},200,origin);
+    let pickup_signature_url:string|null=null;
+    const signaturePath=safe(orders[0]?.pickup_signature_path,500);
+    if(signaturePath){
+      const encodedPath=signaturePath.split("/").map(encodeURIComponent).join("/");
+      const signResponse=await fetch(`${url}/storage/v1/object/sign/pickup-signatures/${encodedPath}`,{
+        method:"POST",headers,body:JSON.stringify({expiresIn:3600}),signal:AbortSignal.timeout(8000)
+      });
+      const signed=signResponse.ok?await signResponse.json():null;
+      const signedPath=signed?.signedURL||signed?.signedUrl||null;
+      if(signedPath) pickup_signature_url=String(signedPath).startsWith("http")?String(signedPath):`${url}/storage/v1${signedPath}`;
+    }
+    return response({order:{...orders[0],pickup_signature_url},items:items.map((item:any)=>({...item,inventory:stock.get(item.product_slug)||null})),history},200,origin);
   }
 
   if(request.method==="GET"){
@@ -86,6 +97,62 @@ Deno.serve(async(request)=>{
       },{});
     }
     return response({admin,orders:orders.map((order:any)=>({...order,item_count:counts[order.id]||0}))},200,origin);
+  }
+
+  if(request.method==="POST"&&requestUrl.searchParams.get("action")==="confirm-pickup"){
+    const contentType=request.headers.get("content-type")||"";
+    if(!contentType.includes("multipart/form-data")) return response({error:"Envie a foto da assinatura para confirmar a retirada."},400,origin);
+    let form:FormData;try{form=await request.formData();}catch{return response({error:"Não foi possível ler o comprovante enviado."},400,origin);}
+    const orderId=safe(form.get("orderId"),36);
+    const receiverName=safe(form.get("receiverName"),160);
+    const signature=form.get("signature");
+    if(!uuid.test(orderId)) return response({error:"Pedido inválido."},400,origin);
+    if(!(signature instanceof File)||signature.size<1) return response({error:"A foto da assinatura do retirante é obrigatória."},400,origin);
+    if(signature.size>5*1024*1024) return response({error:"A imagem deve ter no máximo 5 MB."},413,origin);
+    const allowed=new Set(["image/jpeg","image/png","image/webp"]);
+    if(!allowed.has(signature.type)) return response({error:"Envie uma imagem JPG, PNG ou WebP."},400,origin);
+
+    const verifyResponse=await fetch(`${url}/rest/v1/orders?id=eq.${orderId}&select=id,code,financial_status,operational_status,shipping_carrier_code&limit=1`,{headers,signal:AbortSignal.timeout(8000)});
+    const verifyRows=verifyResponse.ok?await verifyResponse.json():[];
+    const target=verifyRows[0];
+    if(!target) return response({error:"Pedido não encontrado."},404,origin);
+    if(target.shipping_carrier_code!=="PICKUP_VENDOR") return response({error:"Este pedido não é de retirada com o vendedor."},409,origin);
+    if(target.financial_status!=="pago"||target.operational_status!=="pronto_para_envio")
+      return response({error:"A retirada só pode ser confirmada após o pagamento e quando o pedido estiver aguardando retirada."},409,origin);
+
+    const extension=signature.type==="image/png"?"png":signature.type==="image/webp"?"webp":"jpg";
+    const objectPath=`${orderId}/${crypto.randomUUID()}.${extension}`;
+    const encodedPath=objectPath.split("/").map(encodeURIComponent).join("/");
+    const upload=await fetch(`${url}/storage/v1/object/pickup-signatures/${encodedPath}`,{
+      method:"POST",
+      headers:{apikey:serviceKey,Authorization:`Bearer ${serviceKey}`,"Content-Type":signature.type,"x-upsert":"false"},
+      body:signature,
+      signal:AbortSignal.timeout(15000)
+    });
+    if(!upload.ok){
+      console.error("Pickup signature upload failed",upload.status);
+      return response({error:"Não foi possível salvar a foto da assinatura."},503,origin);
+    }
+
+    const rpc=await fetch(`${url}/rest/v1/rpc/confirm_pickup_delivery`,{
+      method:"POST",headers,
+      body:JSON.stringify({
+        target_order_id:orderId,
+        actor_user_id:admin.id,
+        signature_path_value:objectPath,
+        receiver_name_value:receiverName||null
+      }),
+      signal:AbortSignal.timeout(10000)
+    });
+    const data=await rpc.json().catch(()=>({}));
+    if(!rpc.ok){
+      await fetch(`${url}/storage/v1/object/pickup-signatures/${encodedPath}`,{
+        method:"DELETE",headers:{apikey:serviceKey,Authorization:`Bearer ${serviceKey}`},signal:AbortSignal.timeout(8000)
+      }).catch(()=>null);
+      console.error("Pickup confirmation failed",rpc.status,data?.code||"unknown");
+      return response({error:"Não foi possível confirmar a retirada."},400,origin);
+    }
+    return response({order:data,confirmed:true},200,origin);
   }
 
   if(request.method==="PATCH"){
