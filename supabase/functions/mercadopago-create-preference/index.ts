@@ -56,7 +56,7 @@ Deno.serve(async(request)=>{
     const orderId=String(Array.isArray(prepared)?prepared[0]:prepared);
     if(!uuid.test(orderId)) throw new Error("INVALID_PREPARE_RESULT");
     const [orderResponse,itemsResponse]=await Promise.all([
-      fetch(`${supabaseUrl}/rest/v1/orders?id=eq.${orderId}&select=id,code,customer_name,customer_email,customer_phone,tax_id,postal_code,shipping_price,shipping_service,subtotal,discount,grand_total,currency,reservation_expires_at,payment_preference_id,payment_preference_url&limit=1`,{headers,signal:AbortSignal.timeout(8000)}),
+      fetch(`${supabaseUrl}/rest/v1/orders?id=eq.${orderId}&select=id,code,customer_name,customer_email,customer_phone,tax_id,postal_code,shipping_carrier_code,shipping_price,shipping_service,subtotal,discount,grand_total,currency,reservation_expires_at,payment_preference_id,payment_preference_url&limit=1`,{headers,signal:AbortSignal.timeout(8000)}),
       fetch(`${supabaseUrl}/rest/v1/order_items?order_id=eq.${orderId}&select=product_slug,sku,product_name,unit_price,quantity,line_total&order=id`,{headers,signal:AbortSignal.timeout(8000)})
     ]);
     const orders=orderResponse.ok?await orderResponse.json():[],items=itemsResponse.ok?await itemsResponse.json():[];
@@ -101,7 +101,7 @@ Deno.serve(async(request)=>{
         name:safe(order.customer_name,160),email:safe(order.customer_email,320),
         identification:taxId?{type:taxId.length===14?"CNPJ":"CPF",number:taxId}:undefined,
         phone:phone.length>=10?{area_code:phone.slice(0,2),number:phone.slice(2)}:undefined,
-        address:{zip_code:safe(order.postal_code,8)}
+        address:order.shipping_carrier_code==="PICKUP_VENDOR"?undefined:{zip_code:safe(order.postal_code,8)}
       },
       external_reference:order.code,
       back_urls:{success:back("pagamento-sucesso.html"),pending:back("pagamento-pendente.html"),failure:back("pagamento-falhou.html")},
