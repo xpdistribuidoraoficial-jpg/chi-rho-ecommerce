@@ -10,15 +10,15 @@ import middleware, { config } from '../middleware.js';
 const read = (file) => fs.readFileSync(new URL(`../${file}`, import.meta.url), 'utf8');
 const paths = sitemapUrls(activeProducts, categories);
 
-test('sitemap cobre exatamente as páginas públicas, categorias e 63 produtos ativos', () => {
+test('sitemap cobre exatamente as páginas públicas, categorias e 61 produtos operacionais', () => {
   const xml = read('sitemap.xml');
   assert.match(xml, /^<\?xml version="1.0" encoding="UTF-8"\?>/);
   assert.match(xml, /xmlns="http:\/\/www.sitemaps.org\/schemas\/sitemap\/0.9"/);
   const locations = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1].replaceAll('&amp;', '&'));
   assert.deepEqual(locations, paths.map((path) => SITE + path));
-  assert.equal(locations.length, 77);
-  assert.equal(new Set(locations).size, 77);
-  assert.equal(locations.filter((url) => url.includes('?produto=')).length, 63);
+  assert.equal(locations.length, 79);
+  assert.equal(new Set(locations).size, 79);
+  assert.equal(locations.filter((url) => url.includes('?produto=')).length, 61);
   assert.doesNotMatch(xml, /vercel\.app|checkout|pagamento-|admin-|basculantes|#|<lastmod>/);
 });
 
@@ -29,7 +29,7 @@ test('robots libera recursos de renderização e declara o sitemap oficial', () 
   assert.doesNotMatch(robots, /Disallow:.*(?:assets|\.js|\.css|catalogo|produto|checkout)/);
 });
 
-test('cinco páginas estáticas possuem metadados e schemas únicos sem duplicação', () => {
+test('páginas estáticas possuem metadados e schemas únicos sem duplicação', () => {
   const titles = [];
   for (const file of Object.keys(pages)) {
     const html = read(file), meta = getMetadata(file);
@@ -43,10 +43,10 @@ test('cinco páginas estáticas possuem metadados e schemas únicos sem duplica�
     assert.equal(renderPage(html, meta), html, `${file} precisa de seo:build`);
     titles.push(meta.title);
   }
-  assert.equal(new Set(titles).size, 5);
+  assert.equal(new Set(titles).size, Object.keys(pages).length);
 });
 
-test('todas as 77 URLs recebem canonical próprio e HTML 200 antes do JavaScript', async () => {
+test('todas as 79 URLs recebem canonical próprio e HTML 200 antes do JavaScript', async () => {
   const titles = new Set();
   for (const path of paths) {
     const url = new URL(path, SITE), file = url.pathname.slice(1) || 'index.html';
