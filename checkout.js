@@ -1,3 +1,4 @@
+import { getAttribution } from "./seo/attribution.mjs";
 import { shippingProducts } from "./data/shipping-products.mjs";
 
 const CART_STORAGE_KEY = "chi-rho-test-cart-v1";
@@ -301,7 +302,8 @@ document.querySelector("#checkout-form")?.addEventListener("submit", async (even
       state: form.elements.state.value
     },
     items: cart.map((item) => ({ slug: item.slug, quantity: item.quantity })),
-    shipping
+    shipping,
+    attribution: getAttribution()
   };
 
   submitButton.disabled = true;
