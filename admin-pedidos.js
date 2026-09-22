@@ -37,6 +37,18 @@ const apiRequest=async(endpoint,path="",options={})=>{let session;try{session=aw
   if(response.status===401){clearSession();throw new Error("AUTH_REQUIRED");}
   if(!response.ok)throw new Error(data.error||"Não foi possível concluir esta ação.");return data;};
 const request=(path="",options={})=>apiRequest(ADMIN_ENDPOINT,path,options);
+const uploadPickupConfirmation=async(formData)=>{
+  let session;try{session=await ensureSession();}catch{clearSession();throw new Error("AUTH_REQUIRED");}
+  const response=await fetch(`${ADMIN_ENDPOINT}?action=confirm-pickup`,{
+    method:"POST",
+    headers:{apikey:PUBLIC_KEY,Authorization:`Bearer ${session.access_token}`},
+    body:formData
+  });
+  const data=await response.json().catch(()=>({}));
+  if(response.status===401){clearSession();throw new Error("AUTH_REQUIRED");}
+  if(!response.ok)throw new Error(data.error||"Não foi possível confirmar a retirada.");
+  return data;
+};
 const loadLabelCapability=async()=>{try{const data=await apiRequest(LABEL_ENDPOINT);labelCapability={
     available:data.available===true,
     message:data.available===true?"Emissão Frenet disponível.":"A emissão aguarda a homologação do Partner Token da Frenet."
@@ -81,14 +93,36 @@ const loadDetail=async id=>{if(!dialog.open)dialog.showModal();const content=doc
         node("span","",`${money(item.unit_price)} por unidade`),
         node("span","",`Estoque: ${item.inventory?.stock_total??"—"} total • ${item.inventory?.stock_reserved??"—"} reservado • ${item.inventory?.stock_available??"—"} disponível`));
       card.append(image,copy,node("b","",money(item.line_total)));products.append(card);});
-    const shipping=section("Frete, etiqueta e entrega"),shippingGrid=node("div","admin-detail-grid");
-    shippingGrid.append(field("Transportadora",order.shipping_carrier),field("Serviço",order.shipping_service),field("Prazo",order.shipping_delivery_time),
-      field("Frete",money(order.shipping_price)),field("Etiqueta",label(order.label_status)),field("ID Frenet",order.shipping_label_id),
-      field("Rastreamento",order.tracking_code||order.tracking_url),field("Validade da etiqueta",date(order.label_valid_through)),field("Situação",label(order.operational_status)));shipping.append(shippingGrid);
+    const isPickup=order.shipping_carrier_code==="PICKUP_VENDOR";
+    const operationalLabel=value=>isPickup&&value==="pronto_para_envio"?"Aguardando retirada":isPickup&&value==="entregue"?"Retirado pelo cliente":label(value);
+    const shipping=section(isPickup?"Retirada com o vendedor":"Frete, etiqueta e entrega"),shippingGrid=node("div","admin-detail-grid");
+    if(isPickup){
+      shippingGrid.append(
+        field("Modalidade","Retirada com o vendedor"),
+        field("Frete",money(order.shipping_price)),
+        field("Situação",operationalLabel(order.operational_status)),
+        field("Retirante",order.pickup_receiver_name||"—"),
+        field("Retirada confirmada em",date(order.pickup_confirmed_at)),
+        field("Comprovante",order.pickup_signature_url?"Assinatura registrada":"—")
+      );
+    }else{
+      shippingGrid.append(field("Transportadora",order.shipping_carrier),field("Serviço",order.shipping_service),field("Prazo",order.shipping_delivery_time),
+        field("Frete",money(order.shipping_price)),field("Etiqueta",label(order.label_status)),field("ID Frenet",order.shipping_label_id),
+        field("Rastreamento",order.tracking_code||order.tracking_url),field("Validade da etiqueta",date(order.label_valid_through)),field("Situação",label(order.operational_status)));
+    }
+    shipping.append(shippingGrid);
+    if(isPickup&&order.pickup_signature_url){
+      const proofActions=node("div","admin-actions");
+      proofActions.append(button("Ver assinatura do retirante","btn btn-secondary",()=>openDocument(order.pickup_signature_url)));
+      shipping.append(proofActions);
+    }
     const payment=section("Pagamento"),paymentGrid=node("div","admin-detail-grid");
     paymentGrid.append(field("Subtotal",money(order.subtotal)),field("Desconto",money(order.discount)),field("Frete",money(order.shipping_price)),
       field("Total",money(order.grand_total)),field("Situação",label(order.financial_status)),field("Forma",order.payment_method),field("Transação",order.payment_external_id));payment.append(paymentGrid);
-    const progress=section("Operação"),track=node("div","admin-progress");["novo","pago","em_separacao","pronto_para_envio","enviado","entregue"].forEach(step=>track.append(node("span",step===order.financial_status||step===order.operational_status?"is-current":"",label(step))));progress.append(track);
+    const progress=section("Operação"),track=node("div","admin-progress");
+    const operationSteps=isPickup?["novo","pago","em_separacao","pronto_para_envio","entregue"]:["novo","pago","em_separacao","pronto_para_envio","enviado","entregue"];
+    operationSteps.forEach(step=>track.append(node("span",step===order.financial_status||step===order.operational_status?"is-current":"",operationalLabel(step))));
+    progress.append(track);
     const history=section("Histórico"),timeline=node("ol","admin-history");
     (data.history||[]).forEach(entry=>{const item=node("li"),head=node("div"),type=entry.status_type==="financial"?"Pagamento":"Operação";
       head.append(node("strong","",`${type}: ${label(entry.status)}`),node("time","",date(entry.created_at)));item.append(head);
@@ -97,17 +131,44 @@ const loadDetail=async id=>{if(!dialog.open)dialog.showModal();const content=doc
     if(!timeline.children.length)timeline.append(node("li","admin-history-empty","Nenhuma alteração registrada."));history.append(timeline);
     const actions=section("Ações administrativas"),buttons=node("div","admin-actions");
     if(order.operational_status==="novo"&&order.financial_status==="pago")buttons.append(button("Iniciar separação","btn btn-primary",()=>updateOrder(order.id,"em_separacao")));
-    if(order.operational_status==="em_separacao")buttons.append(button("Marcar como pronto para envio","btn btn-primary",()=>updateOrder(order.id,"pronto_para_envio")));
-    if(order.operational_status==="pronto_para_envio"&&order.label_status!=="gerada"){
+    if(order.operational_status==="em_separacao"){
+      buttons.append(button(isPickup?"Pronto para retirada":"Marcar como pronto para envio","btn btn-primary",()=>updateOrder(order.id,"pronto_para_envio")));
+    }
+    if(isPickup&&order.operational_status==="pronto_para_envio"){
+      const pickupBox=node("div","admin-pickup-confirmation");
+      const intro=node("p","admin-action-note","Para confirmar a entrega presencial, registre o nome do retirante e fotografe a assinatura.");
+      const nameLabel=node("label","admin-pickup-field"),nameTitle=node("span","","Nome do retirante"),nameInput=node("input");
+      nameInput.type="text";nameInput.maxLength=160;nameInput.placeholder="Nome de quem retirou o pedido";nameInput.autocomplete="name";
+      nameLabel.append(nameTitle,nameInput);
+      const photoLabel=node("label","admin-pickup-field"),photoTitle=node("span","","Foto da assinatura"),photoInput=node("input");
+      photoInput.type="file";photoInput.accept="image/jpeg,image/png,image/webp";photoInput.setAttribute("capture","environment");
+      photoLabel.append(photoTitle,photoInput);
+      const confirm=button("Confirmar entrega com assinatura","btn btn-primary",async()=>{
+        const file=photoInput.files?.[0];
+        if(!nameInput.value.trim()){status.textContent="Informe o nome do retirante.";nameInput.focus();return;}
+        if(!file){status.textContent="Fotografe ou selecione a assinatura do retirante.";photoInput.focus();return;}
+        if(file.size>5*1024*1024){status.textContent="A imagem deve ter no máximo 5 MB.";return;}
+        if(!window.confirm(`Confirmar que o pedido ${order.code} foi retirado por ${nameInput.value.trim()}?`))return;
+        confirm.disabled=true;confirm.textContent="Confirmando entrega…";status.textContent="Salvando comprovante e confirmando retirada…";
+        try{
+          const formData=new FormData();formData.append("orderId",order.id);formData.append("receiverName",nameInput.value.trim());formData.append("signature",file,file.name||"assinatura.jpg");
+          await uploadPickupConfirmation(formData);
+          await Promise.all([loadOrders(),loadDetail(order.id)]);
+          status.textContent="Retirada confirmada com assinatura.";
+        }catch(error){status.textContent=error.message==="AUTH_REQUIRED"?"Sua sessão expirou. Entre novamente.":error.message;confirm.disabled=false;confirm.textContent="Confirmar entrega com assinatura";}
+      });
+      pickupBox.append(intro,nameLabel,photoLabel,confirm);buttons.append(pickupBox);
+    }
+    if(!isPickup&&order.operational_status==="pronto_para_envio"&&order.label_status!=="gerada"){
       const generate=button(order.label_status==="gerando"?"Etiqueta em processamento":labelCapability.available?"Gerar etiqueta":"Etiqueta aguardando homologação","btn btn-primary",()=>generateLabel(order.id));
       generate.disabled=order.label_status==="gerando"||!labelCapability.available;generate.title=labelCapability.available?"Gerar etiqueta na Frenet":labelCapability.message;buttons.append(generate);
     }
-    if(order.label_status==="gerada"){
+    if(!isPickup&&order.label_status==="gerada"){
       buttons.append(button("Imprimir etiqueta","btn btn-secondary",()=>openDocument(order.label_url)));
       if(order.declaration_url)buttons.append(button("Imprimir declaração","btn btn-secondary",()=>openDocument(order.declaration_url)));
       if(order.operational_status==="pronto_para_envio")buttons.append(button("Marcar como enviado","btn btn-primary",()=>updateOrder(order.id,"enviado")));
     }
-    if(order.operational_status==="enviado"){
+    if(!isPickup&&order.operational_status==="enviado"){
       if(order.tracking_url)buttons.append(button("Abrir rastreamento","btn btn-secondary",()=>openDocument(order.tracking_url)));
       buttons.append(button("Marcar como entregue","btn btn-primary",()=>updateOrder(order.id,"entregue")));
     }
