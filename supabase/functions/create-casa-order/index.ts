@@ -34,6 +34,15 @@ const roundMoney = (value: number) => Number(value.toFixed(2));
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const slugPattern = /^[a-z0-9][a-z0-9-]{0,119}$/;
+const PICKUP_ADDRESS = Object.freeze({
+  postal_code: "25525660",
+  street: "Rua Bento Siqueira",
+  number: "668",
+  complement: "LT 6, CS 7",
+  district: "Retirada CHI RHO",
+  city: "São João de Meriti",
+  state: "RJ"
+});
 
 const validTaxId = (value: string) => {
   if (!/^\d{11}$|^\d{14}$/.test(value) || /^(\d)\1+$/.test(value)) return false;
@@ -143,7 +152,7 @@ const validateAddress = (body: any) => {
 
 const getVerifiedShipping = async (body: any, items: Array<{ slug: string; quantity: number }>, postcode: string) => {
   const selected = body?.shipping?.service;
-  if (!selected || onlyDigits(body?.shipping?.cep) !== postcode) throw new Error("INVALID_SHIPPING");
+  if (!selected) throw new Error("INVALID_SHIPPING");
 
   if (cleanText(selected?.carrierCode, 80) === "PICKUP_VENDOR") {
     return {
@@ -156,6 +165,8 @@ const getVerifiedShipping = async (body: any, items: Array<{ slug: string; quant
       quoted_at: new Date().toISOString()
     };
   }
+
+  if (onlyDigits(body?.shipping?.cep) !== postcode) throw new Error("INVALID_SHIPPING");
 
   const quoteResponse = await fetch(`${SITE_ORIGIN}/api/frete`, {
     method: "POST",
@@ -217,7 +228,8 @@ Deno.serve(async (request: Request) => {
     if (!uuidPattern.test(clientRequestId)) throw new Error("INVALID_REQUEST_ID");
 
     const customer = validateContact(body);
-    const address = validateAddress(body);
+    const isPickup = cleanText(body?.shipping?.service?.carrierCode, 80) === "PICKUP_VENDOR";
+    const address = isPickup ? { ...PICKUP_ADDRESS } : validateAddress(body);
     const items = await getReleasedItems(body?.items);
     const subtotal = roundMoney(items.reduce((total, item) => total + item.unit_price * item.quantity, 0));
     const shipping = await getVerifiedShipping(body, items, address.postal_code);
