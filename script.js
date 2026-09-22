@@ -2472,6 +2472,20 @@ const requestShippingQuote = async (cep, itens) => {
   return data;
 };
 
+const PICKUP_VENDOR_SERVICE = Object.freeze({
+  carrier: "Retirada com o vendedor",
+  carrierCode: "PICKUP_VENDOR",
+  description: "Retirar com o vendedor",
+  serviceCode: "PICKUP_VENDOR",
+  deliveryTime: "Retirada a combinar",
+  price: 0
+});
+
+const withPickupOption = (services = []) => [
+  ...services.filter((service) => service?.carrierCode !== "PICKUP_VENDOR"),
+  PICKUP_VENDOR_SERVICE
+];
+
 const renderShippingServices = (container, services, { selectable = false, onSelect } = {}) => {
   container.replaceChildren();
 
@@ -2514,7 +2528,7 @@ const calculateProductShipping = async () => {
   try {
     const quote = await requestShippingQuote(productDialogPostcode.value, [{ slug, quantity }]);
     productDialogShippingStatus.textContent = `${quote.services.length} ${quote.services.length === 1 ? "opção encontrada" : "opções encontradas"}.`;
-    renderShippingServices(productDialogShippingResults, quote.services);
+    renderShippingServices(productDialogShippingResults, withPickupOption(quote.services));
   } catch (error) {
     productDialogShippingStatus.textContent = error.message;
   } finally {
@@ -2823,7 +2837,7 @@ testCartDialog.innerHTML = `
         <div class="test-cart-total"><span>Total</span><strong data-cart-total>R$ 0,00</strong></div>
       </div>
       <button class="btn btn-primary" type="button" data-cart-checkout disabled>Finalizar compra</button>
-      <small>Frete calculado pela Frenet. O pagamento será configurado na próxima etapa.</small>
+      <small>Escolha entrega calculada pela Frenet ou retirada com o vendedor.</small>
     </footer>
   </div>
 `;
@@ -2895,7 +2909,7 @@ const calculateCartShipping = async () => {
   try {
     const quote = await requestShippingQuote(postcodeInput.value, itens);
     status.textContent = "Escolha uma modalidade de entrega:";
-    renderShippingServices(options, quote.services, {
+    renderShippingServices(options, withPickupOption(quote.services), {
       selectable: true,
       onSelect: (service, selectedOption) => {
         selectedCartShipping = service;
