@@ -140,11 +140,19 @@ function renderOrders(payload) {
     const card = document.createElement('article');
     card.className = 'order-card';
     const itemRows = (order.items || []).map((item) => `<div class="order-item"><span>${safe(item.product_name)} × ${Number(item.quantity || 0)}</span><strong>${money(item.line_total)}</strong></div>`).join('');
-    const tracking = order.tracking_code
-      ? `<a class="tracking-link" href="${safe(order.tracking_url || '#')}" ${order.tracking_url ? 'target="_blank" rel="noopener noreferrer"' : ''}>Rastrear pedido: ${safe(order.tracking_code)} →</a>`
-      : '<span class="tracking-pending">Rastreio disponível após a postagem.</span>';
+    const isPickup = String(order.shipping_carrier || '').toLowerCase().includes('retirada com o vendedor');
+    const tracking = isPickup
+      ? '<span class="tracking-pending">Retirada presencial: aguarde a confirmação de que o pedido está pronto.</span>'
+      : order.tracking_code
+        ? `<a class="tracking-link" href="${safe(order.tracking_url || '#')}" ${order.tracking_url ? 'target="_blank" rel="noopener noreferrer"' : ''}>Rastrear pedido: ${safe(order.tracking_code)} →</a>`
+        : '<span class="tracking-pending">Rastreio disponível após a postagem.</span>';
     const delivery = [order.shipping_carrier, order.shipping_service].filter(Boolean).map(label).join(' • ');
-    const destination = [order.city, order.state].filter(Boolean).join(' - ');
+    const destination = isPickup ? '' : [order.city, order.state].filter(Boolean).join(' - ');
+    const operationalStatus = isPickup && order.operational_status === 'pronto_para_envio'
+      ? 'Aguardando retirada'
+      : isPickup && order.operational_status === 'entregue'
+        ? 'Retirado pelo cliente'
+        : label(order.operational_status);
     const history = Array.isArray(order.history) ? order.history : [];
     const historyRows = history.slice(-5).reverse().map((event) => `
       <li>
@@ -162,11 +170,11 @@ function renderOrders(payload) {
       </div>
       <div class="status-grid">
         <div class="status-box"><small>Pagamento</small><strong>${safe(label(order.financial_status))}</strong></div>
-        <div class="status-box"><small>Pedido</small><strong>${safe(label(order.operational_status))}</strong></div>
+        <div class="status-box"><small>Pedido</small><strong>${safe(operationalStatus)}</strong></div>
       </div>
       <div class="order-summary-grid">
         ${order.payment_method ? `<div><small>Forma de pagamento</small><strong>${safe(label(order.payment_method))}</strong></div>` : ''}
-        ${delivery ? `<div><small>Entrega</small><strong>${safe(delivery)}</strong></div>` : ''}
+        ${delivery ? `<div><small>${isPickup ? 'Retirada' : 'Entrega'}</small><strong>${safe(delivery)}</strong></div>` : ''}
         ${destination ? `<div><small>Destino</small><strong>${safe(destination)}</strong></div>` : ''}
         ${order.shipped_at ? `<div><small>Postado em</small><strong>${safe(date(order.shipped_at))}</strong></div>` : ''}
       </div>
