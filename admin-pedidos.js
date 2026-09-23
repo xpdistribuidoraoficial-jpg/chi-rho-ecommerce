@@ -150,13 +150,16 @@ const loadDetail=async id=>{if(!dialog.open)dialog.showModal();const content=doc
         if(!file){status.textContent="Fotografe ou selecione a assinatura do retirante.";photoInput.focus();return;}
         if(file.size>5*1024*1024){status.textContent="A imagem deve ter no máximo 5 MB.";return;}
         if(!window.confirm(`Confirmar que o pedido ${order.code} foi retirado por ${nameInput.value.trim()}?`))return;
+        const messageWindow=window.open("","_blank");
+        if(messageWindow){messageWindow.document.title="CHI RHO";messageWindow.document.body.textContent="Preparando mensagem ao cliente…";}
         confirm.disabled=true;confirm.textContent="Confirmando entrega…";status.textContent="Salvando comprovante e confirmando retirada…";
         try{
           const formData=new FormData();formData.append("orderId",order.id);formData.append("receiverName",nameInput.value.trim());formData.append("signature",file,file.name||"assinatura.jpg");
           await uploadPickupConfirmation(formData);
+          const messagePrepared=openCustomerUpdate(order,"entregue",messageWindow);
           await Promise.all([loadOrders(),loadDetail(order.id)]);
-          status.textContent="Retirada confirmada com assinatura.";
-        }catch(error){status.textContent=error.message==="AUTH_REQUIRED"?"Sua sessão expirou. Entre novamente.":error.message;confirm.disabled=false;confirm.textContent="Confirmar entrega com assinatura";}
+          status.textContent=messagePrepared?"Retirada confirmada. A mensagem ao cliente foi preparada no WhatsApp.":"Retirada confirmada com assinatura.";
+        }catch(error){messageWindow?.close();status.textContent=error.message==="AUTH_REQUIRED"?"Sua sessão expirou. Entre novamente.":error.message;confirm.disabled=false;confirm.textContent="Confirmar entrega com assinatura";}
       });
       pickupBox.append(intro,nameLabel,photoLabel,confirm);buttons.append(pickupBox);
     }
@@ -167,7 +170,7 @@ const loadDetail=async id=>{if(!dialog.open)dialog.showModal();const content=doc
     if(!isPickup&&order.label_status==="gerada"){
       buttons.append(button("Imprimir etiqueta","btn btn-secondary",()=>openDocument(order.label_url)));
       if(order.declaration_url)buttons.append(button("Imprimir declaração","btn btn-secondary",()=>openDocument(order.declaration_url)));
-      if(order.operational_status==="pronto_para_envio")buttons.append(button("Marcar como enviado","btn btn-primary",()=>updateOrder(order.id,"enviado")));
+      if(order.operational_status==="pronto_para_envio")buttons.append(button("Marcar como enviado","btn btn-primary",()=>updateOrder(order.id,"enviado",order)));
     }
     if(!isPickup&&order.operational_status==="enviado"){
       if(order.tracking_url)buttons.append(button("Abrir rastreamento","btn btn-secondary",()=>openDocument(order.tracking_url)));
