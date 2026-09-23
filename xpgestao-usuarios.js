@@ -1,0 +1,32 @@
+const SUPABASE_URL="https://sailabcmcqdzrqhqztqs.supabase.co";
+const PUBLIC_KEY="sb_publishable_ipNBmuf0pUOZRzzlpU8kWw_Md1Y5FuE";
+const ENDPOINT=`${SUPABASE_URL}/functions/v1/admin-user-management`;
+const SESSION_KEY="chi-rho-admin-session-v1";
+const login=document.querySelector("[data-admin-login]");
+const dashboard=document.querySelector("[data-admin-dashboard]");
+const loginStatus=document.querySelector("[data-admin-login-status]");
+const status=document.querySelector("[data-status]");
+const inviteStatus=document.querySelector("[data-invite-status]");
+const tbody=document.querySelector("[data-users]");
+const empty=document.querySelector("[data-empty]");
+let refreshPromise=null;
+
+const getSession=()=>{try{return JSON.parse(sessionStorage.getItem(SESSION_KEY)||"null");}catch{return null;}};
+const saveSession=session=>{const expiresAt=Number(session.expires_at)||Math.floor(Date.now()/1000)+Number(session.expires_in||3600);sessionStorage.setItem(SESSION_KEY,JSON.stringify({...session,expires_at:expiresAt}));};
+const clearSession=()=>{sessionStorage.removeItem(SESSION_KEY);setView(false);};
+const setView=authenticated=>{login.hidden=authenticated;dashboard.hidden=!authenticated;document.querySelector("[data-admin-signout]").hidden=!authenticated;};
+const refreshSession=async()=>{const session=getSession();if(!session?.refresh_token)throw new Error("AUTH_REQUIRED");const response=await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`,{method:"POST",headers:{apikey:PUBLIC_KEY,"Content-Type":"application/json"},body:JSON.stringify({refresh_token:session.refresh_token})});const data=await response.json().catch(()=>({}));if(!response.ok)throw new Error("AUTH_REQUIRED");saveSession(data);return data;};
+const ensureSession=async()=>{const session=getSession();if(!session?.access_token)throw new Error("AUTH_REQUIRED");if(Number(session.expires_at||0)>Math.floor(Date.now()/1000)+60)return session;if(!refreshPromise)refreshPromise=refreshSession().finally(()=>{refreshPromise=null;});return refreshPromise;};
+const request=async(options={})=>{let session;try{session=await ensureSession();}catch{clearSession();throw new Error("AUTH_REQUIRED");}const response=await fetch(ENDPOINT,{...options,headers:{apikey:PUBLIC_KEY,Authorization:`Bearer ${session.access_token}`,"Content-Type":"application/json",...(options.headers||{})}});const data=await response.json().catch(()=>({}));if(response.status===401){clearSession();throw new Error("AUTH_REQUIRED");}if(!response.ok)throw new Error(data.error||"Não foi possível concluir a ação.");return data;};
+
+const render=users=>{tbody.replaceChildren();empty.hidden=users.length>0;users.forEach(user=>{const row=document.createElement("tr");const values=[user.display_name||"—",user.email||"—",user.role==="owner"?"Proprietário":"Operador",user.active?"Ativo":"Desativado"];values.forEach(value=>{const td=document.createElement("td");td.textContent=value;row.append(td);});const action=document.createElement("td");if(user.role!=="owner"){const button=document.createElement("button");button.type="button";button.className=user.active?"btn btn-secondary":"btn btn-primary";button.textContent=user.active?"Desativar":"Reativar";button.addEventListener("click",async()=>{if(user.active&&!window.confirm(`Desativar o acesso de ${user.display_name}?`))return;button.disabled=true;try{await request({method:"PATCH",body:JSON.stringify({userId:user.user_id,active:!user.active})});await load();}catch(error){status.textContent=error.message;}finally{button.disabled=false;}});action.append(button);}else action.textContent="Conta principal";row.append(action);tbody.append(row);});};
+
+const load=async()=>{status.textContent="Carregando usuários…";try{const data=await request();document.querySelector("[data-admin-user]").textContent=`${data.owner?.displayName||"Proprietário"} • proprietário`;render(Array.isArray(data.users)?data.users:[]);status.textContent="";}catch(error){status.textContent=error.message==="AUTH_REQUIRED"?"Sua sessão expirou. Entre novamente.":error.message;if(error.message!=="AUTH_REQUIRED"){dashboard.hidden=true;login.hidden=false;loginStatus.textContent="Esta página é exclusiva da conta proprietária.";}}};
+
+document.querySelector("[data-admin-login-form]").addEventListener("submit",async event=>{event.preventDefault();loginStatus.textContent="Entrando…";const form=new FormData(event.currentTarget);try{const response=await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`,{method:"POST",headers:{apikey:PUBLIC_KEY,"Content-Type":"application/json"},body:JSON.stringify({email:form.get("email"),password:form.get("password")})});const data=await response.json().catch(()=>({}));if(!response.ok)throw new Error("E-mail ou senha inválidos.");saveSession(data);setView(true);loginStatus.textContent="";await load();}catch(error){clearSession();loginStatus.textContent=error.message;}});
+
+document.querySelector("[data-invite-form]").addEventListener("submit",async event=>{event.preventDefault();inviteStatus.textContent="Enviando convite…";const form=new FormData(event.currentTarget);const button=event.currentTarget.querySelector('button[type="submit"]');button.disabled=true;try{const data=await request({method:"POST",body:JSON.stringify({displayName:form.get("displayName"),email:form.get("email")})});inviteStatus.classList.add("is-success");inviteStatus.textContent=`Convite enviado para ${data.email}. O acesso ficará identificado como ${data.displayName}.`;event.currentTarget.reset();await load();}catch(error){inviteStatus.classList.remove("is-success");inviteStatus.textContent=error.message;}finally{button.disabled=false;}});
+
+document.querySelector("[data-refresh]").onclick=load;
+document.querySelector("[data-admin-signout]").onclick=async()=>{const session=getSession();try{if(session?.access_token)await fetch(`${SUPABASE_URL}/auth/v1/logout`,{method:"POST",headers:{apikey:PUBLIC_KEY,Authorization:`Bearer ${session.access_token}`}});}finally{clearSession();}};
+(async()=>{if(!getSession()?.access_token){setView(false);return;}setView(true);await load();})();
