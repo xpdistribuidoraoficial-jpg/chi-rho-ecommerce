@@ -13,6 +13,8 @@ const node=(tag,className,text)=>{const element=document.createElement(tag);if(c
 const login=document.querySelector("[data-admin-login]"),dashboard=document.querySelector("[data-admin-dashboard]");
 const passwordButton=document.querySelector("[data-admin-password]"),passwordDialog=document.querySelector("[data-password-dialog]");
 const passwordForm=document.querySelector("[data-password-form]"),passwordStatus=document.querySelector("[data-password-status]");
+const forgotPasswordButton=document.querySelector("[data-admin-forgot-password]"),passwordHelp=document.querySelector("[data-password-help]"),currentPasswordLabel=document.querySelector("[data-current-password-label]");
+let passwordRecoveryMode=false;
 const loginStatus=document.querySelector("[data-admin-login-status]"),status=document.querySelector("[data-admin-status]");
 const tbody=document.querySelector("[data-admin-orders]"),empty=document.querySelector("[data-admin-empty]");
 const dialog=document.querySelector("[data-order-dialog]");let activeFilter={},refreshPromise=null,ordersRequestSequence=0;
@@ -230,13 +232,22 @@ const passwordError=data=>{const code=String(data?.code||data?.error_code||"");
   if(code.includes("same_password"))return "A nova senha precisa ser diferente da senha atual.";
   if(code.includes("weak_password"))return "Escolha uma senha mais forte, com pelo menos 8 caracteres.";
   return data?.msg||data?.message||data?.error_description||"Não foi possível alterar a senha.";};
-const changePassword=async event=>{event.preventDefault();passwordStatus.classList.remove("is-success");passwordStatus.textContent="Validando…";
+const changePassword=async event=>{event.preventDefault();passwordStatus.classList.remove("is-success");passwordStatus.textContent=passwordRecoveryMode?"Salvando nova senha…":"Validando…";
   const form=new FormData(event.currentTarget),currentPassword=String(form.get("current_password")||"");
   const newPassword=String(form.get("new_password")||""),confirmation=String(form.get("confirm_password")||"");
   if(newPassword.length<8){passwordStatus.textContent="A nova senha deve ter pelo menos 8 caracteres.";return;}
   if(newPassword!==confirmation){passwordStatus.textContent="A confirmação da nova senha não confere.";return;}
   if(newPassword===currentPassword){passwordStatus.textContent="A nova senha precisa ser diferente da senha atual.";return;}
-  try{const session=await ensureSession(),email=session.user?.email;if(!email)throw new Error("Não foi possível identificar o usuário conectado.");
+  try{
+    if(passwordRecoveryMode){
+      const session=getSession();if(!session?.access_token)throw new Error("O link de redefinição expirou. Solicite um novo link.");
+      const updateResponse=await fetch(`${SUPABASE_URL}/auth/v1/user`,{method:"PUT",headers:{apikey:PUBLIC_KEY,Authorization:`Bearer ${session.access_token}`,"Content-Type":"application/json"},
+        body:JSON.stringify({password:newPassword}),signal:AbortSignal.timeout(10000)});
+      const updated=await updateResponse.json().catch(()=>({}));if(!updateResponse.ok)throw new Error(passwordError(updated));
+      event.currentTarget.reset();passwordStatus.classList.add("is-success");passwordStatus.textContent="Senha redefinida com sucesso. Você já pode entrar na Gestão Reservada.";
+      passwordRecoveryMode=false;sessionStorage.removeItem(SESSION_KEY);history.replaceState(null,"",location.pathname);setTimeout(()=>{if(passwordDialog.open)passwordDialog.close();setView(false);},1500);return;
+    }
+    const session=await ensureSession(),email=session.user?.email;if(!email)throw new Error("Não foi possível identificar o usuário conectado.");
     const verifyResponse=await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`,{method:"POST",headers:{apikey:PUBLIC_KEY,"Content-Type":"application/json"},
       body:JSON.stringify({email,password:currentPassword}),signal:AbortSignal.timeout(10000)});
     const verified=await verifyResponse.json().catch(()=>({}));if(!verifyResponse.ok)throw new Error("A senha atual não confere.");
@@ -248,8 +259,8 @@ const changePassword=async event=>{event.preventDefault();passwordStatus.classLi
     passwordStatus.textContent="Senha alterada com sucesso.";setTimeout(()=>{if(passwordDialog.open)passwordDialog.close();},1200);
   }catch(error){passwordStatus.textContent=error.message;}};
 
-passwordButton.onclick=()=>{passwordForm.reset();passwordStatus.textContent="";passwordStatus.classList.remove("is-success");passwordDialog.showModal();
-  passwordForm.elements.current_password.focus();};
+passwordButton.onclick=()=>{passwordRecoveryMode=false;passwordForm.reset();passwordStatus.textContent="";passwordStatus.classList.remove("is-success");currentPasswordLabel.hidden=false;passwordForm.elements.current_password.required=true;passwordHelp.textContent="Confirme sua senha atual e defina uma nova senha com pelo menos 8 caracteres.";passwordDialog.showModal();passwordForm.elements.current_password.focus();};
+forgotPasswordButton.onclick=async()=>{const email=String(document.querySelector('[data-admin-login-form] [name="email"]')?.value||"").trim().toLowerCase();if(!email){loginStatus.textContent="Informe seu e-mail acima para receber o link de redefinição.";return;}loginStatus.textContent="Enviando link de redefinição…";try{const response=await fetch(`${SUPABASE_URL}/auth/v1/recover`,{method:"POST",headers:{apikey:PUBLIC_KEY,"Content-Type":"application/json"},body:JSON.stringify({email,redirect_to:"https://www.chirho.com.br/xpdistribuidora.html"}),signal:AbortSignal.timeout(10000)});if(!response.ok)throw new Error("Não foi possível enviar o link agora.");loginStatus.textContent="Se este e-mail estiver cadastrado, enviaremos um link para redefinir sua senha.";}catch(error){loginStatus.textContent=error.message;}};
 document.querySelector("[data-password-close]").onclick=()=>passwordDialog.close();
 document.querySelector("[data-password-cancel]").onclick=()=>passwordDialog.close();
 passwordDialog.addEventListener("click",event=>{if(event.target===passwordDialog)passwordDialog.close();});
@@ -265,4 +276,4 @@ document.querySelectorAll("[data-filter],[data-financial],[data-operational]").f
   document.querySelectorAll(".admin-filters button").forEach(filter=>filter.classList.remove("is-active"));item.classList.add("is-active");
   activeFilter=item.dataset.financial?{financial:item.dataset.financial}:item.dataset.operational?{operational:item.dataset.operational}:{};loadOrders();}));
 
-const restore=async()=>{if(!getSession()?.access_token){setView(false);return;}setView(true);await loadOrders();};restore();
+const restore=async()=>{const hash=new URLSearchParams(location.hash.replace(/^#/,""));if(hash.get("type")==="recovery"&&hash.get("access_token")){passwordRecoveryMode=true;saveSession({access_token:hash.get("access_token"),refresh_token:hash.get("refresh_token")||"",expires_in:Number(hash.get("expires_in")||3600),token_type:"bearer",user:{email:""}});setView(false);passwordForm.reset();currentPasswordLabel.hidden=true;passwordForm.elements.current_password.required=false;passwordHelp.textContent="Defina uma nova senha com pelo menos 8 caracteres.";passwordStatus.textContent="";passwordDialog.showModal();passwordForm.elements.new_password.focus();return;}if(!getSession()?.access_token){setView(false);return;}setView(true);await loadOrders();};restore();
