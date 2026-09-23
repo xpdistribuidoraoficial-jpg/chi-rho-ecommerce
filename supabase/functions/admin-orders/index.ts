@@ -27,7 +27,7 @@ const getAdmin=async(request:Request,url:string,serviceKey:string)=>{
     apikey:serviceKey,Authorization:`Bearer ${serviceKey}`,"Content-Type":"application/json"},
     body:JSON.stringify({target_user_id:user.id,target_session_id:sessionId}),signal:AbortSignal.timeout(8000)});
   const admins=check.ok?await check.json():[];
-  return admins[0]?{id:user.id,email:user.email,displayName:admins[0].display_name}:null;
+  return admins[0]?{id:user.id,email:user.email,displayName:admins[0].display_name,role:admins[0].role||"operator"}:null;
 };
 
 Deno.serve(async(request)=>{
