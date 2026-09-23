@@ -6,7 +6,7 @@
   },
   "headers": [
     {
-      "source": "/:internal(checkout|pagamento-sucesso|pagamento-pendente|pagamento-falhou|xpdistribuidora|xpdistribuidora-estoque|xpgestao|xpgestao-estoque|minhas-compras).html",
+      "source": "/:internal(checkout|pagamento-sucesso|pagamento-pendente|pagamento-falhou|xpdistribuidora|xpdistribuidora-estoque|xpgestao|xpgestao-estoque|xpgestao-usuarios|minhas-compras).html",
       "headers": [
         {
           "key": "X-Robots-Tag",
@@ -40,7 +40,7 @@
       ]
     },
     {
-      "source": "/:admin(xpdistribuidora|xpdistribuidora-estoque|xpgestao|xpgestao-estoque).html",
+      "source": "/:admin(xpdistribuidora|xpdistribuidora-estoque|xpgestao|xpgestao-estoque|xpgestao-usuarios).html",
       "headers": [
         {
           "key": "Cache-Control",
