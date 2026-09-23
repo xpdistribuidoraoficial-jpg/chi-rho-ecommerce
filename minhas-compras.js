@@ -132,7 +132,7 @@ function renderOrders(payload) {
   if (!orders.length) {
     const empty = document.createElement('div');
     empty.className = 'empty-state';
-    empty.innerHTML = '<strong>Nenhuma compra encontrada.</strong><span>Use o mesmo e-mail informado no checkout. Se a compra foi recente, aguarde alguns instantes e tente novamente.</span>';
+    empty.innerHTML = '<strong>Nenhum pedido encontrado.</strong><span>Use o mesmo e-mail informado no checkout. Se a compra foi recente, aguarde alguns instantes e tente novamente.</span>';
     ordersList.appendChild(empty);
     return;
   }
@@ -202,7 +202,7 @@ async function loadOrders() {
       sessionStorage.removeItem(SESSION_KEY);
       throw new Error('Sua sessão expirou. Solicite um novo código.');
     }
-    if (!response.ok) throw new Error(payload?.error || 'Não foi possível carregar suas compras agora.');
+    if (!response.ok) throw new Error(payload?.error || 'Não foi possível carregar seus pedidos agora.');
     requestForm.hidden = true;
     verifyForm.hidden = true;
     ordersSection.hidden = false;
@@ -211,7 +211,7 @@ async function loadOrders() {
   } catch (error) {
     ordersSection.hidden = true;
     requestForm.hidden = false;
-    showNotice(error.message || 'Não foi possível carregar suas compras agora.', 'error');
+    showNotice(error.message || 'Não foi possível carregar seus pedidos agora.', 'error');
   }
 }
 
