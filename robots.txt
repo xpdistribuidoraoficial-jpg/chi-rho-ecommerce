@@ -5,6 +5,7 @@ Disallow: /xpdistribuidora.html
 Disallow: /xpdistribuidora-estoque.html
 Disallow: /xpgestao.html
 Disallow: /xpgestao-estoque.html
+Disallow: /xpgestao-usuarios.html
 Disallow: /audits/
 Disallow: /tests/
 Disallow: /scripts/
