@@ -1,0 +1,34 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Usuários | Gestão Reservada CHI RHO</title><meta name="robots" content="noindex,nofollow"><meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; connect-src 'self' https://sailabcmcqdzrqhqztqs.supabase.co; base-uri 'self'; form-action 'self'">
+<link rel="stylesheet" href="style.css"><link rel="stylesheet" href="admin.css"></head>
+<body class="admin-page"><header class="admin-header"><div class="container admin-header-row">
+<a class="brand" href="index.html"><img src="assets/logo-chi-rho.png" alt="Chi Rho"><span><strong>CHI RHO</strong><small>GESTÃO RESERVADA</small></span></a>
+<div class="admin-session"><a class="admin-nav-link" href="xpgestao.html">Pedidos</a><a class="admin-nav-link" href="xpgestao-estoque.html">Estoque</a><span data-admin-user></span><button class="admin-signout" type="button" data-admin-signout hidden>Sair</button></div>
+</div></header>
+<main class="container admin-main">
+<section class="admin-login" data-admin-login><span>ÁREA DO PROPRIETÁRIO</span><h1>Usuários administrativos</h1>
+<p>Entre com a conta proprietária para convidar, acompanhar ou desativar acessos administrativos.</p>
+<form data-admin-login-form><label>E-mail<input name="email" type="email" autocomplete="username" required></label>
+<label>Senha<input name="password" type="password" autocomplete="current-password" required></label>
+<button class="btn btn-primary" type="submit">Entrar</button><p class="admin-status" data-admin-login-status></p></form></section>
+
+<section data-admin-dashboard hidden>
+<div class="admin-title"><div><span>CONTROLE DE ACESSO</span><h1>Usuários</h1><p>Contas individuais permitem identificar quem alterou pedidos e estoque.</p></div><button class="btn btn-secondary" type="button" data-refresh>Atualizar</button></div>
+
+<section class="admin-detail-section">
+<h3>Convidar usuário</h3>
+<form class="admin-password-form" data-invite-form>
+<label>Nome do usuário<input name="displayName" type="text" maxlength="120" placeholder="Ex.: Paulo Perini" required></label>
+<label>E-mail<input name="email" type="email" maxlength="254" placeholder="email@exemplo.com" required></label>
+<p class="admin-action-note">O usuário será criado como operador. Ele poderá trabalhar com pedidos e estoque, e suas alterações ficarão vinculadas ao próprio usuário.</p>
+<div class="admin-password-actions"><button class="btn btn-primary" type="submit">Enviar convite</button></div>
+<p class="admin-status" data-invite-status aria-live="polite"></p>
+</form>
+</section>
+
+<section class="admin-detail-section"><h3>Acessos cadastrados</h3>
+<div class="admin-table-wrap"><table class="admin-orders-table"><thead><tr><th>Nome</th><th>E-mail</th><th>Perfil</th><th>Status</th><th>Ação</th></tr></thead><tbody data-users></tbody></table><div class="admin-empty" data-empty hidden>Nenhum usuário encontrado.</div></div>
+<p class="admin-status" data-status aria-live="polite"></p></section>
+</section>
+</main>
+<script type="module" src="xpgestao-usuarios.js"></script></body></html>
