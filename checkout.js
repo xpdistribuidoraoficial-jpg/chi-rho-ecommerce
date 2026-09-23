@@ -196,7 +196,7 @@ if (cart.length === 0 || !shipping) {
   deliveryLabel.textContent = isPickup ? "RETIRADA SELECIONADA" : "ENTREGA SELECIONADA";
   deliveryService.textContent = `${shipping.service.carrier} • ${shipping.service.description}`;
   deliveryTime.textContent = isPickup
-    ? "Retirada a combinar com o vendedor após a confirmação do pagamento."
+    ? "Rua Maria do Carmo, 220 - Penha Circular - Rio de Janeiro/RJ - CEP 21210-240. Retirada após a confirmação do pagamento."
     : `${formatDeliveryTime(shipping.service.deliveryTime)} para o CEP ${formatPostcode(shipping.cep)}`;
   delivery.replaceChildren(deliveryLabel, deliveryService, deliveryTime);
   const checkoutForm = document.querySelector("#checkout-form");
