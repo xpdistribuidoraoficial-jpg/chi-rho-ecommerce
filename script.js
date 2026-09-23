@@ -2472,13 +2472,13 @@ const requestShippingQuote = async (cep, itens) => {
   return data;
 };
 
-const PICKUP_VENDOR_POSTCODE = "25525660";
+const PICKUP_VENDOR_POSTCODE = "21210240";
 const PICKUP_VENDOR_SERVICE = Object.freeze({
   carrier: "Retirada com o vendedor",
   carrierCode: "PICKUP_VENDOR",
-  description: "Retirar com o vendedor",
+  description: "Retirada grátis • Rua Maria do Carmo, 220 - Penha Circular - Rio de Janeiro/RJ",
   serviceCode: "PICKUP_VENDOR",
-  deliveryTime: "Retirada a combinar após a confirmação do pagamento",
+  deliveryTime: "Rua Maria do Carmo, 220 - Penha Circular - Rio de Janeiro/RJ - CEP 21210-240",
   price: 0
 });
 
