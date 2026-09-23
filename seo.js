@@ -342,3 +342,5 @@ window.addEventListener('storage', (event) => {
   applyFavoritesView();
 });
 
+
+refreshReleasedCatalog();
