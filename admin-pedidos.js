@@ -131,9 +131,9 @@ const loadDetail=async id=>{if(!dialog.open)dialog.showModal();const content=doc
       if(entry.note)item.append(node("small","",entry.note));timeline.append(item);});
     if(!timeline.children.length)timeline.append(node("li","admin-history-empty","Nenhuma alteração registrada."));history.append(timeline);
     const actions=section("Ações administrativas"),buttons=node("div","admin-actions");
-    if(order.operational_status==="novo"&&order.financial_status==="pago")buttons.append(button("Iniciar separação","btn btn-primary",()=>updateOrder(order.id,"em_separacao")));
+    if(order.operational_status==="novo"&&order.financial_status==="pago")buttons.append(button("Iniciar separação","btn btn-primary",()=>updateOrder(order.id,"em_separacao",order)));
     if(order.operational_status==="em_separacao"){
-      buttons.append(button(isPickup?"Pronto para retirada":"Marcar como pronto para envio","btn btn-primary",()=>updateOrder(order.id,"pronto_para_envio")));
+      buttons.append(button(isPickup?"Pronto para retirada":"Marcar como pronto para envio","btn btn-primary",()=>updateOrder(order.id,"pronto_para_envio",order)));
     }
     if(isPickup&&order.operational_status==="pronto_para_envio"){
       const pickupBox=node("div","admin-pickup-confirmation");
@@ -171,13 +171,55 @@ const loadDetail=async id=>{if(!dialog.open)dialog.showModal();const content=doc
     }
     if(!isPickup&&order.operational_status==="enviado"){
       if(order.tracking_url)buttons.append(button("Abrir rastreamento","btn btn-secondary",()=>openDocument(order.tracking_url)));
-      buttons.append(button("Marcar como entregue","btn btn-primary",()=>updateOrder(order.id,"entregue")));
+      buttons.append(button("Marcar como entregue","btn btn-primary",()=>updateOrder(order.id,"entregue",order)));
     }
     if(!buttons.children.length)buttons.append(node("p","admin-action-note",order.financial_status==="aguardando_pagamento"?"Aguarde a confirmação real do pagamento para iniciar a separação.":"Nenhuma ação disponível para o estado atual."));
     actions.append(buttons);content.append(client,origin,products,shipping,payment,progress,history,actions);
   }catch(error){content.replaceChildren(node("p","admin-status",error.message));}};
-const updateOrder=async(orderId,newStatus)=>{status.textContent="Atualizando pedido…";try{await request("",{method:"PATCH",body:JSON.stringify({orderId,status:newStatus})});
-  await Promise.all([loadOrders(),loadDetail(orderId)]);status.textContent="Pedido atualizado.";}catch(error){status.textContent=error.message;}};
+const customerUpdateMessage=(order,newStatus)=>{
+  const firstName=String(order?.customer_name||"cliente").trim().split(/\s+/)[0]||"cliente";
+  const code=order?.code||"";
+  const isPickup=order?.shipping_carrier_code==="PICKUP_VENDOR";
+  const messages={
+    em_separacao:`Olá, ${firstName}! Seu pedido ${code} da CHI RHO está em separação. Avisaremos você assim que avançarmos para a próxima etapa.`,
+    pronto_para_envio:isPickup
+      ? `Olá, ${firstName}! Seu pedido ${code} da CHI RHO está pronto para retirada. Aguarde nossa confirmação do atendimento para realizar a retirada.`
+      : `Olá, ${firstName}! Seu pedido ${code} da CHI RHO está pronto para envio. Assim que for postado, enviaremos a atualização e o rastreamento, quando disponível.`,
+    enviado:`Olá, ${firstName}! Seu pedido ${code} da CHI RHO foi enviado.${order?.tracking_code?` Código de rastreio: ${order.tracking_code}.`:""} Acompanhe as próximas atualizações em Minhas Compras.`,
+    entregue:isPickup
+      ? `Olá, ${firstName}! Confirmamos a retirada do pedido ${code}. Obrigado por comprar com a CHI RHO!`
+      : `Olá, ${firstName}! O pedido ${code} foi marcado como entregue. Obrigado por comprar com a CHI RHO!`
+  };
+  return messages[newStatus]||`Olá, ${firstName}! O pedido ${code} da CHI RHO foi atualizado para: ${label(newStatus)}.`;
+};
+const whatsappCustomerUrl=(order,message)=>{
+  const digits=String(order?.customer_whatsapp||order?.customer_phone||"").replace(/\D/g,"");
+  if(digits.length<10) return null;
+  const phone=digits.startsWith("55")?digits:`55${digits}`;
+  return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+};
+const openCustomerUpdate=(order,newStatus,preopenedWindow=null)=>{
+  const url=whatsappCustomerUrl(order,customerUpdateMessage(order,newStatus));
+  if(!url){preopenedWindow?.close();return false;}
+  if(preopenedWindow){preopenedWindow.location.href=url;return true;}
+  window.open(url,"_blank","noopener,noreferrer");
+  return true;
+};
+
+const updateOrder=async(orderId,newStatus,order=null)=>{
+  const messageWindow=order?window.open("","_blank"):null;
+  if(messageWindow){messageWindow.document.title="CHI RHO";messageWindow.document.body.textContent="Preparando mensagem ao cliente…";}
+  status.textContent="Atualizando pedido…";
+  try{
+    await request("",{method:"PATCH",body:JSON.stringify({orderId,status:newStatus})});
+    const messagePrepared=order?openCustomerUpdate(order,newStatus,messageWindow):false;
+    await Promise.all([loadOrders(),loadDetail(orderId)]);
+    status.textContent=messagePrepared?"Pedido atualizado. A mensagem ao cliente foi preparada no WhatsApp.":"Pedido atualizado.";
+  }catch(error){
+    messageWindow?.close();
+    status.textContent=error.message;
+  }
+};
 const generateLabel=async orderId=>{status.textContent="Solicitando a etiqueta à Frenet…";try{await apiRequest(LABEL_ENDPOINT,"",{method:"POST",body:JSON.stringify({orderId})});
   await Promise.all([loadOrders(),loadDetail(orderId)]);status.textContent="Etiqueta gerada. Confira os dados antes de imprimir.";}catch(error){status.textContent=error.message;await loadDetail(orderId);}};
 
