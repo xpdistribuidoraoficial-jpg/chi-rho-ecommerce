@@ -3025,25 +3025,29 @@ const renderTestCart = ({ pruneUnavailable = inventoryHydrated } = {}) => {
     link.setAttribute("aria-label", `Carrinho com ${totalQuantity} ${totalQuantity === 1 ? "item" : "itens"}`);
   });
 
-  itemsElement.innerHTML = validItems.length
-    ? validItems.map(({ product, quantity }) => `
+  itemsElement.innerHTML = displayedItems.length
+    ? displayedItems.map(({ product, quantity }) => {
+      const hydratedProduct = getTestCartProduct(product.slug);
+      const usableProduct = hydratedProduct || product;
+      const availableStock = Number.isInteger(usableProduct.estoque) ? usableProduct.estoque : null;
+      return `
       <article class="test-cart-item">
-        <img src="${product.imagem}" alt="" />
+        <img src="${usableProduct.imagem}" alt="" />
         <div class="test-cart-item-copy">
-          <small>${product.categoria}</small>
-          <h3>${product.nome}</h3>
-          <strong>${getProductStatus(product)}</strong>
-          <div class="test-cart-item-controls" aria-label="Quantidade de ${product.nome}">
-            <button type="button" data-cart-action="decrease" data-cart-slug="${product.slug}" aria-label="Diminuir quantidade">−</button>
+          <small>${usableProduct.categoria}</small>
+          <h3>${usableProduct.nome}</h3>
+          <strong>${inventoryHydrated ? getProductStatus(usableProduct) : "Atualizando preço e estoque…"}</strong>
+          <div class="test-cart-item-controls" aria-label="Quantidade de ${usableProduct.nome}">
+            <button type="button" data-cart-action="decrease" data-cart-slug="${usableProduct.slug}" aria-label="Diminuir quantidade" ${inventoryHydrated ? "" : "disabled"}>−</button>
             <output>${quantity}</output>
-            <button type="button" data-cart-action="increase" data-cart-slug="${product.slug}" aria-label="Aumentar quantidade" ${quantity >= product.estoque ? "disabled" : ""}>+</button>
-            <button class="test-cart-remove" type="button" data-cart-action="remove" data-cart-slug="${product.slug}">Remover</button>
+            <button type="button" data-cart-action="increase" data-cart-slug="${usableProduct.slug}" aria-label="Aumentar quantidade" ${!inventoryHydrated || (availableStock !== null && quantity >= availableStock) ? "disabled" : ""}>+</button>
+            <button class="test-cart-remove" type="button" data-cart-action="remove" data-cart-slug="${usableProduct.slug}">Remover</button>
           </div>
-          <span>${product.estoque} unidades em estoque</span>
+          <span>${inventoryHydrated && availableStock !== null ? `${availableStock} unidades em estoque` : "Confirmando disponibilidade…"}</span>
         </div>
-      </article>
-    `).join("")
-    : '<div class="test-cart-empty"><strong>Seu carrinho está vazio.</strong><span>Adicione um dos itens de Casa disponíveis para o teste.</span></div>';
+      </article>`;
+    }).join("")
+    : '<div class="test-cart-empty"><strong>Seu carrinho está vazio.</strong><span>Adicione produtos e continue sua compra.</span></div>';
 
   const postcodeInput = testCartDialog.querySelector("#test-cart-postcode");
   const calculateButton = testCartDialog.querySelector("[data-cart-shipping-calculate]");
