@@ -169,3 +169,13 @@ test("Casa mobile mantém banner sem aviso de catálogo em expansão", () => {
   assert.match(mobileStyles, /\.catalog-hero-casa-mobile\{display:none\}/);
   assert.match(mobileStyles, /@media\(max-width:340px\)[\s\S]*?min-height:405px/);
 });
+
+test("carrinho preserva itens durante hidratacao e persiste em local e session storage", () => {
+  assert.ok(source.includes("let inventoryHydrated = false"));
+  assert.ok(source.includes("renderTestCart({ pruneUnavailable: false })"));
+  assert.ok(source.includes("renderTestCart({ pruneUnavailable: true })"));
+  assert.ok(source.includes("localStorage.setItem(TEST_CART_STORAGE_KEY"));
+  assert.ok(source.includes("sessionStorage.setItem(TEST_CART_STORAGE_KEY"));
+  assert.ok(source.includes("catalogProducts.find((candidate) => candidate.slug === item.slug)"));
+  assert.ok(source.includes("product.testeCarrinho = true"));
+});
