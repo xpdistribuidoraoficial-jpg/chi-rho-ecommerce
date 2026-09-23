@@ -2778,14 +2778,21 @@ const INVENTORY_ENDPOINT = "https://sailabcmcqdzrqhqztqs.supabase.co/functions/v
 const INVENTORY_PUBLIC_KEY = "sb_publishable_ipNBmuf0pUOZRzzlpU8kWw_Md1Y5FuE";
 
 const loadTestCart = () => {
-  try {
-    const storedCart = JSON.parse(localStorage.getItem(TEST_CART_STORAGE_KEY) || "[]");
-    return Array.isArray(storedCart)
-      ? storedCart.filter((item) => typeof item?.slug === "string" && Number.isInteger(item?.quantity))
-      : [];
-  } catch {
-    return [];
-  }
+  const parseCart = (raw) => {
+    try {
+      const storedCart = JSON.parse(raw || "[]");
+      return Array.isArray(storedCart)
+        ? storedCart.filter((item) => typeof item?.slug === "string" && Number.isInteger(item?.quantity) && item.quantity > 0)
+        : [];
+    } catch {
+      return [];
+    }
+  };
+  let localCart = [];
+  let sessionCart = [];
+  try { localCart = parseCart(localStorage.getItem(TEST_CART_STORAGE_KEY)); } catch {}
+  try { sessionCart = parseCart(sessionStorage.getItem(TEST_CART_STORAGE_KEY)); } catch {}
+  return localCart.length ? localCart : sessionCart;
 };
 
 let testCart = loadTestCart();
@@ -2956,11 +2963,17 @@ const calculateCartShipping = async () => {
 };
 
 const saveTestCart = () => {
+  const value = JSON.stringify(testCart);
+  let persisted = false;
   try {
-    localStorage.setItem(TEST_CART_STORAGE_KEY, JSON.stringify(testCart));
-  } catch {
-    // O carrinho continua funcionando nesta página mesmo sem armazenamento local.
-  }
+    localStorage.setItem(TEST_CART_STORAGE_KEY, value);
+    persisted = true;
+  } catch {}
+  try {
+    sessionStorage.setItem(TEST_CART_STORAGE_KEY, value);
+    persisted = true;
+  } catch {}
+  return persisted;
 };
 
 const getTestCartProduct = (slug) => catalogProducts.find((product) =>
