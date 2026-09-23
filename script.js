@@ -2789,6 +2789,7 @@ const loadTestCart = () => {
 };
 
 let testCart = loadTestCart();
+let inventoryHydrated = false;
 
 const loadTestCartShipping = () => {
   try {
@@ -2988,19 +2989,27 @@ const updateTestCartQuantity = (slug, requestedQuantity) => {
   return quantity;
 };
 
-const renderTestCart = () => {
-  testCart = testCart
-    .map((item) => {
-      const product = getTestCartProduct(item.slug);
-      if (!product || !getProductCartAvailability(product).available) return null;
-      return { slug: item.slug, quantity: clampProductCartQuantity(product, item.quantity) };
-    })
-    .filter(Boolean);
-  saveTestCart();
+const renderTestCart = ({ pruneUnavailable = inventoryHydrated } = {}) => {
+  if (pruneUnavailable) {
+    testCart = testCart
+      .map((item) => {
+        const product = getTestCartProduct(item.slug);
+        if (!product || !getProductCartAvailability(product).available) return null;
+        return { slug: item.slug, quantity: clampProductCartQuantity(product, item.quantity) };
+      })
+      .filter(Boolean);
+    saveTestCart();
+  }
 
   const itemsElement = testCartDialog.querySelector(".test-cart-items");
-  const validItems = testCart.map((item) => ({ ...item, product: getTestCartProduct(item.slug) }));
-  const totalQuantity = validItems.reduce((total, item) => total + item.quantity, 0);
+  const validItems = testCart
+    .map((item) => ({ ...item, product: getTestCartProduct(item.slug) }))
+    .filter((item) => item.product && getProductCartAvailability(item.product).available);
+  const displayedItems = inventoryHydrated ? validItems : testCart.map((item) => ({
+    ...item,
+    product: catalogProducts.find((product) => product.slug === item.slug)
+  })).filter((item) => item.product);
+  const totalQuantity = testCart.reduce((total, item) => total + item.quantity, 0);
   const subtotal = validItems.reduce((total, item) => total + item.product.preco * item.quantity, 0);
   testCartSubtotal = subtotal;
 
@@ -3039,9 +3048,13 @@ const renderTestCart = () => {
   const postcodeInput = testCartDialog.querySelector("#test-cart-postcode");
   const calculateButton = testCartDialog.querySelector("[data-cart-shipping-calculate]");
   const shippingStatus = testCartDialog.querySelector("[data-cart-shipping-status]");
-  postcodeInput.disabled = validItems.length === 0;
-  calculateButton.disabled = validItems.length === 0;
-  if (validItems.length === 0) {
+  postcodeInput.disabled = !inventoryHydrated || validItems.length === 0;
+  calculateButton.disabled = !inventoryHydrated || validItems.length === 0;
+  if (!inventoryHydrated && testCart.length) {
+    clearCartShipping();
+    testCartDialog.querySelector(".test-cart-shipping-options").replaceChildren();
+    shippingStatus.textContent = "Confirmando os itens do carrinho…";
+  } else if (validItems.length === 0) {
     clearCartShipping();
     testCartDialog.querySelector(".test-cart-shipping-options").replaceChildren();
     shippingStatus.textContent = "Adicione um produto antes de escolher a entrega.";
@@ -3069,19 +3082,30 @@ const refreshAvailableInventory = async () => {
   try {
     const response = await fetch(INVENTORY_ENDPOINT, {
       headers: { apikey: INVENTORY_PUBLIC_KEY },
-      signal: AbortSignal.timeout(8000)
+      signal: AbortSignal.timeout(12000)
     });
     const data = await response.json();
-    if (!response.ok || !Array.isArray(data.inventory)) return;
+    if (!response.ok || !Array.isArray(data.inventory)) throw new Error("INVENTORY_UNAVAILABLE");
+
     data.inventory.forEach((item) => {
-      const product = catalogProducts.find((candidate) => candidate.slug === item.slug && candidate.testeCarrinho === true);
-      if (product && Number.isInteger(item.available)) product.estoque = Math.max(0, item.available);
+      const product = catalogProducts.find((candidate) => candidate.slug === item.slug);
+      if (!product) return;
+      const unitPrice = Number(item.unitPrice);
+      const available = Number(item.available);
+      if (!Number.isFinite(unitPrice) || unitPrice <= 0 || !Number.isInteger(available)) return;
+      product.preco = unitPrice;
+      product.estoque = Math.max(0, available);
+      product.testeCarrinho = true;
+      if (item.sku) product.sku = item.sku;
     });
+
+    inventoryHydrated = true;
     const activeFilter = document.querySelector(".catalog-filter.is-active")?.dataset.filter;
     if (catalogGrid) setCatalogFilter(activeFilter || requestedCategory, requestedQuery);
-    renderTestCart();
+    renderTestCart({ pruneUnavailable: true });
   } catch {
-    // Mantém o último limite local; o servidor confirma o estoque antes de reservar.
+    inventoryHydrated = false;
+    renderTestCart({ pruneUnavailable: false });
   }
 };
 
@@ -3199,7 +3223,7 @@ testCartDialog.querySelector("#test-cart-postcode")?.addEventListener("keydown",
   }
 });
 
-renderTestCart();
+renderTestCart({ pruneUnavailable: false });
 refreshAvailableInventory();
 
 const requestedProductSlug = new URLSearchParams(window.location.search).get("produto");
