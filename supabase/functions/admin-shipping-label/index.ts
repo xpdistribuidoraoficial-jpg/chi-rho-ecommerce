@@ -30,7 +30,7 @@ const getAdmin=async(request:Request,url:string,serviceKey:string)=>{
   if(!uuid.test(String(user?.id||""))||!uuid.test(sessionId)) return null;
   const authorized=await rpc(url,serviceKey,"authorize_admin_session",{target_user_id:user.id,target_session_id:sessionId});
   const record=Array.isArray(authorized.data)?authorized.data[0]:null;
-  return authorized.ok&&record?{id:user.id,email:user.email,displayName:record.display_name}:null;
+  return authorized.ok&&record?{id:user.id,email:user.email,displayName:record.display_name,role:record.role||"operator"}:null;
 };
 
 Deno.serve(async(request)=>{
