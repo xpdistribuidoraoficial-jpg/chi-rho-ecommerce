@@ -133,12 +133,12 @@ if (base && typeof catalogProducts !== 'undefined') {
 
 const CUSTOMER_PURCHASES_URL = 'https://www.chirho.com.br/minhas-compras.html';
 document.querySelectorAll('.mobile-purchases-link, .mobile-header-actions').forEach((element) => element.remove());
-document.querySelectorAll('a[href$="#conta"], a[aria-label="Minhas Compras"]').forEach((anchor) => {
+document.querySelectorAll('a[href$="#conta"], a[aria-label="Meus Pedidos"]').forEach((anchor) => {
   anchor.href = CUSTOMER_PURCHASES_URL;
   const label = anchor.querySelector('span');
-  if (label) label.textContent = 'Minhas Compras';
-  else anchor.textContent = 'Minhas Compras';
-  anchor.setAttribute('aria-label', 'Minhas Compras');
+  if (label) label.textContent = 'Meus Pedidos';
+  else anchor.textContent = 'Meus Pedidos';
+  anchor.setAttribute('aria-label', 'Meus Pedidos');
 });
 
 if (!document.querySelector('#chi-rho-mobile-account-style')) {
@@ -149,7 +149,7 @@ if (!document.querySelector('#chi-rho-mobile-account-style')) {
       .header-row{grid-template-columns:44px minmax(0,1fr) 92px!important}
       .header-actions{display:flex!important;align-items:center!important;justify-content:flex-end!important;gap:4px!important}
       .header-actions a{display:none!important}
-      .header-actions a[aria-label="Minhas Compras"],
+      .header-actions a[aria-label="Meus Pedidos"],
       .header-actions .header-cart-link,
       .header-actions a[href$="#carrinho"]{
         width:44px!important;
@@ -163,7 +163,7 @@ if (!document.querySelector('#chi-rho-mobile-account-style')) {
         color:var(--navy)!important;
         text-decoration:none!important;
       }
-      .header-actions a[aria-label="Minhas Compras"] span,
+      .header-actions a[aria-label="Meus Pedidos"] span,
       .header-actions .header-cart-link span,
       .header-actions a[href$="#carrinho"] span{display:none!important}
     }
@@ -171,7 +171,7 @@ if (!document.querySelector('#chi-rho-mobile-account-style')) {
       .header-row{grid-template-columns:40px minmax(0,1fr) 84px!important;gap:6px 8px!important}
       .brand img{width:52px!important;height:52px!important;flex-basis:52px!important}
       .brand strong{font-size:19px!important}
-      .header-actions a[aria-label="Minhas Compras"],
+      .header-actions a[aria-label="Meus Pedidos"],
       .header-actions .header-cart-link,
       .header-actions a[href$="#carrinho"]{width:40px!important;height:40px!important;font-size:22px!important}
     }
