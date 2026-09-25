@@ -5,6 +5,7 @@ const LABEL_ENDPOINT=`${SUPABASE_URL}/functions/v1/admin-shipping-label`;
 const SESSION_KEY="chi-rho-admin-session-v1";
 const money=value=>Number(value||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
 const date=value=>value?new Date(value).toLocaleString("pt-BR",{dateStyle:"short",timeStyle:"short"}):"—";
+const adminRoleLabel=role=>({owner:"Proprietário",senior_admin:"Administrador Sênior",operator:"Operador"}[role]||"Administrador");
 const label=value=>({aguardando_pagamento:"Aguardando pagamento",pago:"Pago",recusado:"Recusado",cancelado:"Cancelado",
   reembolsado:"Reembolsado",novo:"Novo",em_separacao:"Em separação",pronto_para_envio:"Pronto para envio",
   enviado:"Enviado",entregue:"Entregue",nao_solicitada:"Não solicitada",gerando:"Gerando",gerada:"Gerada",falhou:"Falhou"}[value]||value||"—");
@@ -66,7 +67,7 @@ const renderOrders=orders=>{tbody.replaceChildren();empty.hidden=orders.length>0
 const loadOrders=async()=>{const requestSequence=++ordersRequestSequence;status.textContent="Carregando…";const params=new URLSearchParams(activeFilter);try{const [data]=await Promise.all([request(`?${params}`),loadLabelCapability()]);
   if(requestSequence!==ordersRequestSequence)return;
   renderOrders(data.orders||[]);document.querySelector("[data-admin-summary]").textContent=`${data.orders?.length||0} pedidos neste filtro`;
-  document.querySelector("[data-admin-user]").textContent=data.admin?.displayName||data.admin?.email||"Administrador";status.textContent="";}catch(error){if(requestSequence!==ordersRequestSequence)return;status.textContent=error.message==="AUTH_REQUIRED"?"Sua sessão expirou. Entre novamente.":error.message;}};
+  document.querySelector("[data-admin-user]").textContent=`${data.admin?.displayName||data.admin?.email||"Administrador"} • ${adminRoleLabel(data.admin?.role)}`;status.textContent="";}catch(error){if(requestSequence!==ordersRequestSequence)return;status.textContent=error.message==="AUTH_REQUIRED"?"Sua sessão expirou. Entre novamente.":error.message;}};
 const field=(title,value)=>{const wrapper=node("div","admin-detail-field");wrapper.append(node("span","",title),node("strong","",value||"—"));return wrapper;};
 const section=title=>{const element=node("section","admin-detail-section");element.append(node("h3","",title));return element;};
 const button=(text,className,action)=>{const item=node("button",className,text);item.type="button";item.onclick=action;return item;};
