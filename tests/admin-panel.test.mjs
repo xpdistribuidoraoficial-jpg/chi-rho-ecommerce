@@ -1,8 +1,16 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { execFileSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
 
 const read = path => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
+
+test("script compartilhado do painel possui sintaxe válida", () => {
+  assert.doesNotThrow(() => execFileSync(process.execPath, [
+    "--check", fileURLToPath(new URL("../admin-pedidos.js", import.meta.url))
+  ], { stdio: "pipe" }));
+});
 
 test("painel ignora respostas antigas ao trocar filtros rapidamente", () => {
   const source = read("admin-pedidos.js");
