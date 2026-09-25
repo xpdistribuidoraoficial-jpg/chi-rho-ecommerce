@@ -8,7 +8,7 @@ const VERCEL_PREVIEW_ORIGIN=/^https:\/\/chi-rho-ecommerce-[a-z0-9-]+\.vercel\.ap
 const isAllowedOrigin=(origin:string)=>ALLOWED_ORIGINS.has(origin)||VERCEL_PREVIEW_ORIGIN.test(origin);
 const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const response=(body:unknown,status=200,origin=SITE_ORIGIN)=>new Response(JSON.stringify(body),{status,headers:{
-  "Access-Control-Allow-Origin":origin,"Access-Control-Allow-Headers":"authorization, apikey, content-type",
+  "Access-Control-Allow-Origin":origin,"Access-Control-Allow-Headers":"authorization, apikey, content-type, x-admin-portal",
   "Access-Control-Allow-Methods":"GET, POST, OPTIONS","Cache-Control":"no-store",
   "Content-Type":"application/json; charset=utf-8","Vary":"Origin"}});
 const safe=(value:unknown,max:number)=>String(value||"").trim().slice(0,max);
@@ -42,6 +42,11 @@ Deno.serve(async(request)=>{
   if(!url||!serviceKey) return response({error:"Operação temporariamente indisponível."},503,origin);
   const admin=await getAdmin(request,url,serviceKey);
   if(!admin) return response({error:"Acesso administrativo não autorizado."},401,origin);
+  const portal=safe(request.headers.get("x-admin-portal"),20);
+  const expectedEmail=portal==="paulo"?"xpdistribuidora.oficial@gmail.com":portal==="owner"?"contato.michellopes@gmail.com":"";
+  if(!expectedEmail||String(admin.email||"").toLowerCase()!==expectedEmail){
+    return response({error:"Este usuário não pertence a este acesso administrativo."},403,origin);
+  }
 
   const frenetToken=Deno.env.get("FRENET_TOKEN")?.trim();
   const partnerToken=Deno.env.get("FRENET_PARTNER_TOKEN")?.trim();
