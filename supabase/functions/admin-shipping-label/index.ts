@@ -13,7 +13,7 @@ const response=(body:unknown,status=200,origin=SITE_ORIGIN)=>new Response(JSON.s
   "Content-Type":"application/json; charset=utf-8","Vary":"Origin"}});
 const safe=(value:unknown,max:number)=>String(value||"").trim().slice(0,max);
 const digits=(value:unknown)=>String(value||"").replace(/\D/g,"");
-const jwtPayload=(authorization:string)=>{try{return JSON.parse(atob(authorization.split(".")[1].replace(/-/g,"+").replace(/_/g,"/")));}catch{return null;}};
+const jwtPayload=(authorization:string)=>{try{const part=authorization.split(".")[1];if(!part)return null;const base64=part.replace(/-/g,"+").replace(/_/g,"/").padEnd(Math.ceil(part.length/4)*4,"=");return JSON.parse(atob(base64));}catch{return null;}};
 const rpc=async(url:string,serviceKey:string,name:string,body:unknown)=>{
   const result=await fetch(`${url}/rest/v1/rpc/${name}`,{method:"POST",headers:{apikey:serviceKey,Authorization:`Bearer ${serviceKey}`,"Content-Type":"application/json"},
     body:JSON.stringify(body),signal:AbortSignal.timeout(10000)});
