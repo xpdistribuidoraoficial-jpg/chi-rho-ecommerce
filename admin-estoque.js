@@ -3,6 +3,7 @@ const PUBLIC_KEY="sb_publishable_ipNBmuf0pUOZRzzlpU8kWw_Md1Y5FuE";
 const INVENTORY_ENDPOINT=`${SUPABASE_URL}/functions/v1/admin-inventory`;
 const SESSION_KEY="chi-rho-admin-session-v1";
 const LOW_STOCK_LIMIT=2;
+const adminRoleLabel=role=>({owner:"Proprietário",senior_admin:"Administrador Sênior",operator:"Operador"}[role]||"Administrador");
 const money=value=>Number(value||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
 const date=value=>value?new Date(value).toLocaleString("pt-BR",{dateStyle:"short",timeStyle:"short"}):"—";
 const login=document.querySelector("[data-admin-login]");
@@ -105,7 +106,7 @@ const openHistory=async item=>{document.querySelector("[data-history-title]").te
   catch(error){historyStatus.textContent=error.message==="AUTH_REQUIRED"?"Sua sessão expirou. Entre novamente.":error.message;}};
 
 const load=async()=>{status.classList.remove("is-success");status.textContent="Carregando estoque…";
-  try{const data=await request();items=Array.isArray(data.items)?data.items:[];document.querySelector("[data-admin-user]").textContent=data.admin?.displayName||data.admin?.email||"Administrador";
+  try{const data=await request();items=Array.isArray(data.items)?data.items:[];document.querySelector("[data-admin-user]").textContent=`${data.admin?.displayName||data.admin?.email||"Administrador"} • ${adminRoleLabel(data.admin?.role)}`;
     buildCategories();render();document.querySelector("[data-admin-summary]").textContent=`${items.length} produtos no estoque operacional • alerta de estoque baixo em até ${LOW_STOCK_LIMIT} unidades disponíveis`;status.textContent="";}
   catch(error){status.textContent=error.message==="AUTH_REQUIRED"?"Sua sessão expirou. Entre novamente.":error.message;}};
 
