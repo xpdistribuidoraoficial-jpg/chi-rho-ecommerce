@@ -13,7 +13,7 @@ const response=(body:unknown,status=200,origin=SITE_ORIGIN)=>new Response(status
 });
 const safe=(value:unknown,max:number)=>String(value||"").trim().slice(0,max);
 const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-const jwtPayload=(token:string)=>{try{return JSON.parse(atob(token.split(".")[1].replace(/-/g,"+").replace(/_/g,"/")));}catch{return null;}};
+const jwtPayload=(token:string)=>{try{const part=token.split(".")[1];if(!part)return null;const base64=part.replace(/-/g,"+").replace(/_/g,"/").padEnd(Math.ceil(part.length/4)*4,"=");return JSON.parse(atob(base64));}catch{return null;}};
 
 const getAdmin=async(request:Request,url:string,serviceKey:string)=>{
   const authorization=request.headers.get("authorization")||"";
