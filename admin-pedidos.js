@@ -21,6 +21,31 @@ let passwordRecoveryMode=false;
 const loginStatus=document.querySelector("[data-admin-login-status]"),status=document.querySelector("[data-admin-status]");
 const tbody=document.querySelector("[data-admin-orders]"),empty=document.querySelector("[data-admin-empty]");
 const dialog=document.querySelector("[data-order-dialog]");let activeFilter={},refreshPromise=null,ordersRequestSequence=0;
+let currentPage=1;
+const filtersForm=node("form","admin-search-filters");
+filtersForm.setAttribute("aria-label","Busca e filtros combinados");
+const filterInputs={};
+const addFilter=(name,title,options=null,type="text")=>{
+  const wrapper=node("label","",title),input=node(options?"select":"input");
+  input.name=name;
+  if(options)options.forEach(([value,text])=>{const option=node("option","",text);option.value=value;input.append(option);});
+  else{input.type=type;if(name==="q"){input.maxLength=100;input.placeholder="Pedido ou nome do cliente";}}
+  wrapper.append(input);filtersForm.append(wrapper);filterInputs[name]=input;
+};
+addFilter("q","Buscar pedido ou cliente");
+addFilter("from","De",null,"date");addFilter("to","Até",null,"date");
+addFilter("financial","Pagamento",[["","Todos"],["aguardando_pagamento","Aguardando pagamento"],["pago","Pago"],["recusado","Recusado"],["cancelado","Cancelado"],["reembolsado","Reembolsado"]]);
+addFilter("operational","Etapa",[["","Todas"],["novo","Novo"],["em_separacao","Em separação"],["pronto_para_envio","Pronto para envio / retirada"],["enviado","Enviado"],["entregue","Entregue"],["cancelado","Cancelado"]]);
+addFilter("delivery","Entrega",[["","Todas"],["pickup","Retirada"],["shipping","Transportadora"]]);
+addFilter("archive","Visibilidade",[["active","Não arquivados"],["archived","Arquivados"],["all","Todos, inclusive arquivados"]]);
+const applyFiltersButton=node("button","btn btn-primary","Aplicar filtros");applyFiltersButton.type="submit";
+const clearFiltersButton=node("button","btn btn-secondary","Limpar filtros");clearFiltersButton.type="button";
+filtersForm.append(applyFiltersButton,clearFiltersButton);
+document.querySelector(".admin-filters").before(filtersForm);
+const pagination=node("nav","admin-pagination");pagination.setAttribute("aria-label","Páginas de pedidos");
+const previousPageButton=node("button","btn btn-secondary","Anterior"),nextPageButton=node("button","btn btn-secondary","Próxima"),pageLabel=node("span","","Página 1");
+previousPageButton.type=nextPageButton.type="button";previousPageButton.disabled=nextPageButton.disabled=true;
+pagination.append(previousPageButton,pageLabel,nextPageButton);document.querySelector(".admin-table-wrap").after(pagination);
 let labelCapability={available:false,message:"A emissão aguarda a homologação do Partner Token da Frenet."};
 const getSession=()=>{try{return JSON.parse(sessionStorage.getItem(SESSION_KEY)||"null");}catch{return null;}};
 const saveSession=session=>{const expiresAt=Number(session.expires_at)||Math.floor(Date.now()/1000)+Number(session.expires_in||3600);
@@ -66,9 +91,10 @@ const renderOrders=orders=>{tbody.replaceChildren();empty.hidden=orders.length>0
       label(order.financial_status),(order.shipping_carrier_code==="PICKUP_VENDOR"&&order.operational_status==="pronto_para_envio"?"Aguardando retirada":order.shipping_carrier_code==="PICKUP_VENDOR"&&order.operational_status==="entregue"?"Retirado pelo cliente":label(order.operational_status))].forEach((value,index)=>{const cell=node("td",index>7?"admin-state":"",value);
       if(index===0)cell.classList.add("admin-order-code");row.append(cell);});
     const open=()=>loadDetail(order.id);row.addEventListener("click",open);row.addEventListener("keydown",event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();open();}});tbody.append(row);});};
-const loadOrders=async()=>{const requestSequence=++ordersRequestSequence;status.textContent="Carregando…";const params=new URLSearchParams(activeFilter);try{const [data]=await Promise.all([request(`?${params}`),loadLabelCapability()]);
+const loadOrders=async()=>{const requestSequence=++ordersRequestSequence;status.textContent="Carregando…";previousPageButton.disabled=nextPageButton.disabled=true;const params=new URLSearchParams({...activeFilter,page:String(currentPage)});try{const [data]=await Promise.all([request(`?${params}`),loadLabelCapability()]);
   if(requestSequence!==ordersRequestSequence)return;
-  renderOrders(data.orders||[]);document.querySelector("[data-admin-summary]").textContent=`${data.orders?.length||0} pedidos neste filtro`;
+  renderOrders(data.orders||[]);document.querySelector("[data-admin-summary]").textContent=`${data.orders?.length||0} pedidos nesta página • filtros combinados`;
+  pageLabel.textContent=`Página ${data.page||currentPage}`;previousPageButton.disabled=currentPage<=1;nextPageButton.disabled=!data.hasMore;
   document.querySelector("[data-admin-user]").textContent=`${data.admin?.displayName||data.admin?.email||"Administrador"} • ${adminRoleLabel(data.admin?.role)}`;status.textContent="";}catch(error){if(requestSequence!==ordersRequestSequence)return;status.textContent=error.message==="AUTH_REQUIRED"?"Sua sessão expirou. Entre novamente.":error.message;}};
 const field=(title,value)=>{const wrapper=node("div","admin-detail-field");wrapper.append(node("span","",title),node("strong","",value||"—"));return wrapper;};
 const section=title=>{const element=node("section","admin-detail-section");element.append(node("h3","",title));return element;};
@@ -130,7 +156,7 @@ const loadDetail=async id=>{if(!dialog.open)dialog.showModal();const content=doc
     progress.append(track);
     const history=section("Histórico"),timeline=node("ol","admin-history");
     (data.history||[]).forEach(entry=>{const item=node("li"),head=node("div"),type=entry.status_type==="financial"?"Pagamento":"Operação";
-      head.append(node("strong","",`${type}: ${label(entry.status)}`),node("time","",date(entry.created_at)));item.append(head);
+      head.append(node("strong","",`${entry.status_type==="admin"?"Administração":type}: ${label(entry.status)}`),node("time","",date(entry.created_at)));item.append(head);
       if(entry.previous_status)item.append(node("span","",`Anterior: ${label(entry.previous_status)}`));
       if(entry.actor_name)item.append(node("small","",`Responsável: ${entry.actor_name}`));
       if(entry.note)item.append(node("small","",entry.note));timeline.append(item);});
@@ -181,9 +207,24 @@ const loadDetail=async id=>{if(!dialog.open)dialog.showModal();const content=doc
       if(order.tracking_url)buttons.append(button("Abrir rastreamento","btn btn-secondary",()=>openDocument(order.tracking_url)));
       buttons.append(button("Marcar como entregue","btn btn-primary",()=>updateOrder(order.id,"entregue",order)));
     }
+    if(order.admin_archived_at){
+      buttons.append(node("p","admin-action-note",`Arquivado em ${date(order.admin_archived_at)}. Histórico preservado.`));
+      buttons.append(button("Restaurar pedido","btn btn-secondary",event=>setOrderArchive(order,false,event.currentTarget)));
+    }else if(order.operational_status==="cancelado"&&order.financial_status!=="pago"){
+      buttons.append(button("Arquivar pedido cancelado","btn btn-secondary",event=>setOrderArchive(order,true,event.currentTarget)));
+    }
     if(!buttons.children.length)buttons.append(node("p","admin-action-note",order.financial_status==="aguardando_pagamento"?"Aguarde a confirmação real do pagamento para iniciar a separação.":"Nenhuma ação disponível para o estado atual."));
     actions.append(buttons);content.append(client,origin,products,shipping,payment,progress,history,actions);
   }catch(error){content.replaceChildren(node("p","admin-status",error.message));}};
+const setOrderArchive=async(order,archived,control)=>{
+  if(!window.confirm(archived?`Arquivar o pedido ${order.code}? Ele sairá da lista principal, mas o histórico será preservado.`:`Restaurar o pedido ${order.code} na lista principal? O status continuará o mesmo.`))return;
+  control.disabled=true;
+  try{
+    await request("?action=archive",{method:"POST",body:JSON.stringify({orderId:order.id,archived})});
+    currentPage=1;await Promise.all([loadOrders(),loadDetail(order.id)]);
+    status.textContent=archived?"Pedido arquivado. Consulte no filtro Arquivados.":"Pedido restaurado.";
+  }catch(error){status.textContent=error.message;control.disabled=false;}
+};
 const customerUpdateMessage=(order,newStatus)=>{
   const firstName=String(order?.customer_name||"cliente").trim().split(/\s+/)[0]||"cliente";
   const code=order?.code||"";
@@ -277,8 +318,19 @@ document.querySelector("[data-admin-login-form]").addEventListener("submit",asyn
     saveSession(data);setView(true);loginStatus.textContent="";await loadOrders();}catch(error){clearSession();loginStatus.textContent=error.message;}});
 document.querySelector("[data-admin-signout]").onclick=async()=>{const session=getSession();try{if(session?.access_token)await fetch(`${SUPABASE_URL}/auth/v1/logout`,{method:"POST",headers:{apikey:PUBLIC_KEY,Authorization:`Bearer ${session.access_token}`}});}finally{clearSession();}};
 document.querySelector("[data-admin-refresh]").onclick=loadOrders;document.querySelector("[data-detail-close]").onclick=()=>dialog.close();
+const applyCombinedFilters=()=>{
+  activeFilter=Object.fromEntries(Object.entries(filterInputs).filter(([,input])=>input.value).map(([name,input])=>[name,input.value]));
+  currentPage=1;loadOrders();
+};
+filtersForm.addEventListener("submit",event=>{event.preventDefault();document.querySelectorAll(".admin-filters button").forEach(item=>item.classList.remove("is-active"));applyCombinedFilters();});
+clearFiltersButton.onclick=()=>{filtersForm.reset();document.querySelectorAll(".admin-filters button").forEach(item=>item.classList.toggle("is-active",item.dataset.filter==="all"));applyCombinedFilters();};
+previousPageButton.onclick=()=>{if(currentPage>1){currentPage--;loadOrders();}};
+nextPageButton.onclick=()=>{currentPage++;loadOrders();};
 document.querySelectorAll("[data-filter],[data-financial],[data-operational]").forEach(item=>item.addEventListener("click",()=>{
   document.querySelectorAll(".admin-filters button").forEach(filter=>filter.classList.remove("is-active"));item.classList.add("is-active");
-  activeFilter=item.dataset.financial?{financial:item.dataset.financial}:item.dataset.operational?{operational:item.dataset.operational}:{};loadOrders();}));
+  if(item.dataset.filter==="all"){filterInputs.financial.value="";filterInputs.operational.value="";}
+  if(item.dataset.financial)filterInputs.financial.value=item.dataset.financial;
+  if(item.dataset.operational)filterInputs.operational.value=item.dataset.operational;
+  applyCombinedFilters();}));
 
 const restore=async()=>{const hash=new URLSearchParams(location.hash.replace(/^#/,""));if(hash.get("type")==="recovery"&&hash.get("access_token")){passwordRecoveryMode=true;saveSession({access_token:hash.get("access_token"),refresh_token:hash.get("refresh_token")||"",expires_in:Number(hash.get("expires_in")||3600),token_type:"bearer",user:{email:""}});setView(false);passwordForm.reset();currentPasswordLabel.hidden=true;passwordForm.elements.current_password.required=false;passwordHelp.textContent="Defina uma nova senha com pelo menos 8 caracteres.";passwordStatus.textContent="";passwordDialog.showModal();passwordForm.elements.new_password.focus();return;}if(!getSession()?.access_token){setView(false);return;}setView(true);await loadOrders();};restore();

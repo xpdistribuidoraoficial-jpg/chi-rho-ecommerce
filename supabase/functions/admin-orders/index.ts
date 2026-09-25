@@ -1,4 +1,5 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+import { buildOrderFilters, PAGE_SIZE } from "./order-filters.mjs";
 
 const SITE_ORIGIN="https://www.chirho.com.br";
 const ROOT_ORIGIN="https://chirho.com.br";
@@ -96,18 +97,21 @@ Deno.serve(async(request)=>{
       const signedPath=signed?.signedURL||signed?.signedUrl||null;
       if(signedPath) pickup_signature_url=String(signedPath).startsWith("http")?String(signedPath):`${url}/storage/v1${signedPath}`;
     }
-    return response({order:{...orders[0],pickup_signature_url},items:items.map((item:any)=>({...item,inventory:stock.get(item.product_slug)||null})),history},200,origin);
+    const archiveResult=await fetch(`${url}/rest/v1/admin_order_archives?order_id=eq.${id}&select=archived_at&limit=1`,{headers});
+    if(!archiveResult.ok) return response({error:"Não foi possível consultar o arquivamento."},503,origin);
+    const archiveRows=await archiveResult.json();
+    return response({order:{...orders[0],pickup_signature_url,admin_archived_at:archiveRows[0]?.archived_at||null},items:items.map((item:any)=>({...item,inventory:stock.get(item.product_slug)||null})),history},200,origin);
   }
 
   if(request.method==="GET"){
-    const financial=safe(requestUrl.searchParams.get("financial"),30);
-    const operational=safe(requestUrl.searchParams.get("operational"),30);
-    let filters="";
-    if(financial) filters+=`&financial_status=eq.${encodeURIComponent(financial)}`;
-    if(operational) filters+=`&operational_status=eq.${encodeURIComponent(operational)}`;
-    const select="id,code,customer_name,customer_whatsapp,grand_total,financial_status,operational_status,shipping_carrier_code,attribution_channel,attribution_device,created_at";
-    const ordersResponse=await fetch(`${url}/rest/v1/orders?select=${select}${filters}&order=created_at.desc&limit=100`,{headers});
-    const orders=ordersResponse.ok?await ordersResponse.json():[];
+    let parsed;
+    try{parsed=buildOrderFilters(requestUrl.searchParams);}catch(error){return response({error:(error as Error).message},400,origin);}
+    const {params,page}=parsed;
+    params.set("select","id,code,customer_name,customer_whatsapp,grand_total,financial_status,operational_status,shipping_carrier_code,attribution_channel,attribution_device,created_at,admin_order_archives(archived_at)");
+    const ordersResponse=await fetch(`${url}/rest/v1/orders?${params}`,{headers});
+    const rows=ordersResponse.ok?await ordersResponse.json():[];
+    const hasMore=rows.length>PAGE_SIZE;
+    const orders=rows.slice(0,PAGE_SIZE);
     if(!ordersResponse.ok){console.error("Admin orders list failed",ordersResponse.status);return response({error:"Não foi possível carregar os pedidos."},503,origin);}
     let counts:Record<string,number>={};
     if(orders.length){
@@ -118,7 +122,23 @@ Deno.serve(async(request)=>{
         result[item.order_id]=(result[item.order_id]||0)+Number(item.quantity);return result;
       },{});
     }
-    return response({admin,orders:orders.map((order:any)=>({...order,item_count:counts[order.id]||0}))},200,origin);
+    return response({admin,page,hasMore,orders:orders.map((order:any)=>({...order,item_count:counts[order.id]||0}))},200,origin);
+  }
+
+  if(request.method==="POST"&&requestUrl.searchParams.get("action")==="archive"){
+    let body:any;try{body=await request.json();}catch{return response({error:"Ação inválida."},400,origin);}
+    if(!uuid.test(String(body?.orderId||""))||typeof body?.archived!=="boolean")
+      return response({error:"Pedido ou ação inválidos."},400,origin);
+    const rpc=await fetch(`${url}/rest/v1/rpc/set_admin_order_archived`,{method:"POST",headers,
+      body:JSON.stringify({target_order_id:body.orderId,actor_user_id:admin.id,archive_value:body.archived})});
+    const data=await rpc.json().catch(()=>({}));
+    if(!rpc.ok){
+      const message=String(data.message||"");
+      if(message.includes("ORDER_NOT_FOUND")) return response({error:"Pedido não encontrado."},404,origin);
+      if(message.includes("ORDER_NOT_CANCELLED")) return response({error:"Somente pedidos cancelados e sem pagamento aprovado podem ser arquivados."},409,origin);
+      return response({error:"Não foi possível alterar o arquivamento."},400,origin);
+    }
+    return response(data,200,origin);
   }
 
   if(request.method==="POST"&&requestUrl.searchParams.get("action")==="confirm-pickup"){
