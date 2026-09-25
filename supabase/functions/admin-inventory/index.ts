@@ -7,7 +7,7 @@ const ALLOWED_ORIGINS=new Set([SITE_ORIGIN,ROOT_ORIGIN,"http://localhost:3000","
 const VERCEL_PREVIEW_ORIGIN=/^https:\/\/chi-rho-ecommerce-[a-z0-9-]+\.vercel\.app$/i;
 const isAllowedOrigin=(origin:string)=>ALLOWED_ORIGINS.has(origin)||VERCEL_PREVIEW_ORIGIN.test(origin);
 const response=(body:unknown,status=200,origin=SITE_ORIGIN)=>new Response(status===204?null:JSON.stringify(body),{
-  status,headers:{"Access-Control-Allow-Origin":origin,"Access-Control-Allow-Headers":"authorization, apikey, content-type",
+  status,headers:{"Access-Control-Allow-Origin":origin,"Access-Control-Allow-Headers":"authorization, apikey, content-type, x-admin-portal",
     "Access-Control-Allow-Methods":"GET, PATCH, OPTIONS","Cache-Control":"no-store",
     "Content-Type":"application/json; charset=utf-8","Vary":"Origin"}
 });
@@ -38,6 +38,11 @@ Deno.serve(async(request)=>{
   if(!url||!serviceKey) return response({error:"Painel temporariamente indisponível."},503,origin);
   const admin=await getAdmin(request,url,serviceKey);
   if(!admin) return response({error:"Acesso administrativo não autorizado."},401,origin);
+  const portal=safe(request.headers.get("x-admin-portal"),20);
+  const expectedEmail=portal==="paulo"?"xpdistribuidora.oficial@gmail.com":portal==="owner"?"contato.michellopes@gmail.com":"";
+  if(!expectedEmail||String(admin.email||"").toLowerCase()!==expectedEmail){
+    return response({error:"Este usuário não pertence a este acesso administrativo."},403,origin);
+  }
   const headers={apikey:serviceKey,Authorization:`Bearer ${serviceKey}`,"Content-Type":"application/json"};
   const requestUrl=new URL(request.url);
 
