@@ -2,7 +2,9 @@ const SUPABASE_URL="https://sailabcmcqdzrqhqztqs.supabase.co";
 const PUBLIC_KEY="sb_publishable_ipNBmuf0pUOZRzzlpU8kWw_Md1Y5FuE";
 const ADMIN_ENDPOINT=`${SUPABASE_URL}/functions/v1/admin-orders`;
 const LABEL_ENDPOINT=`${SUPABASE_URL}/functions/v1/admin-shipping-label`;
-const SESSION_KEY="chi-rho-admin-session-v1";
+const ADMIN_PORTAL=location.pathname.includes("xpdistribuidora")?"paulo":"owner";
+const EXPECTED_ADMIN_EMAIL=ADMIN_PORTAL==="paulo"?"xpdistribuidora.oficial@gmail.com":"contato.michellopes@gmail.com";
+const SESSION_KEY=ADMIN_PORTAL==="paulo"?"chi-rho-admin-session-paulo-v1":"chi-rho-admin-session-owner-v1";
 const money=value=>Number(value||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
 const date=value=>value?new Date(value).toLocaleString("pt-BR",{dateStyle:"short",timeStyle:"short"}):"—";
 const adminRoleLabel=role=>({owner:"Proprietário",senior_admin:"Administrador Sênior",operator:"Operador"}[role]||"Administrador");
@@ -35,7 +37,7 @@ const ensureSession=async()=>{const session=getSession();if(!session?.access_tok
   if(Number(session.expires_at||0)>Math.floor(Date.now()/1000)+60)return session;
   if(!refreshPromise)refreshPromise=refreshSession().finally(()=>{refreshPromise=null;});return refreshPromise;};
 const apiRequest=async(endpoint,path="",options={})=>{let session;try{session=await ensureSession();}catch{clearSession();throw new Error("AUTH_REQUIRED");}
-  const response=await fetch(`${endpoint}${path}`,{...options,headers:{apikey:PUBLIC_KEY,Authorization:`Bearer ${session.access_token}`,
+  const response=await fetch(`${endpoint}${path}`,{...options,headers:{apikey:PUBLIC_KEY,Authorization:`Bearer ${session.access_token}`,"X-Admin-Portal":ADMIN_PORTAL,
     "Content-Type":"application/json",...(options.headers||{})}});const data=await response.json().catch(()=>({}));
   if(response.status===401){clearSession();throw new Error("AUTH_REQUIRED");}
   if(!response.ok)throw new Error(data.error||"Não foi possível concluir esta ação.");return data;};
@@ -44,7 +46,7 @@ const uploadPickupConfirmation=async(formData)=>{
   let session;try{session=await ensureSession();}catch{clearSession();throw new Error("AUTH_REQUIRED");}
   const response=await fetch(`${ADMIN_ENDPOINT}?action=confirm-pickup`,{
     method:"POST",
-    headers:{apikey:PUBLIC_KEY,Authorization:`Bearer ${session.access_token}`},
+    headers:{apikey:PUBLIC_KEY,Authorization:`Bearer ${session.access_token}`,"X-Admin-Portal":ADMIN_PORTAL},
     body:formData
   });
   const data=await response.json().catch(()=>({}));
@@ -267,9 +269,11 @@ document.querySelector("[data-password-cancel]").onclick=()=>passwordDialog.clos
 passwordDialog.addEventListener("click",event=>{if(event.target===passwordDialog)passwordDialog.close();});
 passwordForm.addEventListener("submit",changePassword);
 
+const adminLoginEmail=document.querySelector('[data-admin-login-form] [name="email"]');
+if(adminLoginEmail){adminLoginEmail.value=EXPECTED_ADMIN_EMAIL;adminLoginEmail.readOnly=true;}
 document.querySelector("[data-admin-login-form]").addEventListener("submit",async event=>{event.preventDefault();loginStatus.textContent="Entrando…";
   const form=new FormData(event.currentTarget);try{const response=await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`,{method:"POST",headers:{apikey:PUBLIC_KEY,"Content-Type":"application/json"},
-    body:JSON.stringify({email:form.get("email"),password:form.get("password")}),signal:AbortSignal.timeout(10000)});const data=await response.json().catch(()=>({}));if(!response.ok)throw new Error("E-mail ou senha inválidos.");
+    body:JSON.stringify({email:EXPECTED_ADMIN_EMAIL,password:form.get("password")}),signal:AbortSignal.timeout(10000)});const data=await response.json().catch(()=>({}));if(!response.ok)throw new Error("E-mail ou senha inválidos.");
     saveSession(data);setView(true);loginStatus.textContent="";await loadOrders();}catch(error){clearSession();loginStatus.textContent=error.message;}});
 document.querySelector("[data-admin-signout]").onclick=async()=>{const session=getSession();try{if(session?.access_token)await fetch(`${SUPABASE_URL}/auth/v1/logout`,{method:"POST",headers:{apikey:PUBLIC_KEY,Authorization:`Bearer ${session.access_token}`}});}finally{clearSession();}};
 document.querySelector("[data-admin-refresh]").onclick=loadOrders;document.querySelector("[data-detail-close]").onclick=()=>dialog.close();
