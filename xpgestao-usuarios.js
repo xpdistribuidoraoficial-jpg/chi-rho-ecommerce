@@ -1,7 +1,8 @@
 const SUPABASE_URL="https://sailabcmcqdzrqhqztqs.supabase.co";
 const PUBLIC_KEY="sb_publishable_ipNBmuf0pUOZRzzlpU8kWw_Md1Y5FuE";
 const ENDPOINT=`${SUPABASE_URL}/functions/v1/admin-user-management`;
-const SESSION_KEY="chi-rho-admin-session-v1";
+const SESSION_KEY="chi-rho-admin-session-owner-v1";
+const EXPECTED_ADMIN_EMAIL="contato.michellopes@gmail.com";
 const login=document.querySelector("[data-admin-login]");
 const dashboard=document.querySelector("[data-admin-dashboard]");
 const loginStatus=document.querySelector("[data-admin-login-status]");
@@ -27,7 +28,9 @@ const load=async()=>{status.textContent="Carregando usuários…";try{const data
 
 forgotPasswordButton?.addEventListener("click",async()=>{const email=String(document.querySelector('[data-admin-login-form] [name="email"]')?.value||"").trim().toLowerCase();if(!email){loginStatus.textContent="Informe seu e-mail acima para receber o link de redefinição.";return;}loginStatus.textContent="Enviando link de redefinição…";forgotPasswordButton.disabled=true;try{const response=await fetch(`${SUPABASE_URL}/auth/v1/recover`,{method:"POST",headers:{apikey:PUBLIC_KEY,"Content-Type":"application/json"},body:JSON.stringify({email,redirect_to:"https://www.chirho.com.br/xpgestao.html"}),signal:AbortSignal.timeout(10000)});const data=await response.json().catch(()=>({}));if(!response.ok)throw new Error(data?.msg||data?.message||"Não foi possível enviar o link agora.");loginStatus.textContent="Se este e-mail estiver cadastrado, enviaremos um link para redefinir sua senha.";}catch(error){loginStatus.textContent=error.message||"Não foi possível enviar o link agora.";}finally{forgotPasswordButton.disabled=false;}});
 
-document.querySelector("[data-admin-login-form]").addEventListener("submit",async event=>{event.preventDefault();loginStatus.textContent="Entrando…";const form=new FormData(event.currentTarget);try{const response=await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`,{method:"POST",headers:{apikey:PUBLIC_KEY,"Content-Type":"application/json"},body:JSON.stringify({email:form.get("email"),password:form.get("password")})});const data=await response.json().catch(()=>({}));if(!response.ok)throw new Error("E-mail ou senha inválidos.");saveSession(data);setView(true);loginStatus.textContent="";await load();}catch(error){clearSession();loginStatus.textContent=error.message;}});
+const adminLoginEmail=document.querySelector('[data-admin-login-form] [name="email"]');
+if(adminLoginEmail){adminLoginEmail.value=EXPECTED_ADMIN_EMAIL;adminLoginEmail.readOnly=true;}
+document.querySelector("[data-admin-login-form]").addEventListener("submit",async event=>{event.preventDefault();loginStatus.textContent="Entrando…";const form=new FormData(event.currentTarget);try{const response=await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`,{method:"POST",headers:{apikey:PUBLIC_KEY,"Content-Type":"application/json"},body:JSON.stringify({email:EXPECTED_ADMIN_EMAIL,password:form.get("password")})});const data=await response.json().catch(()=>({}));if(!response.ok)throw new Error("E-mail ou senha inválidos.");saveSession(data);setView(true);loginStatus.textContent="";await load();}catch(error){clearSession();loginStatus.textContent=error.message;}});
 
 document.querySelector("[data-invite-form]").addEventListener("submit",async event=>{event.preventDefault();inviteStatus.textContent="Enviando convite…";const form=new FormData(event.currentTarget);const button=event.currentTarget.querySelector('button[type="submit"]');button.disabled=true;try{const data=await request({method:"POST",body:JSON.stringify({displayName:form.get("displayName"),email:form.get("email")})});inviteStatus.classList.add("is-success");inviteStatus.textContent=`Convite enviado para ${data.email}. O acesso ficará identificado como ${data.displayName}.`;event.currentTarget.reset();await load();}catch(error){inviteStatus.classList.remove("is-success");inviteStatus.textContent=error.message;}finally{button.disabled=false;}});
 
