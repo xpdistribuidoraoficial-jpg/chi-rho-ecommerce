@@ -69,6 +69,29 @@ Deno.serve(async(request)=>{
 
   if(request.method==="POST"){
     let body:any;try{body=await request.json();}catch{return response({error:"Dados inválidos."},400,origin);}
+    const action=safe(body?.action,40);
+    if(action==="reset_password"){
+      const userId=safe(body?.userId,36);
+      if(!uuid.test(userId)) return response({error:"Usuário inválido."},400,origin);
+      const targetAdminResponse=await fetch(`${url}/rest/v1/admin_users?user_id=eq.${userId}&select=user_id,role,active&limit=1`,{headers,signal:AbortSignal.timeout(8000)});
+      const targetAdmins=targetAdminResponse.ok?await targetAdminResponse.json():[];
+      const targetAdmin=targetAdmins[0];
+      if(!targetAdmin) return response({error:"Usuário administrativo não encontrado."},404,origin);
+      const targetUserResponse=await fetch(`${url}/auth/v1/admin/users/${userId}`,{headers,signal:AbortSignal.timeout(8000)});
+      const targetUser=targetUserResponse.ok?await targetUserResponse.json():null;
+      const targetEmail=safe(targetUser?.email,254).toLowerCase();
+      if(!emailPattern.test(targetEmail)) return response({error:"O usuário não possui e-mail válido."},409,origin);
+      const redirectPath=targetAdmin.role==="owner"?"/xpgestao.html":"/xpdistribuidora.html";
+      const recoverResponse=await fetch(`${url}/auth/v1/recover`,{
+        method:"POST",
+        headers:{apikey:PUBLIC_KEY,"Content-Type":"application/json"},
+        body:JSON.stringify({email:targetEmail,redirect_to:`${SITE_ORIGIN}${redirectPath}`}),
+        signal:AbortSignal.timeout(10000)
+      });
+      if(!recoverResponse.ok) return response({error:"Não foi possível enviar o link de redefinição."},503,origin);
+      return response({sent:true,email:targetEmail},200,origin);
+    }
+
     const email=safe(body?.email,254).toLowerCase();
     const displayName=safe(body?.displayName,120);
     if(!emailPattern.test(email)||displayName.length<2) return response({error:"Informe nome e e-mail válidos."},400,origin);
