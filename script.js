@@ -469,6 +469,44 @@ const catalogProducts = [
     maisVendido: true
   },
   {
+    id: "biblia-defesa-fe-luxo-preta",
+    slug: "biblia-defesa-fe-luxo-preta",
+    nome: "Bíblia de Estudo em Defesa da Fé — Grande Luxo Preta",
+    categoria: "Bíblias de Estudo",
+    categoriaSlug: "biblias-de-estudo",
+    imagem: "assets/logo-chi-rho.png",
+    descricao: "Edição ARC, acabamento luxo preto. Imagem definitiva e estoque em confirmação.",
+    perfil: "Apologética e formação",
+    editora: "CPAD",
+    precoOriginal: 199.99,
+    preco: 119.99,
+    statusPreco: "Estoque em confirmação",
+    destaqueOfertaCpad: true,
+    estoque: null,
+    testeCarrinho: false,
+    destaque: false,
+    maisVendido: false
+  },
+  {
+    id: "biblia-defesa-fe-luxo-vinho",
+    slug: "biblia-defesa-fe-luxo-vinho",
+    nome: "Bíblia de Estudo em Defesa da Fé — Grande Luxo Vinho",
+    categoria: "Bíblias de Estudo",
+    categoriaSlug: "biblias-de-estudo",
+    imagem: "assets/logo-chi-rho.png",
+    descricao: "Edição ARC, acabamento luxo vinho. Imagem definitiva e estoque em confirmação.",
+    perfil: "Apologética e formação",
+    editora: "CPAD",
+    precoOriginal: 199.99,
+    preco: 119.99,
+    statusPreco: "Estoque em confirmação",
+    destaqueOfertaCpad: true,
+    estoque: null,
+    testeCarrinho: false,
+    destaque: false,
+    maisVendido: false
+  },
+  {
     id: "biblia-estudo-defesa-da-fe",
     slug: "biblia-estudo-defesa-da-fe",
     nome: "Bíblia de Estudo em Defesa da Fé",
@@ -480,6 +518,7 @@ const catalogProducts = [
     editora: "CPAD",
     preco: null,
     estoque: null,
+    destaqueOfertaCpad: true,
     destaque: true,
     maisVendido: false
   },
@@ -1792,8 +1831,8 @@ const bibleCatalogUpdates = Object.freeze({
       "assets/products/biblia-estudo-defesa-fe-04.webp"
     ],
     descricao: "Bíblia de estudo apologética na ARC, desenvolvida para compreender, defender e proclamar a fé cristã.",
-    precoOriginal: 127.49,
-    preco: 119.00,
+    precoOriginal: 149.99,
+    preco: 89.99,
     fontePreco: "Casa Publicadora das Assembleias de Deus (CPAD)",
     fontePrecoUrl: "https://www.cpad.com.br/biblia-de-estudo-defesa-da-fe-capa-dura-180004/p",
     dataConsultaPreco: "2026-08-24",
@@ -2345,6 +2384,7 @@ const setCatalogFilter = (filter = "todas", query = "") => {
       || (filter === "cpad-livros" && product.editora === "CPAD" && product.categoriaSlug === "livros-cristaos")
       || (filter === "cpad-harpas" && product.editora === "CPAD" && product.categoriaSlug === "harpas")
       || (filter === "cpad-kits" && Boolean(product.kitComponents))
+      || (filter === "cpad-ofertas" && ((Boolean(product.kitComponents) && product.categoriaSlug === "cpad-kits") || product.destaqueOfertaCpad))
       || filter === "todas"
       || (filter === "infantil" ? product.infantil : productCategorySlugs.includes(filter));
     const matchesCatalog = matchesCategory
