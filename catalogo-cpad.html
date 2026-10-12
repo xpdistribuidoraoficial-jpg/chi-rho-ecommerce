@@ -82,34 +82,38 @@
       </div>
     </section>
 
-    <section class="catalog-main" id="catalogo">
+    <section class="catalog-main cpad-shop" id="catalogo">
       <div class="container">
-        <div class="catalog-main-heading">
+        <div class="cpad-shop-heading">
           <div>
-            <span>CATÁLOGO CHI RHO</span>
-            <h2 id="catalog-title">Materiais CPAD</h2>
-            <p id="catalog-result-count">Carregando materiais CPAD…</p>
+            <span class="cpad-eyebrow">SELEÇÃO ESPECIAL • CHI RHO</span>
+            <h2 id="catalog-title">Materiais CPAD para sua jornada de fé</h2>
+            <p>Encontre Bíblias, livros e kits preparados para leitura, estudo e presente.</p>
           </div>
+          <span class="cpad-offer-highlight">Kits com 30% OFF</span>
         </div>
-
-        <div class="catalog-filters" role="group" aria-label="Filtrar materiais CPAD">
-          <button class="catalog-filter is-active" type="button" data-filter="cpad">Todos os materiais CPAD</button>
-          <button class="catalog-filter" type="button" data-filter="cpad-biblias">Bíblias CPAD</button>
-          <button class="catalog-filter" type="button" data-filter="cpad-livros">Livros CPAD</button>
-          <button class="catalog-filter" type="button" data-filter="cpad-harpas">Harpas Cristãs</button>
+        <div class="catalog-filters cpad-tabs" role="group" aria-label="Categorias de materiais CPAD">
+          <button class="catalog-filter is-active" type="button" data-filter="cpad">Todos</button>
+          <button class="catalog-filter" type="button" data-filter="cpad-biblias">Bíblias</button>
+          <button class="catalog-filter" type="button" data-filter="cpad-livros">Livros</button>
+          <button class="catalog-filter" type="button" data-filter="cpad-harpas">Harpas</button>
           <button class="catalog-filter" type="button" data-filter="cpad-kits">Kits — 30% OFF</button>
         </div>
-        <form class="cpad-filter-form" data-cpad-filters aria-label="Refinar materiais CPAD">
-          <label>Disponibilidade<select name="stock"><option value="">Todos os produtos</option><option value="available">Disponíveis para compra</option></select></label>
+        <div class="cpad-tools">
+          <p id="catalog-result-count" aria-live="polite">Carregando produtos…</p>
+          <button type="button" class="cpad-more-filters" data-cpad-toggle aria-expanded="false" aria-controls="cpad-advanced-filters">☷ Mais filtros</button>
+        </div>
+        <form class="cpad-filter-form" id="cpad-advanced-filters" data-cpad-filters aria-label="Refinar materiais CPAD" hidden>
+          <label>Disponibilidade<select name="stock"><option value="">Todos os produtos</option><option value="available">Em estoque</option></select></label>
           <label>Preço mínimo<input name="min" type="number" min="0" step="0.01" inputmode="decimal" placeholder="R$ 0,00"></label>
           <label>Preço máximo<input name="max" type="number" min="0" step="0.01" inputmode="decimal" placeholder="Sem limite"></label>
-          <label>Assunto<select name="subject"><option value="">Todos os assuntos</option></select></label>
-          <label>Tradução<select name="translation"><option value="">Todas as traduções</option></select></label>
-          <label>Tamanho da letra<select name="letter"><option value="">Todos os tamanhos</option></select></label>
-          <label>Harpa na Bíblia<select name="harpa"><option value="">Todas as opções</option><option value="Sim">Com Harpa</option><option value="Não">Sem Harpa</option></select></label>
-          <button type="button" class="btn btn-outline" data-cpad-filter-reset>Limpar filtros</button>
+          <label class="cpad-only-books">Assunto<select name="subject"><option value="">Todos os assuntos</option></select></label>
+          <label class="cpad-only-bibles">Tradução<select name="translation"><option value="">Todas as traduções</option></select></label>
+          <label class="cpad-only-bibles">Tamanho da letra<select name="letter"><option value="">Todos os tamanhos</option></select></label>
+          <label class="cpad-only-bibles">Harpa na Bíblia<select name="harpa"><option value="">Todas as opções</option><option value="Sim">Com Harpa</option><option value="Não">Sem Harpa</option></select></label>
+          <button type="button" class="cpad-filter-reset" data-cpad-filter-reset>Limpar filtros</button>
         </form>
-        <p class="cpad-note" data-cpad-status aria-live="polite">Os kits oferecem 30% de desconto sobre os preços individuais vigentes. Frete calculado à parte.</p>
+        <p class="cpad-note" data-cpad-status aria-live="polite">Kits com 30% de desconto sobre os preços individuais vigentes. Frete à parte.</p>
         <div class="catalog-product-grid catalog-all-grid" id="catalog-products" aria-live="polite"></div>
       </div>
     </section>
