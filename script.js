@@ -1,4 +1,4 @@
-const catalogProducts = Object.freeze([
+const catalogProducts = [
   {
     id: "biblia-naa-mulher-floral",
     slug: "biblia-naa-mulher-floral",
@@ -469,6 +469,58 @@ const catalogProducts = Object.freeze([
     maisVendido: true
   },
   {
+    id: "biblia-defesa-fe-luxo-preta",
+    slug: "biblia-defesa-fe-luxo-preta",
+    nome: "Bíblia de Estudo em Defesa da Fé — Grande Luxo Preta",
+    categoria: "Bíblias de Estudo",
+    categoriaSlug: "biblias-de-estudo",
+    imagem: "https://cpad.vtexassets.com/arquivos/ids/168685-800-auto?aspect=true&height=auto&v=638935589835600000&width=800",
+    descricao: "Edição ARC, acabamento luxo preto. Imagem definitiva e estoque em confirmação.",
+    perfil: "Apologética e formação",
+    editora: "CPAD",
+    precoOriginal: 199.99,
+    preco: 119.99,
+    statusPreco: "Estoque em confirmação",
+    destaqueOfertaCpad: true,
+    estoque: null,
+    testeCarrinho: false,
+    codigoCpad: "174578",
+    traducao: "Almeida Revista e Corrigida (ARC)",
+    cor: "Preta",
+    acabamento: "Couro sintético",
+    paginas: "2.304",
+    peso: "1,4 kg",
+    dimensoes: "23 × 16 × 4,2 cm",
+    destaque: false,
+    maisVendido: false
+  },
+  {
+    id: "biblia-defesa-fe-luxo-vinho",
+    slug: "biblia-defesa-fe-luxo-vinho",
+    nome: "Bíblia de Estudo em Defesa da Fé — Grande Luxo Vinho",
+    categoria: "Bíblias de Estudo",
+    categoriaSlug: "biblias-de-estudo",
+    imagem: "https://cpad.vtexassets.com/arquivos/ids/168687-800-auto?aspect=true&height=auto&v=638710162111200000&width=800",
+    descricao: "Edição ARC, acabamento luxo vinho. Imagem definitiva e estoque em confirmação.",
+    perfil: "Apologética e formação",
+    editora: "CPAD",
+    precoOriginal: 199.99,
+    preco: 119.99,
+    statusPreco: "Estoque em confirmação",
+    destaqueOfertaCpad: true,
+    estoque: null,
+    testeCarrinho: false,
+    codigoCpad: "180005",
+    traducao: "Almeida Revista e Corrigida (ARC)",
+    cor: "Vinho",
+    acabamento: "Couro sintético",
+    paginas: "2.304",
+    peso: "1,4 kg",
+    dimensoes: "23 × 16 × 4,2 cm",
+    destaque: false,
+    maisVendido: false
+  },
+  {
     id: "biblia-estudo-defesa-da-fe",
     slug: "biblia-estudo-defesa-da-fe",
     nome: "Bíblia de Estudo em Defesa da Fé",
@@ -480,7 +532,8 @@ const catalogProducts = Object.freeze([
     editora: "CPAD",
     preco: null,
     estoque: null,
-    destaque: false,
+    destaqueOfertaCpad: true,
+    destaque: true,
     maisVendido: false
   },
   {
@@ -1386,6 +1439,27 @@ const catalogProducts = Object.freeze([
     brinquedo: true
   },
   {
+    id: "casa-carregador-kapbom-ka-5005",
+    slug: "casa-carregador-kapbom-ka-5005",
+    nome: "Carregador Rápido USB-C KAPBOM KA-5005 — Branco",
+    categoria: "Utilidades Domésticas",
+    categoriaSlug: "utilidades-domesticas",
+    imagem: "data:image/webp;base64,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",
+    descricao: "Fonte de tomada bivolt com uma porta USB-C, Power Delivery e saídas 5V/2,4A, 9V/2A ou 12V/1,5A (até 18W conforme tensões e correntes informadas na embalagem). Compatível com aparelhos iPhone e Samsung que aceitem carregamento USB-C PD, utilizando cabo adequado vendido separadamente. Modelo KA-5005. Código de homologação declarado na embalagem: 02848-22-14418.",
+    perfil: "Tecnologia e praticidade",
+    marca: "KAPBOM",
+    precoOriginal: 25.00,
+    preco: 14.99,
+    statusPreco: "Oferta de lançamento",
+    peso: "65 g (referência publicada; confirmar na embalagem)",
+    dimensoes: "9 × 4,5 × 11,5 cm (referência comercial)",
+    estoque: 10,
+    testeCarrinho: true,
+    destaque: false,
+    maisVendido: false,
+    casa: true
+  },
+  {
     id: "casa-balanca-digital-cozinha-10kg",
     slug: "casa-balanca-digital-cozinha-10kg",
     nome: "Balança Digital de Cozinha 10 kg",
@@ -1428,7 +1502,7 @@ const catalogProducts = Object.freeze([
     maisVendido: false,
     casa: true
   }
-]);
+];
 
 const bibleCatalogUpdates = Object.freeze({
   "biblia-naa-mulher-floral": {
@@ -1793,7 +1867,7 @@ const bibleCatalogUpdates = Object.freeze({
     ],
     descricao: "Bíblia de estudo apologética na ARC, desenvolvida para compreender, defender e proclamar a fé cristã.",
     precoOriginal: 149.99,
-    preco: 127.49,
+    preco: 89.99,
     fontePreco: "Casa Publicadora das Assembleias de Deus (CPAD)",
     fontePrecoUrl: "https://www.cpad.com.br/biblia-de-estudo-defesa-da-fe-capa-dura-180004/p",
     dataConsultaPreco: "2026-08-24",
@@ -2177,9 +2251,10 @@ catalogProducts.forEach((product) => {
 
 const inactiveCatalogSlugs = new Set([]);
 
-const isProductActive = (product) => !inactiveCatalogSlugs.has(product.slug);
+const isProductActive = (product) => !inactiveCatalogSlugs.has(product.slug) && product.cpadKitDisabled !== true;
 
 const getProductCartAvailability = (product) => {
+  if (typeof window !== 'undefined' && window.ChiRhoCpad?.availability) return window.ChiRhoCpad.availability(product);
   const configured = product?.testeCarrinho === true
     && typeof product.preco === "number"
     && Number.isInteger(product.estoque);
@@ -2220,6 +2295,10 @@ const getProductPriceMarkup = (product) => {
   if (typeof product.preco !== "number") {
     return `<span class="product-price-current product-price-pending">${getProductStatus(product)}</span>`;
   }
+
+  if (product.kitComponents) return `
+    <del class="product-price-original">Comprando separadamente: ${formatProductPrice(product.precoOriginal)}</del>
+    <span class="product-price-current">No kit: ${formatProductPrice(product.preco)}</span>`;
 
   const hasRealDiscount =
     typeof product.precoOriginal === "number" && product.precoOriginal > product.preco;
@@ -2273,8 +2352,10 @@ const getProductCardCartMarkup = (product) => {
 const createProductCard = (product) => `
   <article class="catalog-product-card" id="${product.slug}" data-category="${product.categoriaSlug}">
     <div class="catalog-product-image">
-      <img src="${product.imagem}" alt="${product.nome}" loading="lazy" />
-      ${product.maisVendidoLivro ? '<strong class="catalog-product-badge">Mais vendido</strong>' : ""}
+      ${product.kitComponents && product.imagens?.length > 1
+        ? `<div class="cpad-kit-composition">${product.imagens.slice(0,2).map((image,index) => `${index ? '<b aria-hidden="true">+</b>' : ''}<img src="${image}" alt="${catalogProducts.find(p => p.imagem === image)?.nome || product.nome}" loading="lazy">`).join('')}</div>`
+        : `<img src="${product.imagem}" alt="${product.nome}" loading="lazy" />`}
+      ${product.kitComponents ? '<strong class="catalog-product-badge">30% OFF</strong>' : product.maisVendidoLivro ? '<strong class="catalog-product-badge">Mais vendido</strong>' : ""}
       <span>${product.perfil}</span>
     </div>
     <div class="catalog-product-content">
@@ -2282,7 +2363,7 @@ const createProductCard = (product) => `
       <h3>${product.nome}</h3>
       ${getProductMeta(product) ? `<span class="catalog-product-meta">${getProductMeta(product)}</span>` : ""}
       <p>${product.descricao}</p>
-      <div class="catalog-product-price" aria-label="Preço">${getProductPriceMarkup(product)}</div>
+      <div class="catalog-product-price" aria-label="Preço">${getProductPriceMarkup(product)}${product.kitComponents && typeof product.preco === "number" ? `<small class="cpad-kit-saving">Você economiza ${formatProductPrice(product.precoOriginal-product.preco)}</small>` : ""}</div>
       ${getProductCardCartMarkup(product)}
       <button class="catalog-product-view" type="button" data-product-slug="${product.slug}">Ver produto</button>
     </div>
@@ -2333,7 +2414,13 @@ const setCatalogFilter = (filter = "todas", query = "") => {
   const filteredProducts = catalogProducts.filter((product) => {
     if (!isProductActive(product)) return false;
     const productCategorySlugs = getProductCategorySlugs(product);
-    const matchesCategory = filter === "todas"
+    const matchesCategory = (filter === "cpad" && product.editora === "CPAD")
+      || (filter === "cpad-biblias" && product.editora === "CPAD" && product.categoriaSlug.startsWith("biblias"))
+      || (filter === "cpad-livros" && product.editora === "CPAD" && product.categoriaSlug === "livros-cristaos")
+      || (filter === "cpad-harpas" && product.editora === "CPAD" && product.categoriaSlug === "harpas")
+      || (filter === "cpad-kits" && Boolean(product.kitComponents))
+      || (filter === "cpad-ofertas" && ((Boolean(product.kitComponents) && product.categoriaSlug === "cpad-kits") || product.destaqueOfertaCpad))
+      || filter === "todas"
       || (filter === "infantil" ? product.infantil : productCategorySlugs.includes(filter));
     const matchesCatalog = matchesCategory
       || (filter === "casa" && product.casa)
@@ -2341,8 +2428,12 @@ const setCatalogFilter = (filter = "todas", query = "") => {
     const searchText = [product.nome, product.categoria, product.descricao, product.perfil, product.autor, product.editora, product.marca]
       .join(" ")
       .toLocaleLowerCase("pt-BR");
-    return matchesCatalog && (!normalizedQuery || searchText.includes(normalizedQuery));
-  }).sort((first, second) => (first.ordemLivro ?? 999) - (second.ordemLivro ?? 999));
+    return matchesCatalog && (!normalizedQuery || searchText.includes(normalizedQuery))
+      && (!filter.startsWith("cpad") || window.ChiRhoCpad?.matchesFilters(product) !== false);
+  }).sort((first, second) => filter.startsWith("cpad")
+    ? Number(getProductCartAvailability(second).available) - Number(getProductCartAvailability(first).available)
+      || (first.ordemLivro ?? 999) - (second.ordemLivro ?? 999)
+    : (first.ordemLivro ?? 999) - (second.ordemLivro ?? 999));
 
   catalogGrid.innerHTML = filteredProducts.length
     ? filteredProducts.map(createProductCard).join("")
@@ -2350,6 +2441,11 @@ const setCatalogFilter = (filter = "todas", query = "") => {
 
   if (catalogTitle) {
     const filterTitles = {
+      cpad: "Materiais CPAD",
+      "cpad-biblias": "Bíblias CPAD",
+      "cpad-livros": "Livros CPAD",
+      "cpad-harpas": "Harpas Cristãs",
+      "cpad-kits": "Kits CPAD — 30% OFF",
       todas: "Bíblias e livros cristãos",
       fe: "Bíblias e livros cristãos",
       biblias: "Bíblias",
@@ -2472,13 +2568,13 @@ const requestShippingQuote = async (cep, itens) => {
   return data;
 };
 
-const PICKUP_VENDOR_POSTCODE = "21210240";
+const PICKUP_VENDOR_POSTCODE = "25525660";
 const PICKUP_VENDOR_SERVICE = Object.freeze({
   carrier: "Retirada com o vendedor",
   carrierCode: "PICKUP_VENDOR",
-  description: "Retirada grátis • Rua Maria do Carmo, 220 - Penha Circular - Rio de Janeiro/RJ",
+  description: "Retirada grátis • Retirada a combinar após a confirmação do pagamento",
   serviceCode: "PICKUP_VENDOR",
-  deliveryTime: "Rua Maria do Carmo, 220 - Penha Circular - Rio de Janeiro/RJ - CEP 21210-240",
+  deliveryTime: "Retirada a combinar após a confirmação do pagamento",
   price: 0
 });
 
@@ -2581,6 +2677,8 @@ const setProductDialogText = (selector, value, fallback) => {
 
 const setProductDialogDetails = (product) => {
   const details = [
+    product.kitComponents ? { label: "Composição", value: product.kitComponents.map(item => `${item.quantity} × ${catalogProducts.find(p => p.slug === item.slug)?.nome || item.slug}`).join(" + ") } : null,
+    product.kitComponents ? { label: "Economia no kit", value: typeof product.preco === "number" ? formatProductPrice(product.precoOriginal - product.preco) : "Cadastro em preparação" } : null,
     product.autor ? { label: "Autor", value: product.autor } : null,
     product.editora ? { label: "Editora", value: product.editora } : null,
     product.marca ? { label: "Marca", value: product.marca } : null,
@@ -2643,7 +2741,7 @@ const openProductDialog = (slug, { syncUrl = true } = {}) => {
   const image = productDialogElement.querySelector("#product-dialog-image");
   const isChristianBook = product.categoriaSlug === "livros-cristaos";
   const isBible = product.categoriaSlug.startsWith("biblias");
-  const usesFullDialog = isChristianBook || isBible || product.brinquedo || product.casa;
+  const usesFullDialog = isChristianBook || isBible || product.brinquedo || product.casa || Boolean(product.kitComponents);
   productDialogElement.dataset.category = product.categoriaSlug;
   productDialogElement.dataset.productSlug = product.slug;
   setProductDialogGallery(product);
@@ -2742,7 +2840,7 @@ document.addEventListener("click", (event) => {
   if (quantityAction && productDialogQuantity && !quantityAction.disabled) {
     const currentQuantity = Number(productDialogQuantity.textContent) || 1;
     const currentProduct = catalogProducts.find((product) => product.slug === productDialogElement?.dataset.productSlug);
-    const stockLimit = typeof currentProduct?.estoque === "number" ? currentProduct.estoque : 1;
+    const stockLimit = getProductCartAvailability(currentProduct).stock || 1;
     const nextQuantity = quantityAction.dataset.quantityAction === "increase"
       ? Math.min(stockLimit, currentQuantity + 1)
       : Math.max(1, currentQuantity - 1);
@@ -2842,6 +2940,7 @@ testCartDialog.innerHTML = `
       </section>
       <div class="test-cart-summary">
         <div><span>Produtos</span><strong data-cart-subtotal>R$ 0,00</strong></div>
+        <div data-cart-discount-row hidden><span>Desconto dos kits (30%)</span><strong></strong></div>
         <div><span>Frete</span><strong data-cart-shipping-price>Calcule pelo CEP</strong></div>
         <div class="test-cart-total"><span>Total</span><strong data-cart-total>R$ 0,00</strong></div>
       </div>
@@ -2856,6 +2955,7 @@ const storedCartShipping = loadTestCartShipping();
 let selectedCartShipping = storedCartShipping?.service || null;
 let selectedCartPostcode = storedCartShipping?.cep || "";
 let testCartSubtotal = 0;
+let testCartDiscount = 0;
 
 const saveCartShipping = () => {
   if (!selectedCartShipping || !selectedCartPostcode) return;
@@ -2881,11 +2981,13 @@ const clearCartShipping = () => {
 
 const renderCartTotals = () => {
   const shippingPrice = selectedCartShipping?.price || 0;
-  testCartDialog.querySelector("[data-cart-subtotal]").textContent = formatCurrency(testCartSubtotal);
+  testCartDialog.querySelector("[data-cart-subtotal]").textContent = formatCurrency(testCartSubtotal + testCartDiscount);
   testCartDialog.querySelector("[data-cart-shipping-price]").textContent = selectedCartShipping
     ? (selectedCartShipping.carrierCode === "PICKUP_VENDOR" ? "Grátis" : formatCurrency(shippingPrice))
     : "Escolha entrega ou retirada";
   testCartDialog.querySelector("[data-cart-total]").textContent = formatCurrency(testCartSubtotal + shippingPrice);
+  const discountRow = testCartDialog.querySelector("[data-cart-discount-row]");
+  if (discountRow) { discountRow.hidden = testCartDiscount <= 0; discountRow.querySelector("strong").textContent = `− ${formatCurrency(testCartDiscount)}`; }
   const checkoutButton = testCartDialog.querySelector("[data-cart-checkout]");
   if (checkoutButton) checkoutButton.disabled = testCartSubtotal <= 0 || !selectedCartShipping;
 };
@@ -2998,11 +3100,13 @@ const updateTestCartQuantity = (slug, requestedQuantity) => {
 
   saveTestCart();
   resetCartShipping("Carrinho alterado. Escolha novamente entrega ou retirada.");
+  window.dispatchEvent(new Event("chi-rho-cart-changed"));
   renderTestCart();
   return quantity;
 };
 
 const renderTestCart = ({ pruneUnavailable = inventoryHydrated } = {}) => {
+  pruneUnavailable = pruneUnavailable && window.ChiRhoCpadReady === true;
   if (pruneUnavailable) {
     testCart = testCart
       .map((item) => {
@@ -3025,6 +3129,7 @@ const renderTestCart = ({ pruneUnavailable = inventoryHydrated } = {}) => {
   const totalQuantity = testCart.reduce((total, item) => total + item.quantity, 0);
   const subtotal = validItems.reduce((total, item) => total + item.product.preco * item.quantity, 0);
   testCartSubtotal = subtotal;
+  testCartDiscount = validItems.reduce((sum, item) => sum + (item.product.kitComponents ? (item.product.precoOriginal - item.product.preco) * item.quantity : 0), 0);
 
   document.querySelectorAll('a[href$="#carrinho"]').forEach((link) => {
     let count = link.querySelector(".test-cart-count");
@@ -3117,6 +3222,7 @@ const refreshAvailableInventory = async () => {
     });
 
     inventoryHydrated = true;
+    window.dispatchEvent(new Event("chi-rho-inventory-updated"));
     const activeFilter = document.querySelector(".catalog-filter.is-active")?.dataset.filter;
     if (catalogGrid) setCatalogFilter(activeFilter || requestedCategory, requestedQuery);
     renderTestCart({ pruneUnavailable: true });
@@ -3214,7 +3320,10 @@ document.addEventListener("click", (event) => {
   if (calculateShippingButton && !calculateShippingButton.disabled) calculateCartShipping();
 
   const checkoutButton = event.target.closest("[data-cart-checkout]");
-  if (checkoutButton && !checkoutButton.disabled) window.location.href = "checkout.html";
+  if (checkoutButton && !checkoutButton.disabled) {
+    try { sessionStorage.setItem("chi-rho-cart-origin", location.pathname + location.search); } catch {}
+    window.location.href = "checkout.html";
+  }
 
   if (event.target === testCartDialog) testCartDialog.close();
 });
@@ -3249,3 +3358,4 @@ const initialProductSlug = requestedProductSlug || legacyProductSlug;
 if (initialProductSlug && catalogProducts.some((product) => product.slug === initialProductSlug && isProductActive(product))) {
   window.addEventListener("load", () => openProductDialog(initialProductSlug, { syncUrl: false }), { once: true });
 }
+

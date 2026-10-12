@@ -109,7 +109,7 @@ const openHistory=async item=>{document.querySelector("[data-history-title]").te
 
 const load=async()=>{status.classList.remove("is-success");status.textContent="Carregando estoque…";
   try{const data=await request();items=Array.isArray(data.items)?data.items:[];document.querySelector("[data-admin-user]").textContent=`${data.admin?.displayName||data.admin?.email||"Administrador"} • ${adminRoleLabel(data.admin?.role)}`;
-    buildCategories();render();document.querySelector("[data-admin-summary]").textContent=`${items.length} produtos no estoque operacional • alerta de estoque baixo em até ${LOW_STOCK_LIMIT} unidades disponíveis`;status.textContent="";}
+    buildCategories();render();void loadKits();document.querySelector("[data-admin-summary]").textContent=`${items.length} produtos no estoque operacional • alerta de estoque baixo em até ${LOW_STOCK_LIMIT} unidades disponíveis`;status.textContent="";}
   catch(error){status.textContent=error.message==="AUTH_REQUIRED"?"Sua sessão expirou. Entre novamente.":error.message;}};
 
 stockForm.addEventListener("submit",saveMovement);stockForm.elements.quantity.addEventListener("input",updatePreview);stockForm.elements.movement_type.addEventListener("change",updatePreview);
@@ -126,3 +126,44 @@ document.querySelector("[data-admin-signout]").onclick=async()=>{const session=g
 document.querySelector("[data-inventory-refresh]").onclick=load;
 [searchInput,categorySelect,stockFilter].forEach(element=>element.addEventListener(element===searchInput?"input":"change",render));
 const restore=async()=>{if(!getSession()?.access_token){setView(false);return;}setView(true);await load();};restore();
+
+
+async function loadKits() {
+  const container = document.querySelector('[data-admin-kits]'), message = document.querySelector('[data-admin-kits-status]');
+  if (!container) return;
+  try {
+    const response = await fetch('/api/cpad-kits'), data = await response.json();
+    if (!response.ok || !Array.isArray(data.kits)) throw new Error(data.error || 'Não foi possível carregar os kits.');
+    container.replaceChildren();
+    data.kits.forEach(kit => {
+      const form = document.createElement('form'); form.className='admin-kit-row';
+      const title = document.createElement('h3'); title.textContent=kit.name;
+      const label = document.createElement('label'), active = document.createElement('input'); active.type='checkbox';active.checked=kit.active;
+      label.append(active,document.createTextNode(' Oferta ativa'));
+      const components = document.createElement('div');components.className='admin-kit-components';
+      const controls = kit.components.map(component => {
+        const row = document.createElement('label'), select = document.createElement('select'), quantity = document.createElement('input');
+        select.setAttribute('aria-label','Produto do kit');
+        const products = [...(data.products || [])];
+        if (!products.some(item => item.product_slug === component.slug)) products.push({product_slug:component.slug,product_name:'Harpa avulsa — cadastro pendente'});
+        products.forEach(product => select.append(new Option(product.product_name,product.product_slug)));
+        select.value=component.slug;quantity.type='number';quantity.min='1';quantity.max='99';quantity.step='1';quantity.value=component.quantity;
+        quantity.setAttribute('aria-label','Quantidade no kit');row.append(select,quantity);components.append(row);
+        return {select,quantity};
+      });
+      const save = document.createElement('button');save.type='submit';save.className='btn btn-primary';save.textContent='Salvar kit';
+      const status = document.createElement('p');status.setAttribute('aria-live','polite');
+      form.append(title,label,components,save,status);container.append(form);
+      form.addEventListener('submit',async event => {
+        event.preventDefault();save.disabled=true;status.textContent='Salvando…';
+        try {
+          const session = await ensureSession();
+          const response = await fetch('/api/cpad-kits',{method:'PATCH',headers:{Authorization:`Bearer ${session.access_token}`,'X-Admin-Portal':ADMIN_PORTAL,'Content-Type':'application/json'},
+            body:JSON.stringify({slug:kit.slug,active:active.checked,components:controls.map(item=>({slug:item.select.value,quantity:Number(item.quantity.value)}))})});
+          const result = await response.json();if(!response.ok)throw new Error(result.error || 'Não foi possível salvar.');
+          status.textContent='Kit atualizado. O preço será recalculado pelos componentes.';
+        } catch(error) { status.textContent=error.message; } finally {save.disabled=false;}
+      });
+    });message.textContent='';
+  } catch(error) {message.textContent=error.message;}
+}

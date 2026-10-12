@@ -2,7 +2,7 @@ import { next, rewrite } from '@vercel/functions';
 
 // Public documents only. Never intercept commerce APIs, checkout or admin.
 export const config = {
-  matcher: ['/', '/index.html', '/catalogo-biblias.html', '/catalogo-infantil.html', '/catalogo-casa.html', '/quem-somos.html']
+  matcher: ['/', '/index.html', '/catalogo-cpad.html', '/catalogo-biblias.html', '/catalogo-infantil.html', '/catalogo-casa.html', '/quem-somos.html']
 };
 
 export default function middleware(request) {
@@ -14,3 +14,4 @@ export default function middleware(request) {
   url.pathname = '/api/seo-page';
   return rewrite(url);
 }
+

@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
+<link rel="stylesheet" href="cpad.css" />
   <title>CHI RHO | Bíblias, livros, brinquedos e casa</title>
   <meta name="description" content="Conheça a CHI RHO: Bíblias, livros cristãos, brinquedos e utilidades para casa. Explore os catálogos de Casa, Família e Fé." />
   <meta name="robots" content="index, follow, max-image-preview:large" />
@@ -20,7 +21,7 @@
   <meta property="og:image" content="https://www.chirho.com.br/assets/logo-chi-rho.png" />
   <meta property="og:image:alt" content="CHI RHO" />
   <meta name="twitter:card" content="summary_large_image" />
-  <script type="application/ld+json" id="chi-rho-schema">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://www.chirho.com.br/#organization","name":"CHI RHO","url":"https://www.chirho.com.br/","logo":"https://www.chirho.com.br/assets/logo-chi-rho.png"},{"@type":"WebSite","@id":"https://www.chirho.com.br/#website","name":"CHI RHO","url":"https://www.chirho.com.br/","inLanguage":"pt-BR","publisher":{"@id":"https://www.chirho.com.br/#organization"}}]}</script>
+  <script type="application/ld+json" id="chi-rho-schema">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://www.chirho.com.br/#organization","name":"CHI RHO","legalName":"P S PERINI CHI RHO CASA E LIVROS","taxID":"42.300.391/0001-00","url":"https://www.chirho.com.br/","logo":"https://www.chirho.com.br/assets/logo-chi-rho.png","telephone":"+5521996241324","address":{"@type":"PostalAddress","streetAddress":"Rua Bento Siqueira, 668, LT 6, CS 7","addressLocality":"São João de Meriti","addressRegion":"RJ","postalCode":"25525-660","addressCountry":"BR"}},{"@type":"WebSite","@id":"https://www.chirho.com.br/#website","name":"CHI RHO","url":"https://www.chirho.com.br/","inLanguage":"pt-BR","publisher":{"@id":"https://www.chirho.com.br/#organization"}}]}</script>
 </head>
 <body>
   <div class="topbar">
@@ -169,6 +170,14 @@
       </div>
     </section>
 
+    <section class="section cpad-feature-strip" id="materiais-cpad">
+      <div class="container"><div class="section-heading"><div><span>SELEÇÃO CPAD</span><h2>Conhecimento para fortalecer sua fé.</h2>
+        <p>Bíblias e livros CPAD para sua leitura, estudo e ministério.</p></div>
+        <a href="catalogo-cpad.html">Explorar materiais CPAD →</a></div>
+        <div class="catalog-product-grid" id="cpad-featured-products"></div>
+      </div>
+    </section>
+
     <section class="catalog-section catalog-section-books" id="livros-mais-vendidos">
       <div class="container">
         <div class="catalog-heading">
@@ -262,12 +271,11 @@
 
     <section class="section deals-section" id="ofertas">
       <div class="container">
-        <article class="deal-banner deal-banner-wide">
-          <span>OPORTUNIDADES CHI RHO</span>
-          <h2>Condições e novidades em um só lugar</h2>
-          <p>Quando houver ofertas disponíveis, elas serão apresentadas aqui com informações claras.</p>
-          <a href="catalogo-biblias.html#catalogo" class="btn btn-light">Conhecer as Bíblias →</a>
-        </article>
+        <div class="section-heading"><div><span>OFERTAS CPAD</span><h2>Mais leitura, mais economia.</h2>
+          <p>Kits com 30% OFF e edições selecionadas da Bíblia em Defesa da Fé.</p></div>
+          <a href="catalogo-cpad.html?categoria=cpad-ofertas#catalogo">Ver todas as ofertas →</a></div>
+        <div class="catalog-product-grid" id="cpad-offer-products" aria-live="polite"></div>
+        <p class="cpad-note" data-cpad-status>Desconto calculado sobre os preços individuais vigentes. Frete à parte.</p>
       </div>
     </section>
 
@@ -383,5 +391,7 @@
 
   <script src="script.js"></script>
   <script type="module" src="seo.js"></script>
+  <script type="module" src="cpad-catalog.mjs"></script>
 </body>
 </html>
+

@@ -1,7 +1,7 @@
 {
   "functions": {
     "api/seo-page.js": {
-      "includeFiles": "{index.html,catalogo-biblias.html,catalogo-infantil.html,catalogo-casa.html,quem-somos.html,politica-de-privacidade.html,termos-de-uso.html,trocas-e-devolucoes.html,politica-de-entrega.html,script.js,catalog-pricing-overrides.js}"
+      "includeFiles": "{index.html,catalogo-cpad.html,catalogo-biblias.html,catalogo-infantil.html,catalogo-casa.html,quem-somos.html,politica-de-privacidade.html,termos-de-uso.html,trocas-e-devolucoes.html,politica-de-entrega.html,script.js,catalog-pricing-overrides.js}"
     }
   },
   "headers": [
@@ -19,7 +19,7 @@
       "headers": [
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; img-src 'self' data: https://www.google-analytics.com https://region1.google-analytics.com; script-src 'self' https://www.googletagmanager.com; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src 'self' https://sailabcmcqdzrqhqztqs.supabase.co https://www.google-analytics.com https://region1.google-analytics.com; upgrade-insecure-requests"
+          "value": "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; img-src 'self' data: https://cpad.vtexassets.com https://www.google-analytics.com https://region1.google-analytics.com; script-src 'self' https://www.googletagmanager.com; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src 'self' https://sailabcmcqdzrqhqztqs.supabase.co https://www.google-analytics.com https://region1.google-analytics.com; upgrade-insecure-requests"
         },
         {
           "key": "X-Content-Type-Options",
@@ -66,3 +66,4 @@
     }
   ]
 }
+

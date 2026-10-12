@@ -1,4 +1,5 @@
-import { shippingProducts } from "../data/shipping-products.mjs";
+import { loadShippingCatalog } from "../data/shipping-products.mjs";
+import { priceCart } from "../lib/kit-pricing.mjs";
 
 const jsonResponse = (body, status = 200) => Response.json(body, {
   status,
@@ -10,7 +11,7 @@ const jsonResponse = (body, status = 200) => Response.json(body, {
 
 const onlyDigits = (value) => String(value || "").replace(/\D/g, "");
 
-const getValidatedItems = (requestedItems) => {
+const getValidatedItems = (requestedItems, shippingProducts) => {
   if (!Array.isArray(requestedItems) || requestedItems.length === 0 || requestedItems.length > 30) {
     throw new Error("INVALID_ITEMS");
   }
@@ -82,7 +83,9 @@ export default {
 
     let items;
     try {
-      items = getValidatedItems(body?.itens);
+      const catalog = await loadShippingCatalog();
+      const pricing = priceCart(body?.itens, catalog.baseProducts, catalog.kits);
+      items = getValidatedItems(pricing.items, catalog.baseProducts);
     } catch (error) {
       const message = error.message === "OUT_OF_STOCK"
         ? "A quantidade solicitada é maior que o estoque disponível."
@@ -164,3 +167,4 @@ export default {
     }
   }
 };
+
