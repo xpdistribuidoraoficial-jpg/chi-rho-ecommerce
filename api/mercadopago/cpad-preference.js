@@ -6,7 +6,11 @@ export default { async fetch(request) {
   const token=process.env.MERCADO_PAGO_ACCESS_TOKEN?.trim(),publicKey=process.env.MERCADO_PAGO_PUBLIC_KEY?.trim();
   const testMode=process.env.MERCADO_PAGO_TEST_MODE!=='false';
   const available=Boolean(token&&publicKey&&process.env.CPAD_CHECKOUT_SIGNING_SECRET);
-  if(request.method==='GET')return output({available,provider:'mercado_pago',mode:testMode?'test':'production'});
+  if(request.method==='GET') {
+    let verified=false;
+    if(available) try { const health=await signedAction({action:'health'}); verified=health?.available===true; } catch {}
+    return output({available:available&&verified,provider:'mercado_pago',mode:testMode?'test':'production'});
+  }
   if(request.method!=='POST')return output({error:'Método não permitido.'},405);
   if(!available)return output({error:'Pagamento dos kits em configuração neste ambiente.'},503);
   try {
