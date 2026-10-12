@@ -2251,7 +2251,7 @@ catalogProducts.forEach((product) => {
 
 const inactiveCatalogSlugs = new Set([]);
 
-const isProductActive = (product) => !inactiveCatalogSlugs.has(product.slug);
+const isProductActive = (product) => !inactiveCatalogSlugs.has(product.slug) && product.cpadKitDisabled !== true;
 
 const getProductCartAvailability = (product) => {
   if (typeof window !== 'undefined' && window.ChiRhoCpad?.availability) return window.ChiRhoCpad.availability(product);
