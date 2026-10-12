@@ -1,4 +1,4 @@
-name: Validar preços dos kits CPAD
+name: Validar cálculo e checkout dos kits CPAD
 on:
   pull_request:
     paths:
@@ -21,4 +21,4 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run test:syntax
-      - run: npm test
+      - run: node --test tests/kit-pricing.test.mjs tests/cpad-api.test.mjs
