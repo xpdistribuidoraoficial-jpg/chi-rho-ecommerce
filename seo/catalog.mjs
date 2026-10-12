@@ -1,3 +1,5 @@
+import { initialKits } from '../data/cpad-kits.mjs';
+import { kitSummary } from '../lib/kit-pricing.mjs';
 import fs from 'node:fs';
 import vm from 'node:vm';
 
@@ -64,5 +66,14 @@ if (defense) {
   defense.testeCarrinho = true;
 }
 
+for (const kit of initialKits.filter(item => item.active)) {
+  const inventory = Object.fromEntries(products.map(product => [product.slug,{price:product.preco,stock:0}]));
+  const summary = kitSummary(kit,inventory);
+  products.push({slug:kit.slug,nome:kit.name,descricao:kit.description,editora:'CPAD',categoria:'Kits CPAD',categoriaSlug:'cpad-kits',
+    imagem:products.find(product => product.slug === kit.components[0].slug).imagem,kitComponents:kit.components,
+    sku:kit.slug,preco:summary.price,precoOriginal:summary.original});
+}
+
 export const activeProducts = products
   .filter((product) => !SEO_EXCLUDED_SLUGS.has(product.slug));
+
