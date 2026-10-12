@@ -1,4 +1,4 @@
-const catalogProducts = Object.freeze([
+const catalogProducts = [
   {
     id: "biblia-naa-mulher-floral",
     slug: "biblia-naa-mulher-floral",
@@ -1428,7 +1428,7 @@ const catalogProducts = Object.freeze([
     maisVendido: false,
     casa: true
   }
-]);
+];
 
 const bibleCatalogUpdates = Object.freeze({
   "biblia-naa-mulher-floral": {
@@ -2180,6 +2180,7 @@ const inactiveCatalogSlugs = new Set([]);
 const isProductActive = (product) => !inactiveCatalogSlugs.has(product.slug);
 
 const getProductCartAvailability = (product) => {
+  if (typeof window !== 'undefined' && window.ChiRhoCpad?.availability) return window.ChiRhoCpad.availability(product);
   const configured = product?.testeCarrinho === true
     && typeof product.preco === "number"
     && Number.isInteger(product.estoque);
@@ -2220,6 +2221,10 @@ const getProductPriceMarkup = (product) => {
   if (typeof product.preco !== "number") {
     return `<span class="product-price-current product-price-pending">${getProductStatus(product)}</span>`;
   }
+
+  if (product.kitComponents) return `
+    <del class="product-price-original">Comprando separadamente: ${formatProductPrice(product.precoOriginal)}</del>
+    <span class="product-price-current">No kit: ${formatProductPrice(product.preco)}</span>`;
 
   const hasRealDiscount =
     typeof product.precoOriginal === "number" && product.precoOriginal > product.preco;
@@ -2273,8 +2278,10 @@ const getProductCardCartMarkup = (product) => {
 const createProductCard = (product) => `
   <article class="catalog-product-card" id="${product.slug}" data-category="${product.categoriaSlug}">
     <div class="catalog-product-image">
-      <img src="${product.imagem}" alt="${product.nome}" loading="lazy" />
-      ${product.maisVendidoLivro ? '<strong class="catalog-product-badge">Mais vendido</strong>' : ""}
+      ${product.kitComponents && product.imagens?.length > 1
+        ? `<div class="cpad-kit-composition">${product.imagens.slice(0,2).map((image,index) => `${index ? '<b aria-hidden="true">+</b>' : ''}<img src="${image}" alt="${catalogProducts.find(p => p.imagem === image)?.nome || product.nome}" loading="lazy">`).join('')}</div>`
+        : `<img src="${product.imagem}" alt="${product.nome}" loading="lazy" />`}
+      ${product.kitComponents ? '<strong class="catalog-product-badge">30% OFF</strong>' : product.maisVendidoLivro ? '<strong class="catalog-product-badge">Mais vendido</strong>' : ""}
       <span>${product.perfil}</span>
     </div>
     <div class="catalog-product-content">
@@ -2282,7 +2289,7 @@ const createProductCard = (product) => `
       <h3>${product.nome}</h3>
       ${getProductMeta(product) ? `<span class="catalog-product-meta">${getProductMeta(product)}</span>` : ""}
       <p>${product.descricao}</p>
-      <div class="catalog-product-price" aria-label="Preço">${getProductPriceMarkup(product)}</div>
+      <div class="catalog-product-price" aria-label="Preço">${getProductPriceMarkup(product)}${product.kitComponents && typeof product.preco === "number" ? `<small class="cpad-kit-saving">Você economiza ${formatProductPrice(product.precoOriginal-product.preco)}</small>` : ""}</div>
       ${getProductCardCartMarkup(product)}
       <button class="catalog-product-view" type="button" data-product-slug="${product.slug}">Ver produto</button>
     </div>
@@ -2333,7 +2340,12 @@ const setCatalogFilter = (filter = "todas", query = "") => {
   const filteredProducts = catalogProducts.filter((product) => {
     if (!isProductActive(product)) return false;
     const productCategorySlugs = getProductCategorySlugs(product);
-    const matchesCategory = filter === "todas"
+    const matchesCategory = (filter === "cpad" && product.editora === "CPAD")
+      || (filter === "cpad-biblias" && product.editora === "CPAD" && product.categoriaSlug.startsWith("biblias"))
+      || (filter === "cpad-livros" && product.editora === "CPAD" && product.categoriaSlug === "livros-cristaos")
+      || (filter === "cpad-harpas" && product.editora === "CPAD" && product.categoriaSlug === "harpas")
+      || (filter === "cpad-kits" && Boolean(product.kitComponents))
+      || filter === "todas"
       || (filter === "infantil" ? product.infantil : productCategorySlugs.includes(filter));
     const matchesCatalog = matchesCategory
       || (filter === "casa" && product.casa)
@@ -2341,8 +2353,12 @@ const setCatalogFilter = (filter = "todas", query = "") => {
     const searchText = [product.nome, product.categoria, product.descricao, product.perfil, product.autor, product.editora, product.marca]
       .join(" ")
       .toLocaleLowerCase("pt-BR");
-    return matchesCatalog && (!normalizedQuery || searchText.includes(normalizedQuery));
-  }).sort((first, second) => (first.ordemLivro ?? 999) - (second.ordemLivro ?? 999));
+    return matchesCatalog && (!normalizedQuery || searchText.includes(normalizedQuery))
+      && (!filter.startsWith("cpad") || window.ChiRhoCpad?.matchesFilters(product) !== false);
+  }).sort((first, second) => filter.startsWith("cpad")
+    ? Number(getProductCartAvailability(second).available) - Number(getProductCartAvailability(first).available)
+      || (first.ordemLivro ?? 999) - (second.ordemLivro ?? 999)
+    : (first.ordemLivro ?? 999) - (second.ordemLivro ?? 999));
 
   catalogGrid.innerHTML = filteredProducts.length
     ? filteredProducts.map(createProductCard).join("")
@@ -2350,6 +2366,11 @@ const setCatalogFilter = (filter = "todas", query = "") => {
 
   if (catalogTitle) {
     const filterTitles = {
+      cpad: "Materiais CPAD",
+      "cpad-biblias": "Bíblias CPAD",
+      "cpad-livros": "Livros CPAD",
+      "cpad-harpas": "Harpas Cristãs",
+      "cpad-kits": "Kits CPAD — 30% OFF",
       todas: "Bíblias e livros cristãos",
       fe: "Bíblias e livros cristãos",
       biblias: "Bíblias",
@@ -2472,13 +2493,13 @@ const requestShippingQuote = async (cep, itens) => {
   return data;
 };
 
-const PICKUP_VENDOR_POSTCODE = "21210240";
+const PICKUP_VENDOR_POSTCODE = "25525660";
 const PICKUP_VENDOR_SERVICE = Object.freeze({
   carrier: "Retirada com o vendedor",
   carrierCode: "PICKUP_VENDOR",
-  description: "Retirada grátis • Rua Maria do Carmo, 220 - Penha Circular - Rio de Janeiro/RJ",
+  description: "Retirada grátis • Retirada a combinar após a confirmação do pagamento",
   serviceCode: "PICKUP_VENDOR",
-  deliveryTime: "Rua Maria do Carmo, 220 - Penha Circular - Rio de Janeiro/RJ - CEP 21210-240",
+  deliveryTime: "Retirada a combinar após a confirmação do pagamento",
   price: 0
 });
 
@@ -2581,6 +2602,8 @@ const setProductDialogText = (selector, value, fallback) => {
 
 const setProductDialogDetails = (product) => {
   const details = [
+    product.kitComponents ? { label: "Composição", value: product.kitComponents.map(item => `${item.quantity} × ${catalogProducts.find(p => p.slug === item.slug)?.nome || item.slug}`).join(" + ") } : null,
+    product.kitComponents ? { label: "Economia no kit", value: typeof product.preco === "number" ? formatProductPrice(product.precoOriginal - product.preco) : "Cadastro em preparação" } : null,
     product.autor ? { label: "Autor", value: product.autor } : null,
     product.editora ? { label: "Editora", value: product.editora } : null,
     product.marca ? { label: "Marca", value: product.marca } : null,
@@ -2643,7 +2666,7 @@ const openProductDialog = (slug, { syncUrl = true } = {}) => {
   const image = productDialogElement.querySelector("#product-dialog-image");
   const isChristianBook = product.categoriaSlug === "livros-cristaos";
   const isBible = product.categoriaSlug.startsWith("biblias");
-  const usesFullDialog = isChristianBook || isBible || product.brinquedo || product.casa;
+  const usesFullDialog = isChristianBook || isBible || product.brinquedo || product.casa || Boolean(product.kitComponents);
   productDialogElement.dataset.category = product.categoriaSlug;
   productDialogElement.dataset.productSlug = product.slug;
   setProductDialogGallery(product);
@@ -2742,7 +2765,7 @@ document.addEventListener("click", (event) => {
   if (quantityAction && productDialogQuantity && !quantityAction.disabled) {
     const currentQuantity = Number(productDialogQuantity.textContent) || 1;
     const currentProduct = catalogProducts.find((product) => product.slug === productDialogElement?.dataset.productSlug);
-    const stockLimit = typeof currentProduct?.estoque === "number" ? currentProduct.estoque : 1;
+    const stockLimit = getProductCartAvailability(currentProduct).stock || 1;
     const nextQuantity = quantityAction.dataset.quantityAction === "increase"
       ? Math.min(stockLimit, currentQuantity + 1)
       : Math.max(1, currentQuantity - 1);
@@ -2842,6 +2865,7 @@ testCartDialog.innerHTML = `
       </section>
       <div class="test-cart-summary">
         <div><span>Produtos</span><strong data-cart-subtotal>R$ 0,00</strong></div>
+        <div data-cart-discount-row hidden><span>Desconto dos kits (30%)</span><strong></strong></div>
         <div><span>Frete</span><strong data-cart-shipping-price>Calcule pelo CEP</strong></div>
         <div class="test-cart-total"><span>Total</span><strong data-cart-total>R$ 0,00</strong></div>
       </div>
@@ -2856,6 +2880,7 @@ const storedCartShipping = loadTestCartShipping();
 let selectedCartShipping = storedCartShipping?.service || null;
 let selectedCartPostcode = storedCartShipping?.cep || "";
 let testCartSubtotal = 0;
+let testCartDiscount = 0;
 
 const saveCartShipping = () => {
   if (!selectedCartShipping || !selectedCartPostcode) return;
@@ -2881,11 +2906,13 @@ const clearCartShipping = () => {
 
 const renderCartTotals = () => {
   const shippingPrice = selectedCartShipping?.price || 0;
-  testCartDialog.querySelector("[data-cart-subtotal]").textContent = formatCurrency(testCartSubtotal);
+  testCartDialog.querySelector("[data-cart-subtotal]").textContent = formatCurrency(testCartSubtotal + testCartDiscount);
   testCartDialog.querySelector("[data-cart-shipping-price]").textContent = selectedCartShipping
     ? (selectedCartShipping.carrierCode === "PICKUP_VENDOR" ? "Grátis" : formatCurrency(shippingPrice))
     : "Escolha entrega ou retirada";
   testCartDialog.querySelector("[data-cart-total]").textContent = formatCurrency(testCartSubtotal + shippingPrice);
+  const discountRow = testCartDialog.querySelector("[data-cart-discount-row]");
+  if (discountRow) { discountRow.hidden = testCartDiscount <= 0; discountRow.querySelector("strong").textContent = `− ${formatCurrency(testCartDiscount)}`; }
   const checkoutButton = testCartDialog.querySelector("[data-cart-checkout]");
   if (checkoutButton) checkoutButton.disabled = testCartSubtotal <= 0 || !selectedCartShipping;
 };
@@ -2998,11 +3025,13 @@ const updateTestCartQuantity = (slug, requestedQuantity) => {
 
   saveTestCart();
   resetCartShipping("Carrinho alterado. Escolha novamente entrega ou retirada.");
+  window.dispatchEvent(new Event("chi-rho-cart-changed"));
   renderTestCart();
   return quantity;
 };
 
 const renderTestCart = ({ pruneUnavailable = inventoryHydrated } = {}) => {
+  pruneUnavailable = pruneUnavailable && window.ChiRhoCpadReady === true;
   if (pruneUnavailable) {
     testCart = testCart
       .map((item) => {
@@ -3025,6 +3054,7 @@ const renderTestCart = ({ pruneUnavailable = inventoryHydrated } = {}) => {
   const totalQuantity = testCart.reduce((total, item) => total + item.quantity, 0);
   const subtotal = validItems.reduce((total, item) => total + item.product.preco * item.quantity, 0);
   testCartSubtotal = subtotal;
+  testCartDiscount = validItems.reduce((sum, item) => sum + (item.product.kitComponents ? (item.product.precoOriginal - item.product.preco) * item.quantity : 0), 0);
 
   document.querySelectorAll('a[href$="#carrinho"]').forEach((link) => {
     let count = link.querySelector(".test-cart-count");
@@ -3117,6 +3147,7 @@ const refreshAvailableInventory = async () => {
     });
 
     inventoryHydrated = true;
+    window.dispatchEvent(new Event("chi-rho-inventory-updated"));
     const activeFilter = document.querySelector(".catalog-filter.is-active")?.dataset.filter;
     if (catalogGrid) setCatalogFilter(activeFilter || requestedCategory, requestedQuery);
     renderTestCart({ pruneUnavailable: true });
@@ -3214,7 +3245,10 @@ document.addEventListener("click", (event) => {
   if (calculateShippingButton && !calculateShippingButton.disabled) calculateCartShipping();
 
   const checkoutButton = event.target.closest("[data-cart-checkout]");
-  if (checkoutButton && !checkoutButton.disabled) window.location.href = "checkout.html";
+  if (checkoutButton && !checkoutButton.disabled) {
+    try { sessionStorage.setItem("chi-rho-cart-origin", location.pathname + location.search); } catch {}
+    window.location.href = "checkout.html";
+  }
 
   if (event.target === testCartDialog) testCartDialog.close();
 });
@@ -3249,3 +3283,4 @@ const initialProductSlug = requestedProductSlug || legacyProductSlug;
 if (initialProductSlug && catalogProducts.some((product) => product.slug === initialProductSlug && isProductActive(product))) {
   window.addEventListener("load", () => openProductDialog(initialProductSlug, { syncUrl: false }), { once: true });
 }
+
