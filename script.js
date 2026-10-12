@@ -1444,11 +1444,12 @@ const catalogProducts = [
     nome: "Carregador Rápido USB-C KAPBOM KA-5005 — Branco",
     categoria: "Utilidades Domésticas",
     categoriaSlug: "utilidades-domesticas",
-    imagem: "assets/products/kapbom-ka-5005-original.webp",
+    imagem: "assets/products/kapbom-ka-5005-premium-hero.webp",
     imagens: [
-      "assets/products/kapbom-ka-5005-original.webp",
-      "assets/products/kapbom-ka-5005-estudio.webp",
-      "assets/products/kapbom-ka-5005-detalhe-usbc.webp"
+      "assets/products/kapbom-ka-5005-premium-hero.webp",
+      "assets/products/kapbom-ka-5005-premium-produto.webp",
+      "assets/products/kapbom-ka-5005-premium-recursos.webp",
+      "assets/products/kapbom-ka-5005-premium-embalagem.webp"
     ],
     descricao: "Fonte de tomada bivolt com uma porta USB-C, Power Delivery e saídas 5V/2,4A, 9V/2A ou 12V/1,5A (até 18W conforme tensões e correntes informadas na embalagem). Compatível com aparelhos iPhone e Samsung que aceitem carregamento USB-C PD, utilizando cabo adequado vendido separadamente. Modelo KA-5005. Código de homologação declarado na embalagem: 02848-22-14418.",
     perfil: "Tecnologia e praticidade",
