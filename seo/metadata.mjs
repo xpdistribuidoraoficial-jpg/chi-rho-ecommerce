@@ -6,6 +6,7 @@ import './site-readiness.mjs';
 
 export const SITE = 'https://www.chirho.com.br';
 export const pages = {
+  'catalogo-cpad.html': { path:'/catalogo-cpad.html', category:'cpad', name:'Materiais CPAD', title:'Materiais CPAD: Bíblias, livros e kits | CHI RHO', description:'Encontre Bíblias e livros CPAD na CHI RHO. Conheça as seleções para leitura e estudo e os kits com 30% de desconto.' },
   'index.html': { path: '/', name: 'CHI RHO', title: 'CHI RHO | Bíblias, livros, brinquedos e casa', description: 'Conheça a CHI RHO: Bíblias, livros cristãos, brinquedos e utilidades para casa. Explore os catálogos de Casa, Família e Fé.' },
   'catalogo-biblias.html': { path: '/catalogo-biblias.html', name: 'Bíblias e livros cristãos', title: 'Bíblias e livros cristãos | CHI RHO', description: 'Explore Bíblias de estudo, femininas, masculinas, ministeriais e infantis, além de livros cristãos no catálogo de Fé da CHI RHO.', category: 'fe' },
   'catalogo-infantil.html': { path: '/catalogo-infantil.html', name: 'Infantil', title: 'Brinquedos e Bíblias infantis | CHI RHO', description: 'Conheça os brinquedos e as Bíblias infantis da CHI RHO. Veja imagens, descrições e preços cadastrados para escolher por categoria.', category: 'infantil' },
@@ -17,6 +18,11 @@ export const pages = {
   'politica-de-entrega.html': { path: '/politica-de-entrega.html', name: 'Política de Entrega', title: 'Política de Entrega | CHI RHO', description: 'Consulte como funcionam frete, prazo, endereço, rastreamento e tentativas de entrega dos pedidos CHI RHO.' }
 };
 export const categories = {
+  'cpad': ['Materiais CPAD','catalogo-cpad.html','Bíblias, livros e kits CPAD para sua leitura e estudo.'],
+  'cpad-biblias': ['Bíblias CPAD','catalogo-cpad.html','Compare as Bíblias CPAD por tradução, letra e presença de Harpa.'],
+  'cpad-livros': ['Livros CPAD','catalogo-cpad.html','Livros CPAD para leitura, formação cristã e estudo bíblico.'],
+  'cpad-harpas': ['Harpas Cristãs','catalogo-cpad.html','Harpas Cristãs CPAD. Confira as edições cadastradas e a disponibilidade.'],
+  'cpad-kits': ['Kits CPAD — 30% OFF','catalogo-cpad.html','Seleções CPAD com 30% de desconto sobre os preços individuais vigentes.'],
   'biblias-de-estudo': ['Bíblias de Estudo', 'catalogo-biblias.html', 'Explore Bíblias de estudo com comentários e recursos de leitura. Confira as edições, traduções e editoras cadastradas na CHI RHO.'],
   'biblias-femininas': ['Bíblias Femininas', 'catalogo-biblias.html', 'Conheça as Bíblias femininas da CHI RHO. Compare traduções, capas, formatos e detalhes das edições disponíveis no catálogo.'],
   'biblias-masculinas': ['Bíblias Masculinas', 'catalogo-biblias.html', 'Veja as Bíblias masculinas do catálogo CHI RHO, com diferentes traduções, tamanhos de letra, capas e recursos para leitura.'],
@@ -28,7 +34,7 @@ export const categories = {
   'utilidades-domesticas': ['Utilidades Domésticas', 'catalogo-casa.html', 'Explore utilidades domésticas na CHI RHO, com imagens e informações dos produtos para a rotina da casa.']
 };
 export const categoryPath = (slug) => categories[slug] ? `/${categories[slug][1]}?categoria=${slug}` : '/catalogo-biblias.html';
-export const productPath = (p) => `/${p.casa ? 'catalogo-casa.html' : p.infantil || p.brinquedo ? 'catalogo-infantil.html' : 'catalogo-biblias.html'}?produto=${encodeURIComponent(p.slug)}`;
+export const productPath = (p) => `/${p.kitComponents ? 'catalogo-cpad.html' : p.casa ? 'catalogo-casa.html' : p.infantil || p.brinquedo ? 'catalogo-infantil.html' : 'catalogo-biblias.html'}?produto=${encodeURIComponent(p.slug)}`;
 export const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 export const jsonLd = (value) => JSON.stringify(value).replace(/</g, '\\u003c');
 
@@ -121,3 +127,4 @@ export function metadataMarkup(meta) {
   <meta name="twitter:card" content="summary_large_image" />
   <script type="application/ld+json" id="chi-rho-schema">${jsonLd(meta.schema)}</script>`;
 }
+
