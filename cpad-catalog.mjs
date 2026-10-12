@@ -57,8 +57,8 @@ function updateKits() {
       statusPreco:!kit.active ? 'Seleção em preparação' : !checkoutReady ? 'Pagamento em configuração' : 'Verificando disponibilidade…' });
     try {
       const summary = kitSummary(kit, inventory);
-      if (kit.active && registryLoaded && checkoutReady && kit.components.every(component => catalogProducts.find(item => item.slug === component.slug)?.testeCarrinho))
-        Object.assign(product,{preco:summary.price,precoOriginal:summary.original,estoque:summary.stock,testeCarrinho:true});
+      if (kit.active && registryLoaded && kit.components.every(component => catalogProducts.find(item => item.slug === component.slug)?.testeCarrinho))
+        Object.assign(product,{preco:summary.price,precoOriginal:summary.original,estoque:summary.stock,testeCarrinho:checkoutReady});
     } catch { /* A draft is shown without a fabricated price or inventory. */ }
   }
 }
