@@ -10,7 +10,7 @@ const origin='https://chi-rho-ecommerce-test.vercel.app';
 const secret='unit-test-signing-fixture';
 const publicToken='e5d28d7c-2463-4ffd-a63e-35eeedcc21e6';
 const order={id:'f963a4f2-1321-4f6e-8f4a-36101ba11212',code:'CHR-TEST-CPAD',public_token:publicToken,
-  discount:30.58,shipping_price:11.73,grand_total:83.10,reservation_expires_at:new Date(Date.now()+3600000).toISOString()};
+  discount:17.99,shipping_price:11.73,grand_total:95.69,reservation_expires_at:new Date(Date.now()+3600000).toISOString()};
 const items=[{product_slug:'panorama-da-biblia',product_name:'Panorama da Bíblia',unit_price:59.46,quantity:1},
   {product_slug:'herois-da-fe',product_name:'Heróis da Fé',unit_price:42.49,quantity:1}];
 test('server recomputes a forged kit basket and signs the verified physical order',async()=>{
@@ -24,7 +24,7 @@ test('server recomputes a forged kit basket and signs the verified physical orde
       const {payload_text,signature}=JSON.parse(options.body);
       assert.equal(signature,createHmac('sha256',secret).update(payload_text).digest('hex'));
       verified=JSON.parse(payload_text);
-      return Response.json({order_id:order.id,order_code:order.code,order_public_token:publicToken,order_total:71.37});
+      return Response.json({order_id:order.id,order_code:order.code,order_public_token:publicToken,order_total:83.96});
     }
     throw new Error(`Unexpected fetch: ${url}`);
   };
@@ -32,8 +32,8 @@ test('server recomputes a forged kit basket and signs the verified physical orde
     const body={clientRequestId:order.id,customer:{name:'Teste CPAD',email:'test@example.invalid',whatsapp:'21999999999',taxId:'52998224725'},
       shipping:{service:{carrierCode:'PICKUP_VENDOR'}},items:[{slug:initialKits[0].slug,quantity:1,price:0.01,discount:99}]};
     const response=await orderEndpoint.fetch(new Request(origin+'/api/create-cpad-order',{method:'POST',headers:{origin,apikey:'sb_publishable_ipNBmuf0pUOZRzzlpU8kWw_Md1Y5FuE','Content-Type':'application/json'},body:JSON.stringify(body)}));
-    assert.equal(response.status,201);assert.equal((await response.json()).order.total,71.37);
-    assert.equal(verified.subtotal,101.95);assert.equal(verified.discount,30.58);
+    assert.equal(response.status,201);assert.equal((await response.json()).order.total,83.96);
+    assert.equal(verified.subtotal,101.95);assert.equal(verified.discount,17.99);
     assert.equal(verified.items.length,2);assert.equal(verified.kits.length,1);
     const rejected=await orderEndpoint.fetch(new Request(origin+'/api/create-cpad-order',{method:'POST',headers:{origin:'https://untrusted.example'}}));
     assert.equal(rejected.status,403);
@@ -57,7 +57,7 @@ test('payment provider receives discounted cent-exact items and verified freight
   try{
     const response=await paymentEndpoint.fetch(new Request(origin+'/api/mercadopago/cpad-preference',{method:'POST',headers:{origin,'Content-Type':'application/json'},body:JSON.stringify({code:order.code,publicToken})}));
     assert.equal(response.status,201);
-    assert.equal(Math.round(provider.items.reduce((sum,item)=>sum+item.unit_price*item.quantity,0)*100),7137);
+    assert.equal(Math.round(provider.items.reduce((sum,item)=>sum+item.unit_price*item.quantity,0)*100),8396);
     assert.equal(provider.shipments.cost,11.73);assert.equal(saved.preference_id,'fixture-preference');
     delete process.env.MERCADO_PAGO_ACCESS_TOKEN;
     assert.equal((await (await paymentEndpoint.fetch(new Request(origin+'/api/mercadopago/cpad-preference'))).json()).available,false);
