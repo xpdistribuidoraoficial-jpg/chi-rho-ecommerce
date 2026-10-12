@@ -1,0 +1,23 @@
+export const cpadProductSlugs = [
+  "biblia-media-letra-gigante-harpa",
+  "biblia-harpa-floral-aquarela-gigante",
+  "biblia-harpa-floral-preta-grande",
+  "biblia-estudo-pentecostal",
+  "biblia-aplicacao-pessoal-nvt",
+  "biblia-assembleia-de-deus-capa-luxo",
+  "biblia-estudo-cronologica",
+  "biblia-estudo-defesa-da-fe",
+  "panorama-da-biblia",
+  "herois-da-fe",
+  "uma-garota-segundo-o-coracao-de-deus",
+  "como-ter-o-coracao-de-maria-no-mundo-de-marta",
+  "historia-dos-hebreus",
+  "pequena-enciclopedia-biblica",
+  "historia-eclesiastica",
+  "declaracao-de-fe-atualizada",
+  "israel-gogue-e-o-anticristo",
+  "tempo-do-fim",
+  "comentario-biblico-beacon-antigo-testamento",
+  "comentario-exegetico-de-atos",
+  "teologia-sistematica-stanley-horton"
+];
