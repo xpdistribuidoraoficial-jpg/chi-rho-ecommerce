@@ -1,12 +1,14 @@
 import { getAttribution } from "./seo/attribution.mjs";
-import { shippingProducts } from "./data/shipping-products.mjs";
+import { shippingProducts, baseShippingProducts, shippingKits } from "./data/shipping-products.mjs";
+import { priceCart } from "./lib/kit-pricing.mjs";
 
 const CART_STORAGE_KEY = "chi-rho-test-cart-v1";
 const SHIPPING_STORAGE_KEY = "chi-rho-test-shipping-v1";
 const LAST_ORDER_STORAGE_KEY = "chi-rho-last-order-v1";
-const ORDER_ENDPOINT = "https://sailabcmcqdzrqhqztqs.supabase.co/functions/v1/create-casa-order";
+const ORDER_ENDPOINT = "/api/create-cpad-order";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_ipNBmuf0pUOZRzzlpU8kWw_Md1Y5FuE";
-const PAYMENT_ENDPOINT = "/api/mercadopago/create-preference";
+const PAYMENT_ENDPOINT = cartHasKits() ? "/api/mercadopago/cpad-preference" : "/api/mercadopago/create-preference";
+function cartHasKits(){try{return JSON.parse(localStorage.getItem(CART_STORAGE_KEY)||"[]").some(item=>String(item.slug).startsWith("kit-cpad-"));}catch{return false;}}
 let createdOrder = null;
 let paymentAvailable = false;
 
@@ -80,7 +82,7 @@ const loadCart = () => {
         if (!product || !Number.isInteger(quantity) || quantity < 1) return null;
         return {
           slug: item.slug,
-          quantity: Math.min(quantity, product.stock),
+          quantity,
           product
         };
       })
@@ -151,11 +153,19 @@ const fillAddressByPostcode = async (form, postcode) => {
 
 const cart = loadCart();
 const shipping = loadShipping();
+let cartPricing = null;
+try { cartPricing = priceCart(cart.map(item => ({slug:item.slug,quantity:item.quantity})),baseShippingProducts,shippingKits); } catch {}
+let cartOrigin = '/catalogo-biblias.html';
+try {
+  const storedOrigin = sessionStorage.getItem('chi-rho-cart-origin');
+  if (storedOrigin && /^\/(?:index|catalogo-biblias|catalogo-cpad|catalogo-casa|catalogo-infantil)\.html(?:\?.*)?$/.test(storedOrigin)) cartOrigin = storedOrigin;
+} catch {}
+document.querySelectorAll('a[href^="catalogo-casa.html"]').forEach(link => { link.href = cartOrigin + (link.textContent.trim() === 'Editar' ? '#carrinho' : '#catalogo'); });
 const isPickupOrder = shipping?.service?.carrierCode === "PICKUP_VENDOR";
 const emptyState = document.querySelector("[data-checkout-empty]");
 const checkoutContent = document.querySelector("[data-checkout-content]");
 
-if (cart.length === 0 || !shipping) {
+if (cart.length === 0 || !shipping || !cartPricing) {
   emptyState.hidden = false;
 } else {
   checkoutContent.hidden = false;
@@ -165,7 +175,7 @@ if (cart.length === 0 || !shipping) {
     (total, item) => total + item.product.price * item.quantity,
     0
   );
-  const total = subtotal + shipping.service.price;
+  const total = cartPricing.totalProducts + shipping.service.price;
 
   cart.forEach(({ product, quantity }) => {
     const item = document.createElement("article");
@@ -181,7 +191,7 @@ if (cart.length === 0 || !shipping) {
     const price = document.createElement("b");
 
     name.textContent = product.name;
-    detail.textContent = `${quantity} ${quantity === 1 ? "unidade" : "unidades"}`;
+    detail.textContent = `${quantity} ${quantity === 1 ? "unidade" : "unidades"}${product.kitComponents ? " • " + product.kitComponents.map(component => `${component.quantity} × ${baseShippingProducts[component.slug]?.name || component.slug}`).join(" + ") : ""}`;
     price.textContent = formatCurrency(product.price * quantity);
     copy.append(name, detail);
     item.append(image, copy, price);
@@ -196,7 +206,7 @@ if (cart.length === 0 || !shipping) {
   deliveryLabel.textContent = isPickup ? "RETIRADA SELECIONADA" : "ENTREGA SELECIONADA";
   deliveryService.textContent = `${shipping.service.carrier} • ${shipping.service.description}`;
   deliveryTime.textContent = isPickup
-    ? "Rua Maria do Carmo, 220 - Penha Circular - Rio de Janeiro/RJ - CEP 21210-240. Retirada após a confirmação do pagamento."
+    ? "Retirada a combinar com a CHI RHO após a confirmação do pagamento. O endereço será informado pela equipe."
     : `${formatDeliveryTime(shipping.service.deliveryTime)} para o CEP ${formatPostcode(shipping.cep)}`;
   delivery.replaceChildren(deliveryLabel, deliveryService, deliveryTime);
   const checkoutForm = document.querySelector("#checkout-form");
@@ -216,7 +226,9 @@ if (cart.length === 0 || !shipping) {
     fillAddressByPostcode(checkoutForm, shipping.cep);
   }
 
-  document.querySelector("[data-checkout-subtotal]").textContent = formatCurrency(subtotal);
+  document.querySelector("[data-checkout-subtotal]").textContent = formatCurrency(cartPricing.subtotal);
+  const discountRow = document.querySelector('[data-checkout-discount-row]');
+  if (discountRow) { discountRow.hidden = cartPricing.discount <= 0; discountRow.querySelector('dd').textContent = `− ${formatCurrency(cartPricing.discount)}`; }
   document.querySelector("[data-checkout-shipping-price]").textContent = isPickupOrder ? "Grátis" : formatCurrency(shipping.service.price);
   document.querySelector("[data-checkout-total]").textContent = formatCurrency(total);
 }
@@ -295,12 +307,13 @@ document.querySelector("#checkout-form")?.addEventListener("submit", async (even
     return;
   }
 
-  if (cart.length === 0 || !shipping) {
+  if (cart.length === 0 || !shipping || !cartPricing) {
     status.textContent = "O carrinho ou o frete não está mais disponível. Volte ao catálogo e refaça a cotação.";
     status.className = "checkout-form-status is-error";
     return;
   }
 
+  if (!cartPricing) { status.textContent = "Revise os produtos e o estoque no carrinho."; return; }
   const payload = {
     clientRequestId: checkoutRequestId,
     customer: {
@@ -358,7 +371,9 @@ document.querySelector("#checkout-form")?.addEventListener("submit", async (even
             quantity: item.quantity,
             line_total: Number(item.product.price) * item.quantity
           })),
-          subtotal: cart.reduce((sum, item) => sum + Number(item.product.price) * item.quantity, 0),
+          subtotal: cartPricing.subtotal,
+          discount: cartPricing.discount,
+          kits: cartPricing.kits,
           shippingPrice: Number(shipping.service.price),
           total: Number(result.order.total),
           shipping: {
@@ -397,3 +412,4 @@ document.querySelector("#checkout-form")?.addEventListener("submit", async (even
     submitButton.textContent = "Registrar pedido e continuar";
   }
 });
+
