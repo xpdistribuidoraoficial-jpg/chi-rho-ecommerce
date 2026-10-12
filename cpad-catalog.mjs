@@ -2,7 +2,7 @@ import { kitSummary } from './lib/kit-pricing.mjs';
 import { initialKits } from './data/cpad-kits.mjs';
 import { COMPANY } from './seo/company.mjs';
 
-let registry = [], registryLoaded = false;
+let registry = [], registryLoaded = false, checkoutReady = false;
 const isCpadPage = document.body.dataset.cpadPage === 'true';
 const inventoryMap = () => Object.fromEntries(catalogProducts.filter(product => !product.kitComponents)
   .map(product => [product.slug, { price:product.preco, stock:Number.isInteger(product.estoque) ? product.estoque : 0,
@@ -50,13 +50,14 @@ function updateKits() {
       catalogProducts.push(product);
     }
     Object.assign(product, { nome:kit.name, descricao:kit.description, kitComponents:kit.components,
+      cpadKitDisabled: !kit.active, kitActive: !!kit.active,
       imagem:catalogProducts.find(item => item.slug === kit.components[0].slug)?.imagem || 'assets/logo-chi-rho.png',
       imagens:kit.components.map(component => catalogProducts.find(item => item.slug === component.slug)?.imagem).filter(Boolean),
       sku:kit.slug, testeCarrinho:false, estoque:0, preco:null, precoOriginal:null,
-      statusPreco:registryLoaded ? 'Seleção em preparação' : 'Confirmando a oferta…' });
+      statusPreco:!kit.active ? 'Seleção em preparação' : !checkoutReady ? 'Pagamento em configuração' : 'Verificando disponibilidade…' });
     try {
       const summary = kitSummary(kit, inventory);
-      if (kit.active && registryLoaded && kit.components.every(component => catalogProducts.find(item => item.slug === component.slug)?.testeCarrinho))
+      if (kit.active && registryLoaded && checkoutReady && kit.components.every(component => catalogProducts.find(item => item.slug === component.slug)?.testeCarrinho))
         Object.assign(product,{preco:summary.price,precoOriginal:summary.original,estoque:summary.stock,testeCarrinho:true});
     } catch { /* A draft is shown without a fabricated price or inventory. */ }
   }
@@ -69,7 +70,7 @@ function refreshViews() {
   renderProducts('#cpad-featured-products', catalogProducts.filter(product => product.editora === 'CPAD' && !product.kitComponents)
     .sort((a,b) => Number(availability(b).available) - Number(availability(a).available)).slice(0,4));
   renderProducts('#cpad-offer-products', catalogProducts.filter(product =>
-    (product.kitComponents && product.estoque > 0 && product.testeCarrinho) ||
+    (product.kitComponents && product.kitActive) ||
     product.destaqueOfertaCpad
   ));
   if (productDialogElement?.open) {
@@ -136,7 +137,8 @@ try {
   const response = await fetch('/api/cpad-kits',{signal:AbortSignal.timeout(10000)});
   const data = await response.json();
   if (!response.ok || !Array.isArray(data.kits)) throw new Error('KIT_UNAVAILABLE');
-  registry = data.kits; registryLoaded = true;
+  registry = data.kits; registryLoaded = true; checkoutReady = data.checkoutReady === true;
+  if(!checkoutReady) document.querySelector('[data-cpad-status]')?.replaceChildren(document.createTextNode('Kits em exposição. Finalização da compra temporariamente indisponível; os demais produtos continuam disponíveis.'));
 } catch {
   document.querySelector('[data-cpad-status]')?.replaceChildren(document.createTextNode('Não foi possível confirmar as ofertas. Atualize a página para tentar novamente.'));
 }
