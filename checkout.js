@@ -5,7 +5,7 @@ import { priceCart } from "./lib/kit-pricing.mjs";
 const CART_STORAGE_KEY = "chi-rho-test-cart-v1";
 const SHIPPING_STORAGE_KEY = "chi-rho-test-shipping-v1";
 const LAST_ORDER_STORAGE_KEY = "chi-rho-last-order-v1";
-const ORDER_ENDPOINT = "/api/create-cpad-order";
+const ORDER_ENDPOINT = cartHasKits() ? "/api/create-cpad-order" : "https://sailabcmcqdzrqhqztqs.supabase.co/functions/v1/create-casa-order";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_ipNBmuf0pUOZRzzlpU8kWw_Md1Y5FuE";
 const PAYMENT_ENDPOINT = cartHasKits() ? "/api/mercadopago/cpad-preference" : "/api/mercadopago/create-preference";
 function cartHasKits(){try{return JSON.parse(localStorage.getItem(CART_STORAGE_KEY)||"[]").some(item=>String(item.slug).startsWith("kit-cpad-"));}catch{return false;}}
