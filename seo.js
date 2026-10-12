@@ -56,6 +56,7 @@ const refreshReleasedCatalog = async () => {
       product.testeCarrinho = true;
     });
 
+    window.dispatchEvent(new Event("chi-rho-inventory-updated"));
     if (typeof renderProducts === 'function') {
       renderProducts('#featured-products', catalogProducts.filter((product) => product.destaque && isProductActive(product)).slice(0, 4));
       renderProducts(
@@ -344,3 +345,4 @@ window.addEventListener('storage', (event) => {
 
 
 refreshReleasedCatalog();
+
