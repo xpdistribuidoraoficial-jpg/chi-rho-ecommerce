@@ -226,9 +226,9 @@ if (cart.length === 0 || !shipping || !cartPricing) {
     fillAddressByPostcode(checkoutForm, shipping.cep);
   }
 
-  document.querySelector("[data-checkout-subtotal]").textContent = formatCurrency(cartPricing.subtotal);
+  document.querySelector("[data-checkout-subtotal]").textContent = formatCurrency(cartPricing.referenceSubtotal);
   const discountRow = document.querySelector('[data-checkout-discount-row]');
-  if (discountRow) { discountRow.hidden = cartPricing.discount <= 0; discountRow.querySelector('dd').textContent = `− ${formatCurrency(cartPricing.discount)}`; }
+  if (discountRow) { discountRow.hidden = cartPricing.referenceDiscount <= 0; discountRow.querySelector('dd').textContent = `− ${formatCurrency(cartPricing.referenceDiscount)}`; }
   document.querySelector("[data-checkout-shipping-price]").textContent = isPickupOrder ? "Grátis" : formatCurrency(shipping.service.price);
   document.querySelector("[data-checkout-total]").textContent = formatCurrency(total);
 }
@@ -371,8 +371,8 @@ document.querySelector("#checkout-form")?.addEventListener("submit", async (even
             quantity: item.quantity,
             line_total: Number(item.product.price) * item.quantity
           })),
-          subtotal: cartPricing.subtotal,
-          discount: cartPricing.discount,
+          subtotal: cartPricing.referenceSubtotal,
+          discount: cartPricing.referenceDiscount,
           kits: cartPricing.kits,
           shippingPrice: Number(shipping.service.price),
           total: Number(result.order.total),
