@@ -1,9 +1,10 @@
+import './inventory-fixture.mjs';
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import test from "node:test";
 import vm from "node:vm";
 
-import { shippingProducts } from "../data/shipping-products.mjs";
+import { shippingProducts, baseShippingProducts, shippingKits } from "../data/shipping-products.mjs";
 
 const projectRoot = new URL("../", import.meta.url);
 const source = fs.readFileSync(new URL("script.js", projectRoot), "utf8");
@@ -42,10 +43,16 @@ test("catálogo ativo não possui slugs duplicados nem imagens quebradas", () =>
 });
 
 test("somente produtos com fonte logística entram no fluxo de compra", () => {
-  assert.deepEqual(
-    Array.from(orderableProducts, (product) => product.slug).sort(),
-    Object.keys(shippingProducts).sort()
-  );
+  for (const product of orderableProducts) assert.ok(baseShippingProducts[product.slug], `Fonte logística ausente: ${product.slug}`);
+  for (const [slug, product] of Object.entries(baseShippingProducts)) {
+    assert.ok(activeProducts.some((candidate) => candidate.slug === slug), `Produto físico desconhecido: ${slug}`);
+    assert.ok(product.price > 0);
+    for (const field of ["weight", "length", "width", "height"]) assert.ok(product[field] > 0);
+  }
+  for (const kit of shippingKits.filter((kit) => kit.active)) {
+    assert.ok(shippingProducts[kit.slug]);
+    for (const component of kit.components) assert.ok(baseShippingProducts[component.slug]);
+  }
 });
 
 test("preço e estoque do catálogo conferem com carrinho e frete", () => {
@@ -179,3 +186,4 @@ test("carrinho preserva itens durante hidratacao e persiste em local e session s
   assert.ok(source.includes("catalogProducts.find((candidate) => candidate.slug === item.slug)"));
   assert.ok(source.includes("product.testeCarrinho = true"));
 });
+
