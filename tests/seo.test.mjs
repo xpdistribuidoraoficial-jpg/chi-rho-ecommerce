@@ -1,3 +1,4 @@
+import './inventory-fixture.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -10,15 +11,15 @@ import middleware, { config } from '../middleware.js';
 const read = (file) => fs.readFileSync(new URL(`../${file}`, import.meta.url), 'utf8');
 const paths = sitemapUrls(activeProducts, categories);
 
-test('sitemap cobre exatamente as páginas públicas, categorias e 61 produtos operacionais', () => {
+test('sitemap cobre exatamente as páginas públicas, categorias e 63 produtos operacionais', () => {
   const xml = read('sitemap.xml');
   assert.match(xml, /^<\?xml version="1.0" encoding="UTF-8"\?>/);
   assert.match(xml, /xmlns="http:\/\/www.sitemaps.org\/schemas\/sitemap\/0.9"/);
   const locations = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1].replaceAll('&amp;', '&'));
   assert.deepEqual(locations, paths.map((path) => SITE + path));
-  assert.equal(locations.length, 79);
-  assert.equal(new Set(locations).size, 79);
-  assert.equal(locations.filter((url) => url.includes('?produto=')).length, 61);
+  assert.equal(locations.length, 87);
+  assert.equal(new Set(locations).size, 87);
+  assert.equal(locations.filter((url) => url.includes('?produto=')).length, 63);
   assert.doesNotMatch(xml, /vercel\.app|checkout|pagamento-|admin-|basculantes|#|<lastmod>/);
 });
 
@@ -46,7 +47,7 @@ test('páginas estáticas possuem metadados e schemas únicos sem duplicação',
   assert.equal(new Set(titles).size, Object.keys(pages).length);
 });
 
-test('todas as 79 URLs recebem canonical próprio e HTML 200 antes do JavaScript', async () => {
+test('todas as 87 URLs recebem canonical próprio e HTML 200 antes do JavaScript', async () => {
   const titles = new Set();
   for (const path of paths) {
     const url = new URL(path, SITE), file = url.pathname.slice(1) || 'index.html';
@@ -126,3 +127,4 @@ test('documentos comerciais recebem noindex sem relaxar a CSP', () => {
   assert.ok(config.headers.some((rule) => rule.source.includes('checkout') && rule.headers.some((h) => h.key === 'X-Robots-Tag' && h.value.includes('noindex'))));
   assert.doesNotMatch(read('vercel.json'), /unsafe-inline|unsafe-eval/);
 });
+
