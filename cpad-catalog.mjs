@@ -80,6 +80,27 @@ function refreshViews() {
   renderTestCart();
 }
 
+function syncCpadFilterVisibility() {
+  if (!isCpadPage) return;
+  const current = document.querySelector('.cpad-tabs .catalog-filter.is-active')?.dataset.filter || 'cpad';
+  const bible = current === 'cpad-biblias';
+  const books = bible || current === 'cpad-livros';
+  document.querySelectorAll('.cpad-only-bibles').forEach(el => {el.hidden = !bible; if(!bible) el.querySelectorAll('select,input').forEach(input=>{input.value='';});});
+  document.querySelectorAll('.cpad-only-books').forEach(el => {el.hidden = !books; if(!books) el.querySelectorAll('select,input').forEach(input=>{input.value='';});});
+}
+document.querySelector('[data-cpad-toggle]')?.addEventListener('click', event => {
+  const button=event.currentTarget;
+  const form=document.querySelector('[data-cpad-filters]');
+  form.hidden = !form.hidden;
+  button.setAttribute('aria-expanded',String(!form.hidden));
+  button.textContent = form.hidden ? '☷ Mais filtros' : 'Ocultar filtros';
+});
+document.querySelector('.cpad-tabs')?.addEventListener('click', event => {
+  if(!event.target.closest('[data-filter]')) return;
+  queueMicrotask(()=>{syncCpadFilterVisibility();refreshViews();});
+});
+syncCpadFilterVisibility();
+
 function populateFilters() {
   const products = catalogProducts.filter(product => product.editora === 'CPAD');
   for (const [name, key, label] of [['translation','traducao','Todas as traduções'],['letter','tamanhoLetra','Todos os tamanhos'],['subject','perfil','Todos os assuntos']]) {
