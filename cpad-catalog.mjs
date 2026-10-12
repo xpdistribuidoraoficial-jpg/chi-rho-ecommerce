@@ -68,7 +68,10 @@ function refreshViews() {
   if (catalogGrid) setCatalogFilter(active || (isCpadPage ? 'cpad' : requestedCategory), requestedQuery);
   renderProducts('#cpad-featured-products', catalogProducts.filter(product => product.editora === 'CPAD' && !product.kitComponents)
     .sort((a,b) => Number(availability(b).available) - Number(availability(a).available)).slice(0,4));
-  renderProducts('#cpad-offer-products', catalogProducts.filter(product => product.kitComponents));
+  renderProducts('#cpad-offer-products', catalogProducts.filter(product =>
+    (product.kitComponents && product.estoque > 0 && product.testeCarrinho) ||
+    product.destaqueOfertaCpad
+  ));
   if (productDialogElement?.open) {
     const slug = productDialogElement.dataset.productSlug;
     const selected = Number(productDialogQuantity?.textContent) || 1;
