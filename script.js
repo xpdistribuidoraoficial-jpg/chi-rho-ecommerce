@@ -480,7 +480,7 @@ const catalogProducts = [
     editora: "CPAD",
     preco: null,
     estoque: null,
-    destaque: false,
+    destaque: true,
     maisVendido: false
   },
   {
@@ -1792,8 +1792,8 @@ const bibleCatalogUpdates = Object.freeze({
       "assets/products/biblia-estudo-defesa-fe-04.webp"
     ],
     descricao: "Bíblia de estudo apologética na ARC, desenvolvida para compreender, defender e proclamar a fé cristã.",
-    precoOriginal: 149.99,
-    preco: 127.49,
+    precoOriginal: 127.49,
+    preco: 119.00,
     fontePreco: "Casa Publicadora das Assembleias de Deus (CPAD)",
     fontePrecoUrl: "https://www.cpad.com.br/biblia-de-estudo-defesa-da-fe-capa-dura-180004/p",
     dataConsultaPreco: "2026-08-24",
