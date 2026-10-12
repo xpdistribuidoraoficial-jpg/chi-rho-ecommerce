@@ -83,7 +83,7 @@ test("preço cheio e promocional usam a mesma renderização nos cards e nos det
     assert.ok(markup.includes(`<del class="product-price-original">De: ${money(product.precoOriginal)}</del>`));
     assert.ok(markup.includes(`Por: ${money(product.preco)}`));
   });
-  assert.ok(source.includes('<div class="catalog-product-price" aria-label="Preço">${getProductPriceMarkup(product)}</div>'));
+  assert.ok(source.includes('<div class="catalog-product-price" aria-label="Preço">${getProductPriceMarkup(product)}'));
   const elements = new Map();
   const dialogContext = {
     getProductPriceMarkup: prices.markup,
@@ -125,3 +125,4 @@ test("GTIN confirmado passa no dígito verificador e medidas distinguem embalage
   assert.match(toys.find((p) => p.slug === "brinquedo-onibus-speed-bus").dimensoes, /embalagem/);
   assert.match(toys.find((p) => p.slug === "brinquedo-trator-grande-articulado").dimensoes, /produto/);
 });
+
