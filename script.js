@@ -2303,7 +2303,7 @@ const getProductPriceMarkup = (product) => {
   }
 
   if (product.kitComponents) return `
-    <del class="product-price-original">Comprando separadamente: ${formatProductPrice(product.precoOriginal)}</del>
+    <del class="product-price-original">Preço cheio dos componentes: ${formatProductPrice(product.precoOriginal)}</del>
     <span class="product-price-current">No kit: ${formatProductPrice(product.preco)}</span>`;
 
   const hasRealDiscount =
@@ -2369,7 +2369,7 @@ const createProductCard = (product) => `
       <h3>${product.nome}</h3>
       ${getProductMeta(product) ? `<span class="catalog-product-meta">${getProductMeta(product)}</span>` : ""}
       <p>${product.descricao}</p>
-      <div class="catalog-product-price" aria-label="Preço">${getProductPriceMarkup(product)}${product.kitComponents && typeof product.preco === "number" ? `<small class="cpad-kit-saving">Você economiza ${formatProductPrice(product.precoOriginal-product.preco)}</small>` : ""}</div>
+      <div class="catalog-product-price" aria-label="Preço">${getProductPriceMarkup(product)}${product.kitComponents && typeof product.preco === "number" ? `<small class="cpad-kit-saving">Economia sobre o preço cheio: ${formatProductPrice(product.precoOriginal-product.preco)}</small>` : ""}</div>
       ${getProductCardCartMarkup(product)}
       <button class="catalog-product-view" type="button" data-product-slug="${product.slug}">Ver produto</button>
     </div>

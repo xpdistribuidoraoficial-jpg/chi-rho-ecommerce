@@ -1,5 +1,6 @@
 import {loadShippingCatalog} from '../data/shipping-products.mjs';
 import {signedAction,sameOrigin} from '../lib/cpad-database.mjs';
+import {paymentReadiness} from '../lib/cpad-payment-readiness.mjs';
 
 import { priceCart } from "../lib/kit-pricing.mjs";
 
@@ -174,6 +175,10 @@ export default { async fetch(request) {
 
   if (request.headers.get("apikey") !== PUBLIC_CHECKOUT_KEY) {
     return jsonResponse({ error: "Requisição não autorizada." }, 401, origin);
+  }
+
+  if (!(await paymentReadiness()).ready) {
+    return jsonResponse({error:"Pagamento dos kits aguardando validação. Nenhum estoque foi reservado."},503,origin);
   }
 
   const contentLength = Number(request.headers.get("content-length") || 0);
