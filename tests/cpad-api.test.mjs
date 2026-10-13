@@ -14,10 +14,12 @@ const order={id:'f963a4f2-1321-4f6e-8f4a-36101ba11212',code:'CHR-TEST-CPAD',publ
 const items=[{product_slug:'panorama-da-biblia',product_name:'Panorama da Bíblia',unit_price:59.46,quantity:1},
   {product_slug:'herois-da-fe',product_name:'Heróis da Fé',unit_price:42.49,quantity:1}];
 test('server recomputes a forged kit basket and signs the verified physical order',async()=>{
-  const oldFetch=globalThis.fetch,oldSecret=process.env.CPAD_CHECKOUT_SIGNING_SECRET;
-  process.env.CPAD_CHECKOUT_SIGNING_SECRET=secret;
+  const oldFetch=globalThis.fetch,env={...process.env};
+  Object.assign(process.env,{CPAD_CHECKOUT_SIGNING_SECRET:secret,MERCADO_PAGO_ACCESS_TOKEN:'fixture',MERCADO_PAGO_PUBLIC_KEY:'fixture',MERCADO_PAGO_TEST_MODE:'true',VERCEL_ENV:'preview'});
   let verified;
   globalThis.fetch=async(url,options)=>{
+    if(String(url).includes('/users/me'))return Response.json({id:123,site_id:'MLB',tags:['test_user']});
+    if(String(url).includes('/functions/v1/mercadopago-create-preference'))return Response.json({available:true,mode:'test'});
     if(String(url).includes('inventory-status'))return Response.json({inventory});
     if(String(url).includes('/cpad_kits?'))return Response.json(initialKits);
     if(String(url).includes('cpad_signed_action')){
@@ -33,17 +35,20 @@ test('server recomputes a forged kit basket and signs the verified physical orde
       shipping:{service:{carrierCode:'PICKUP_VENDOR'}},items:[{slug:initialKits[0].slug,quantity:1,price:0.01,discount:99}]};
     const response=await orderEndpoint.fetch(new Request(origin+'/api/create-cpad-order',{method:'POST',headers:{origin,apikey:'sb_publishable_ipNBmuf0pUOZRzzlpU8kWw_Md1Y5FuE','Content-Type':'application/json'},body:JSON.stringify(body)}));
     assert.equal(response.status,201);assert.equal((await response.json()).order.total,83.96);
+    assert.equal(verified.environment,'preview');
     assert.equal(verified.subtotal,101.95);assert.equal(verified.discount,17.99);
     assert.equal(verified.items.length,2);assert.equal(verified.kits.length,1);
     const rejected=await orderEndpoint.fetch(new Request(origin+'/api/create-cpad-order',{method:'POST',headers:{origin:'https://untrusted.example'}}));
     assert.equal(rejected.status,403);
-  }finally{globalThis.fetch=oldFetch;if(oldSecret===undefined)delete process.env.CPAD_CHECKOUT_SIGNING_SECRET;else process.env.CPAD_CHECKOUT_SIGNING_SECRET=oldSecret;}
+  }finally{globalThis.fetch=oldFetch;for(const key of ['CPAD_CHECKOUT_SIGNING_SECRET','MERCADO_PAGO_ACCESS_TOKEN','MERCADO_PAGO_PUBLIC_KEY','MERCADO_PAGO_TEST_MODE','VERCEL_ENV']){if(env[key]===undefined)delete process.env[key];else process.env[key]=env[key];}}
 });
 test('payment provider receives discounted cent-exact items and verified freight only',async()=>{
   const oldFetch=globalThis.fetch,env={...process.env};
-  Object.assign(process.env,{CPAD_CHECKOUT_SIGNING_SECRET:secret,MERCADO_PAGO_ACCESS_TOKEN:'fixture',MERCADO_PAGO_PUBLIC_KEY:'fixture',MERCADO_PAGO_TEST_MODE:'true'});
+  Object.assign(process.env,{CPAD_CHECKOUT_SIGNING_SECRET:secret,MERCADO_PAGO_ACCESS_TOKEN:'fixture',MERCADO_PAGO_PUBLIC_KEY:'fixture',MERCADO_PAGO_TEST_MODE:'true',VERCEL_ENV:'preview'});
   let provider,saved;
   globalThis.fetch=async(url,options)=>{
+    if(String(url).includes('/users/me'))return Response.json({id:123,site_id:'MLB',tags:['test_user']});
+    if(String(url).includes('/functions/v1/mercadopago-create-preference'))return Response.json({available:true,mode:'test'});
     if(String(url).includes('cpad_signed_action')){
       const {payload_text,signature}=JSON.parse(options.body);
       assert.equal(signature,createHmac('sha256',secret).update(payload_text).digest('hex'));
@@ -61,5 +66,5 @@ test('payment provider receives discounted cent-exact items and verified freight
     assert.equal(provider.shipments.cost,11.73);assert.equal(saved.preference_id,'fixture-preference');
     delete process.env.MERCADO_PAGO_ACCESS_TOKEN;
     assert.equal((await (await paymentEndpoint.fetch(new Request(origin+'/api/mercadopago/cpad-preference'))).json()).available,false);
-  }finally{globalThis.fetch=oldFetch;for(const key of ['CPAD_CHECKOUT_SIGNING_SECRET','MERCADO_PAGO_ACCESS_TOKEN','MERCADO_PAGO_PUBLIC_KEY','MERCADO_PAGO_TEST_MODE']){if(env[key]===undefined)delete process.env[key];else process.env[key]=env[key];}}
+  }finally{globalThis.fetch=oldFetch;for(const key of ['CPAD_CHECKOUT_SIGNING_SECRET','MERCADO_PAGO_ACCESS_TOKEN','MERCADO_PAGO_PUBLIC_KEY','MERCADO_PAGO_TEST_MODE','VERCEL_ENV']){if(env[key]===undefined)delete process.env[key];else process.env[key]=env[key];}}
 });
