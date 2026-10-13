@@ -1,5 +1,6 @@
 import { SUPABASE_URL, PUBLIC_KEY, signedAction, sameOrigin } from '../lib/cpad-database.mjs';
 import { cpadProductSlugs } from '../data/cpad-products.mjs';
+import { paymentReadiness } from '../lib/cpad-payment-readiness.mjs';
 const output=(body,status=200)=>Response.json(body,{status,headers:{'Cache-Control':'no-store'}});
 export default { async fetch(request) {
   if(!sameOrigin(request))return output({error:'Origem não autorizada.'},403);
@@ -13,7 +14,7 @@ export default { async fetch(request) {
       if(!kitResponse.ok||!inventoryResponse.ok)throw new Error('DATABASE_UNAVAILABLE');
       const inventory=await inventoryResponse.json();
       let checkoutReady=false;
-      try { const health=await signedAction({action:'health'}); checkoutReady=health?.available===true; } catch {}
+      try { const health=await signedAction({action:'health'}); checkoutReady=health?.available===true&&(await paymentReadiness()).ready; } catch {}
       return output({kits:await kitResponse.json(),checkoutReady,products:inventory.inventory.filter(item=>cpadProductSlugs.includes(item.slug))
         .map(item=>({product_slug:item.slug,product_name:item.name}))});
     }
