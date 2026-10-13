@@ -42,6 +42,41 @@ test('server recomputes a forged kit basket and signs the verified physical orde
     assert.equal(rejected.status,403);
   }finally{globalThis.fetch=oldFetch;for(const key of ['CPAD_CHECKOUT_SIGNING_SECRET','MERCADO_PAGO_ACCESS_TOKEN','MERCADO_PAGO_PUBLIC_KEY','MERCADO_PAGO_TEST_MODE','VERCEL_ENV']){if(env[key]===undefined)delete process.env[key];else process.env[key]=env[key];}}
 });
+test('production Checkout Pro uses the official return pages and notification URL',async()=>{
+  const oldFetch=globalThis.fetch,env={...process.env};
+  Object.assign(process.env,{CPAD_CHECKOUT_SIGNING_SECRET:secret,MERCADO_PAGO_ACCESS_TOKEN:'APP_USR-fixture',
+    MERCADO_PAGO_PUBLIC_KEY:'APP_USR-fixture',MERCADO_PAGO_TEST_MODE:'false',VERCEL_ENV:'production'});
+  let provider,saved;
+  globalThis.fetch=async(url,options)=>{
+    if(String(url).includes('/users/me'))return Response.json({id:123,site_id:'MLB',tags:['normal']});
+    if(String(url).includes('/functions/v1/mercadopago-create-preference'))return Response.json({available:true,mode:'production'});
+    if(String(url).includes('cpad_signed_action')){
+      const payload=JSON.parse(JSON.parse(options.body).payload_text);
+      assert.equal(payload.environment,'production');
+      if(payload.action==='payment_read'){assert.equal(payload.test_mode,false);return Response.json({order,items});}
+      saved=payload;return Response.json({saved:true});
+    }
+    if(String(url).includes('api.mercadopago.com/checkout/preferences')){
+      provider=JSON.parse(options.body);
+      return Response.json({id:'production-fixture',init_point:'https://www.mercadopago.com.br/checkout/fixture',sandbox_init_point:'https://sandbox.mercadopago.com.br/checkout/fixture'});
+    }
+    throw new Error('Unexpected fetch');
+  };
+  try {
+    const response=await paymentEndpoint.fetch(new Request(origin+'/api/mercadopago/cpad-preference',{method:'POST',headers:{origin,'Content-Type':'application/json'},body:JSON.stringify({code:order.code,publicToken})}));
+    assert.equal(response.status,201);
+    assert.equal((await response.json()).paymentUrl,'https://www.mercadopago.com.br/checkout/fixture');
+    for(const [status,page] of [['success','pagamento-sucesso'],['pending','pagamento-pendente'],['failure','pagamento-falhou']])
+      assert.equal(provider.back_urls[status],`https://www.chirho.com.br/${page}.html?order=${order.code}`);
+    assert.equal(provider.notification_url,'https://www.chirho.com.br/api/mercadopago-webhook?source_news=webhooks');
+    assert.equal(saved.payment_url,'https://www.mercadopago.com.br/checkout/fixture');
+  } finally {
+    globalThis.fetch=oldFetch;
+    for(const key of ['CPAD_CHECKOUT_SIGNING_SECRET','MERCADO_PAGO_ACCESS_TOKEN','MERCADO_PAGO_PUBLIC_KEY','MERCADO_PAGO_TEST_MODE','VERCEL_ENV']) {
+      if(env[key]===undefined)delete process.env[key];else process.env[key]=env[key];
+    }
+  }
+});
 test('payment provider receives discounted cent-exact items and verified freight only',async()=>{
   const oldFetch=globalThis.fetch,env={...process.env};
   Object.assign(process.env,{CPAD_CHECKOUT_SIGNING_SECRET:secret,MERCADO_PAGO_ACCESS_TOKEN:'fixture',MERCADO_PAGO_PUBLIC_KEY:'fixture',MERCADO_PAGO_TEST_MODE:'true',VERCEL_ENV:'preview'});
