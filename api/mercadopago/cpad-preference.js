@@ -1,5 +1,6 @@
 import { signedAction, sameOrigin } from '../../lib/cpad-database.mjs';
 import { paymentItems, cents } from '../../lib/kit-pricing.mjs';
+import { paymentReadiness } from '../../lib/cpad-payment-readiness.mjs';
 const output=(body,status=200)=>Response.json(body,{status,headers:{'Cache-Control':'no-store'}});
 export default { async fetch(request) {
   if(!sameOrigin(request))return output({error:'Origem não autorizada.'},403);
@@ -9,10 +10,12 @@ export default { async fetch(request) {
   if(request.method==='GET') {
     let verified=false;
     if(available) try { const health=await signedAction({action:'health'}); verified=health?.available===true; } catch {}
-    return output({available:available&&verified,provider:'mercado_pago',mode:testMode?'test':'production'});
+    const readiness=available&&verified?await paymentReadiness():{ready:false};
+    return output({available:available&&verified&&readiness.ready,provider:'mercado_pago',mode:testMode?'test':'production'});
   }
   if(request.method!=='POST')return output({error:'Método não permitido.'},405);
   if(!available)return output({error:'Pagamento dos kits em configuração neste ambiente.'},503);
+  if(!(await paymentReadiness()).ready)return output({error:'Pagamento dos kits aguardando validação do ambiente e das credenciais.'},503);
   try {
     const raw=await request.text();if(raw.length>5000)return output({error:'Pedido inválido.'},413);
     const body=JSON.parse(raw),code=String(body.code||''),public_token=String(body.publicToken||'');
