@@ -1,4 +1,4 @@
-import { signedAction, sameOrigin } from '../../lib/cpad-database.mjs';
+import { signedAction, sameOrigin, checkoutEnvironment } from '../../lib/cpad-database.mjs';
 import { paymentItems, cents } from '../../lib/kit-pricing.mjs';
 import { paymentReadiness } from '../../lib/cpad-payment-readiness.mjs';
 const output=(body,status=200)=>Response.json(body,{status,headers:{'Cache-Control':'no-store'}});
@@ -26,7 +26,7 @@ export default { async fetch(request) {
     if(providerTotal!==cents(order.grand_total))throw new Error('ORDER_TOTAL_MISMATCH');
     const pattern=testMode?/^https:\/\/sandbox\.mercadopago\.com\.br\//:/^https:\/\/www\.mercadopago\.com\.br\//;
     if(order.payment_preference_id&&pattern.test(order.payment_preference_url||''))return output({paymentUrl:order.payment_preference_url,preferenceId:order.payment_preference_id,reused:true});
-    const origin=new URL(request.url).origin;
+    const origin=checkoutEnvironment()==='production'?'https://www.chirho.com.br':new URL(request.url).origin;
     const payload={items:providerItems,shipments:{cost:Number(order.shipping_price)},external_reference:order.code,
       payer:testMode?undefined:{name:order.customer_name,email:order.customer_email},
       back_urls:Object.fromEntries([['success','pagamento-sucesso.html'],['pending','pagamento-pendente.html'],['failure','pagamento-falhou.html']]
