@@ -6,6 +6,7 @@ import { verifyPaymentDiagnostic } from '../lib/cpad-database.mjs';
 import diagnosticEndpoint from '../api/mercadopago/cpad-readiness.js';
 import orderEndpoint from '../api/create-cpad-order.js';
 import paymentEndpoint from '../api/mercadopago/cpad-preference.js';
+import kitsEndpoint from '../api/cpad-kits.js';
 
 test('production rejects test credentials, sandbox mode and webhook environment mismatch',async()=>{
   const env={...process.env},oldFetch=globalThis.fetch;
@@ -15,6 +16,8 @@ test('production rejects test credentials, sandbox mode and webhook environment 
   globalThis.fetch=async(url)=>{
     if(String(url).includes('/users/me'))return Response.json({id:123,site_id:'MLB',tags});
     if(String(url).includes('mercadopago-create-preference'))return Response.json({available:true,mode:webhookMode});
+    if(String(url).includes('/cpad_kits?'))return Response.json([{slug:'kit-cpad-leitura-crescimento',active:true}]);
+    if(String(url).includes('inventory-status'))return Response.json({inventory:[]});
     if(String(url).includes('cpad_signed_action')){reads++;return Response.json({available:true});}
     throw new Error('Unexpected request');
   };
@@ -31,6 +34,9 @@ test('production rejects test credentials, sandbox mode and webhook environment 
     assert.equal(payment.status,503);assert.equal(reads,0);
     const publicHealth=await (await paymentEndpoint.fetch(new Request(origin+'/api/mercadopago/cpad-preference'))).json();
     assert.equal(publicHealth.available,false);assert.equal(publicHealth.account,undefined);
+    const catalogHealth=await (await kitsEndpoint.fetch(new Request(origin+'/api/cpad-kits'))).json();
+    assert.equal(catalogHealth.checkoutReady,false);
+    assert.equal(catalogHealth.kits[0].active,true,'Kit display remains available while payment is unavailable');
   } finally {
     globalThis.fetch=oldFetch;
     for(const key of ['VERCEL_ENV','CPAD_CHECKOUT_SIGNING_SECRET','MERCADO_PAGO_ACCESS_TOKEN','MERCADO_PAGO_PUBLIC_KEY','MERCADO_PAGO_TEST_MODE']) {
