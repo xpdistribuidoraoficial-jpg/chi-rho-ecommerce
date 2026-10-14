@@ -11,15 +11,15 @@ import middleware, { config } from '../middleware.js';
 const read = (file) => fs.readFileSync(new URL(`../${file}`, import.meta.url), 'utf8');
 const paths = sitemapUrls(activeProducts, categories);
 
-test('sitemap cobre exatamente as páginas públicas, categorias e 63 produtos operacionais', () => {
+test('sitemap cobre exatamente as páginas públicas, categorias e 54 produtos publicados', () => {
   const xml = read('sitemap.xml');
   assert.match(xml, /^<\?xml version="1.0" encoding="UTF-8"\?>/);
   assert.match(xml, /xmlns="http:\/\/www.sitemaps.org\/schemas\/sitemap\/0.9"/);
   const locations = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1].replaceAll('&amp;', '&'));
   assert.deepEqual(locations, paths.map((path) => SITE + path));
-  assert.equal(locations.length, 87);
-  assert.equal(new Set(locations).size, 87);
-  assert.equal(locations.filter((url) => url.includes('?produto=')).length, 63);
+  assert.equal(locations.length, 77);
+  assert.equal(new Set(locations).size, 77);
+  assert.equal(locations.filter((url) => url.includes('?produto=')).length, 54);
   assert.doesNotMatch(xml, /vercel\.app|checkout|pagamento-|admin-|basculantes|#|<lastmod>/);
 });
 
@@ -47,7 +47,7 @@ test('páginas estáticas possuem metadados e schemas únicos sem duplicação',
   assert.equal(new Set(titles).size, Object.keys(pages).length);
 });
 
-test('todas as 87 URLs recebem canonical próprio e HTML 200 antes do JavaScript', async () => {
+test('todas as 77 URLs recebem canonical próprio e HTML 200 antes do JavaScript', async () => {
   const titles = new Set();
   for (const path of paths) {
     const url = new URL(path, SITE), file = url.pathname.slice(1) || 'index.html';
@@ -85,7 +85,7 @@ test('schemas usam somente preço, marca, imagens e identificadores reais', () =
 });
 
 test('produto removido ou inexistente retorna HTTP 404 e noindex', async () => {
-  for (const slug of ['brinquedo-kit-caminhoes-basculantes', 'inexistente', '<script>alert(1)</script>']) {
+  for (const slug of ['brinquedo-kit-caminhoes-basculantes', 'biblia-da-garotada', 'biblia-mulher-naa-laranja', 'brinquedo-blocos-104-pecas', 'biblia-letra-extragigante-indice-preta', 'biblia-letra-gigante-indice-azul', 'biblia-arc-mulher-supergigante-rosa-marrom', 'comentario-exegetico-de-atos', 'minha-primeira-biblia-meninas', 'minha-primeira-biblia-meninos', 'minha-primeira-biblia-palavras-ilustradas', 'minha-primeira-biblia-ilustrada', 'oracao-para-a-cura-emocional', 'inexistente', '<script>alert(1)</script>']) {
     const url = new URL('/api/seo-page?__seo_page=catalogo-infantil.html', SITE); url.searchParams.set('produto', slug);
     const response = await endpoint.fetch(new Request(url));
     assert.equal(response.status, 404); assert.equal(response.headers.get('X-Robots-Tag'), 'noindex, follow');
