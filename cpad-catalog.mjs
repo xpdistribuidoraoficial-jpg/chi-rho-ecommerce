@@ -4,6 +4,12 @@ import { COMPANY } from './seo/company.mjs';
 
 let registry = [], registryLoaded = false, checkoutReady = false;
 const isCpadPage = document.body.dataset.cpadPage === 'true';
+const featuredStudyBibleSlugs = [
+  'biblia-estudo-pentecostal',
+  'biblia-aplicacao-pessoal-nvt',
+  'biblia-estudo-cronologica',
+  'biblia-estudo-defesa-da-fe'
+];
 const inventoryMap = () => Object.fromEntries(catalogProducts.filter(product => !product.kitComponents)
   .map(product => [product.slug, { price:product.preco, stock:Number.isInteger(product.estoque) ? product.estoque : 0,
     name:product.nome, sku:product.sku, category:product.categoria }]));
@@ -67,8 +73,10 @@ function refreshViews() {
   updateKits();
   const active = document.querySelector('.catalog-filter.is-active')?.dataset.filter;
   if (catalogGrid) setCatalogFilter(active || (isCpadPage ? 'cpad' : requestedCategory), requestedQuery);
-  renderProducts('#cpad-featured-products', catalogProducts.filter(product => product.editora === 'CPAD' && !product.kitComponents)
-    .sort((a,b) => Number(availability(b).available) - Number(availability(a).available)).slice(0,4));
+  renderProducts('#cpad-featured-products', featuredStudyBibleSlugs
+    .map(slug => catalogProducts.find(product => product.slug === slug && product.editora === 'CPAD'))
+    .filter(product => product && isProductActive(product)
+      && (!inventoryHydrated || availability(product).available)));
   renderProducts('#cpad-offer-products', catalogProducts.filter(product =>
     (product.kitComponents && product.kitActive) ||
     product.destaqueOfertaCpad
