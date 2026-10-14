@@ -78,11 +78,13 @@ function refreshViews() {
     .filter(product => product && isProductActive(product)
       && (!inventoryHydrated || availability(product).available)));
   const chargerOfferSlug = 'casa-carregador-kapbom-ka-5005';
+  const offerPriority = product => product.slug === chargerOfferSlug ? 0 : product.ofertaHome ? 1 : 2;
   renderProducts('#cpad-offer-products', catalogProducts.filter(product =>
     product.slug === chargerOfferSlug ||
+    product.ofertaHome ||
     (product.kitComponents && product.kitActive) ||
     product.destaqueOfertaCpad
-  ).sort((first, second) => Number(second.slug === chargerOfferSlug) - Number(first.slug === chargerOfferSlug)));
+  ).sort((first, second) => offerPriority(first) - offerPriority(second)));
   if (productDialogElement?.open) {
     const slug = productDialogElement.dataset.productSlug;
     const selected = Number(productDialogQuantity?.textContent) || 1;

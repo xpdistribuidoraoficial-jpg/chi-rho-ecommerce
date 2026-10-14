@@ -1439,6 +1439,31 @@ const catalogProducts = [
     brinquedo: true
   },
   {
+    id: "casa-fone-bluetooth-visor-bateria",
+    slug: "casa-fone-bluetooth-visor-bateria",
+    sku: "CASA-FONE-BT-VISOR-PRETO",
+    nome: "Fone Bluetooth com Estojo e Visor de Bateria — Preto",
+    categoria: "Utilidades Domésticas",
+    categoriaSlug: "utilidades-domesticas",
+    imagem: "assets/products/fone-bluetooth-visor-produto.png",
+    imagens: [
+      "assets/products/fone-bluetooth-visor-produto.png",
+      "assets/products/fone-bluetooth-visor-recursos.png",
+      "assets/products/fone-bluetooth-visor-compatibilidade.png"
+    ],
+    descricao: "Fone sem fio com estojo de carregamento, visor digital de bateria, microfone integrado e controle por toque para músicas e chamadas. Conexão Bluetooth 5.3 e carregamento USB-C, conforme o material do fornecedor. Compatível com dispositivos que ofereçam conexão de áudio Bluetooth. Cor preta com detalhes luminosos.",
+    perfil: "Barato e Bom!",
+    precoOriginal: 50.00,
+    preco: 23.99,
+    fontePreco: "Preço cheio e oferta final definidos pelo lojista em 14/10/2026",
+    estoque: 20,
+    testeCarrinho: true,
+    ofertaHome: true,
+    destaque: false,
+    maisVendido: false,
+    casa: true
+  },
+  {
     id: "casa-carregador-kapbom-ka-5005",
     slug: "casa-carregador-kapbom-ka-5005",
     nome: "Carregador Rápido USB-C KAPBOM KA-5005 — Branco",
