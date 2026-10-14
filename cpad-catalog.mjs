@@ -77,10 +77,12 @@ function refreshViews() {
     .map(slug => catalogProducts.find(product => product.slug === slug && product.editora === 'CPAD'))
     .filter(product => product && isProductActive(product)
       && (!inventoryHydrated || availability(product).available)));
+  const chargerOfferSlug = 'casa-carregador-kapbom-ka-5005';
   renderProducts('#cpad-offer-products', catalogProducts.filter(product =>
+    product.slug === chargerOfferSlug ||
     (product.kitComponents && product.kitActive) ||
     product.destaqueOfertaCpad
-  ));
+  ).sort((first, second) => Number(second.slug === chargerOfferSlug) - Number(first.slug === chargerOfferSlug)));
   if (productDialogElement?.open) {
     const slug = productDialogElement.dataset.productSlug;
     const selected = Number(productDialogQuantity?.textContent) || 1;
