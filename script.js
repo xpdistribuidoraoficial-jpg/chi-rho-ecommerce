@@ -2342,6 +2342,9 @@ const getProductPriceMarkup = (product) => {
     return `<span class="product-price-current product-price-pending">${getProductStatus(product)}</span>`;
   }
 
+  if (product.kitComponents && product.kitPricingMode === 'sum_current_prices') return `
+    ${product.precoOriginal > product.preco ? `<del class="product-price-original">Avulsos em oferta: ${formatProductPrice(product.precoOriginal)}</del>` : ''}
+    <span class="product-price-current">No kit: ${formatProductPrice(product.preco)}</span>`;
   if (product.kitComponents) return `
     <del class="product-price-original">Preço cheio dos componentes: ${formatProductPrice(product.precoOriginal)}</del>
     <span class="product-price-current">No kit: ${formatProductPrice(product.preco)}</span>`;
@@ -2401,7 +2404,7 @@ const createProductCard = (product) => `
       ${product.kitComponents && product.imagens?.length > 1
         ? `<div class="cpad-kit-composition">${product.imagens.slice(0,2).map((image,index) => `${index ? '<b aria-hidden="true">+</b>' : ''}<img src="${image}" alt="${catalogProducts.find(p => p.imagem === image)?.nome || product.nome}" loading="lazy">`).join('')}</div>`
         : `<img src="${product.imagem}" alt="${product.nome}" loading="lazy" />`}
-      ${product.kitComponents ? '<strong class="catalog-product-badge">30% OFF</strong>' : product.maisVendidoLivro ? '<strong class="catalog-product-badge">Mais vendido</strong>' : ""}
+      ${product.kitComponents ? `<strong class="catalog-product-badge">${product.kitPricingMode === 'sum_current_prices' ? 'Kit Casa' : '30% OFF'}</strong>` : product.maisVendidoLivro ? '<strong class="catalog-product-badge">Mais vendido</strong>' : ""}
       <span>${product.perfil}</span>
     </div>
     <div class="catalog-product-content">
@@ -2409,7 +2412,7 @@ const createProductCard = (product) => `
       <h3>${product.nome}</h3>
       ${getProductMeta(product) ? `<span class="catalog-product-meta">${getProductMeta(product)}</span>` : ""}
       <p>${product.descricao}</p>
-      <div class="catalog-product-price" aria-label="Preço">${getProductPriceMarkup(product)}${product.kitComponents && typeof product.preco === "number" ? `<small class="cpad-kit-saving">Economia sobre o preço cheio: ${formatProductPrice(product.precoOriginal-product.preco)}</small>` : ""}</div>
+      <div class="catalog-product-price" aria-label="Preço">${getProductPriceMarkup(product)}${product.kitComponents && typeof product.preco === "number" && product.precoOriginal > product.preco ? `<small class="cpad-kit-saving">${product.kitPricingMode === 'sum_current_prices' ? 'Economia adicional no kit' : 'Economia sobre o preço cheio'}: ${formatProductPrice(product.precoOriginal-product.preco)}</small>` : ""}</div>
       ${getProductCardCartMarkup(product)}
       <button class="catalog-product-view" type="button" data-product-slug="${product.slug}">Ver produto</button>
     </div>
@@ -2469,7 +2472,7 @@ const setCatalogFilter = (filter = "todas", query = "") => {
       || (filter === "cpad-biblias" && product.editora === "CPAD" && product.categoriaSlug.startsWith("biblias"))
       || (filter === "cpad-livros" && product.editora === "CPAD" && product.categoriaSlug === "livros-cristaos")
       || (filter === "cpad-harpas" && product.editora === "CPAD" && product.categoriaSlug === "harpas")
-      || (filter === "cpad-kits" && Boolean(product.kitComponents))
+      || (filter === "cpad-kits" && Boolean(product.kitComponents) && product.categoriaSlug === "cpad-kits")
       || (filter === "cpad-ofertas" && ((Boolean(product.kitComponents) && product.categoriaSlug === "cpad-kits") || product.destaqueOfertaCpad))
       || filter === "todas"
       || (filter === "infantil" ? product.infantil : productCategorySlugs.includes(filter));
@@ -2991,7 +2994,7 @@ testCartDialog.innerHTML = `
       </section>
       <div class="test-cart-summary">
         <div><span>Produtos</span><strong data-cart-subtotal>R$ 0,00</strong></div>
-        <div data-cart-discount-row hidden><span>Desconto dos kits (30%)</span><strong></strong></div>
+        <div data-cart-discount-row hidden><span>Desconto dos kits</span><strong></strong></div>
         <div><span>Frete</span><strong data-cart-shipping-price>Calcule pelo CEP</strong></div>
         <div class="test-cart-total"><span>Total</span><strong data-cart-total>R$ 0,00</strong></div>
       </div>

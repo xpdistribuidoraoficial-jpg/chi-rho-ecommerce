@@ -1,4 +1,5 @@
 import { initialKits } from '../data/cpad-kits.mjs';
+import { casaKits } from '../data/casa-kits.mjs';
 import { kitSummary } from '../lib/kit-pricing.mjs';
 import fs from 'node:fs';
 import vm from 'node:vm';
@@ -66,10 +67,13 @@ if (defense) {
   defense.testeCarrinho = true;
 }
 
-for (const kit of initialKits.filter(item => item.active)) {
+for (const kit of [...initialKits, ...casaKits].filter(item => item.active)) {
+  const isCasa = kit.pricing_mode === 'sum_current_prices';
   const inventory = Object.fromEntries(products.map(product => [product.slug,{price:product.preco,stock:0}]));
   const summary = kitSummary(kit,inventory);
-  products.push({slug:kit.slug,nome:kit.name,descricao:kit.description,editora:'CPAD',categoria:'Kits CPAD',categoriaSlug:'cpad-kits',
+  products.push({slug:kit.slug,nome:kit.name,descricao:kit.description,
+    ...(isCasa ? {casa:true} : {editora:'CPAD'}),categoria:isCasa?'Kits Casa':'Kits CPAD',categoriaSlug:isCasa?'utilidades-domesticas':'cpad-kits',
+    kitPricingMode:kit.pricing_mode,
     imagem:products.find(product => product.slug === kit.components[0].slug).imagem,kitComponents:kit.components,
     sku:kit.slug,preco:summary.price,precoOriginal:summary.original});
 }

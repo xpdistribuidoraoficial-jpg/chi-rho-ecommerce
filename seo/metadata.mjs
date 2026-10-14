@@ -34,7 +34,7 @@ export const categories = {
   'utilidades-domesticas': ['Utilidades Domésticas', 'catalogo-casa.html', 'Explore utilidades domésticas na CHI RHO, com imagens e informações dos produtos para a rotina da casa.']
 };
 export const categoryPath = (slug) => categories[slug] ? `/${categories[slug][1]}?categoria=${slug}` : '/catalogo-biblias.html';
-export const productPath = (p) => `/${p.kitComponents ? 'catalogo-cpad.html' : p.casa ? 'catalogo-casa.html' : p.infantil || p.brinquedo ? 'catalogo-infantil.html' : 'catalogo-biblias.html'}?produto=${encodeURIComponent(p.slug)}`;
+export const productPath = (p) => `/${p.casa ? 'catalogo-casa.html' : p.kitComponents ? 'catalogo-cpad.html' : p.infantil || p.brinquedo ? 'catalogo-infantil.html' : 'catalogo-biblias.html'}?produto=${encodeURIComponent(p.slug)}`;
 export const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 export const jsonLd = (value) => JSON.stringify(value).replace(/</g, '\\u003c');
 
