@@ -58,17 +58,7 @@ const refreshReleasedCatalog = async () => {
 
     window.dispatchEvent(new Event("chi-rho-inventory-updated"));
     if (typeof renderProducts === 'function') {
-      renderProducts('#featured-products', catalogProducts.filter((product) => product.destaque && isProductActive(product)).slice(0, 4));
-      renderProducts(
-        '#featured-books',
-        catalogProducts
-          .filter((product) => product.maisVendidoLivro && isProductActive(product))
-          .sort((first, second) => (first.ordemLivro ?? 999) - (second.ordemLivro ?? 999))
-          .slice(0, 5)
-      );
-      renderProducts('#popular-products', catalogProducts.filter((product) => product.maisVendido && isProductActive(product)).slice(0, 4));
-      renderProducts('#children-products', catalogProducts.filter((product) => product.infantil && isProductActive(product)).slice(0, 4));
-      renderProducts('#toy-products', catalogProducts.filter((product) => product.destaqueInfantil && isProductActive(product)).slice(0, 4));
+      renderHomeProducts();
     }
 
     if (typeof catalogGrid !== 'undefined' && catalogGrid && typeof setCatalogFilter === 'function') {
@@ -332,7 +322,7 @@ document.addEventListener('click', (event) => {
 
 decorateFavoriteCards();
 const favoritesObserver = new MutationObserver(decorateFavoriteCards);
-document.querySelectorAll('.catalog-product-grid, #catalog-products, #featured-products, #featured-books, #popular-products, #children-products, #toy-products').forEach((container) => {
+document.querySelectorAll('.catalog-product-grid, #catalog-products, #featured-products, #featured-books, #popular-products, #home-casa-products, #toy-products').forEach((container) => {
   favoritesObserver.observe(container, { childList: true, subtree: true });
 });
 window.addEventListener('storage', (event) => {

@@ -74,10 +74,10 @@ test("catálogo mantém pendências comerciais fora do checkout", () => {
     activeProducts.findIndex((candidate) => candidate.slug === product.slug) !== index
   );
 
-  assert.equal(catalogProducts.length, 73);
-  assert.equal(activeProducts.length, 73);
-  assert.equal(orderableProducts.length, 2);
-  assert.equal(missingPrice.length, 14);
+  assert.equal(catalogProducts.length, 76);
+  assert.equal(activeProducts.length, 64);
+  assert.equal(orderableProducts.length, 3);
+  assert.equal(missingPrice.length, 13);
   assert.equal(zeroPrice.length, 0);
   assert.equal(duplicateSlugs.length, 0);
 });
@@ -85,9 +85,9 @@ test("catálogo mantém pendências comerciais fora do checkout", () => {
 test("catálogo base preserva registros e a projeção comercial trata substituições", () => {
   const slug = "brinquedo-kit-caminhoes-basculantes";
   assert.ok(catalogProducts.some((product) => product.slug === slug));
-  assert.equal(inactiveCatalogSlugs.size, 0);
+  assert.equal(inactiveCatalogSlugs.size, 12);
   assert.ok(activeProducts.some((product) => product.slug === slug));
-  assert.equal(activeProducts.filter((product) => product.brinquedo).length, 12);
+  assert.equal(activeProducts.filter((product) => product.brinquedo).length, 11);
   assert.equal(activeProducts.filter((product) => product.brinquedo && product.precoOriginal).length, 10);
   assert.ok(source.includes('product.slug === initialProductSlug && isProductActive(product)'));
 });

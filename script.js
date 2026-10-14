@@ -2255,11 +2255,26 @@ catalogProducts.forEach((product) => {
   }
 });
 
-const inactiveCatalogSlugs = new Set([]);
+// Retirados da vitrine pelo lojista em 13/10/2026, por estoque zerado.
+const inactiveCatalogSlugs = new Set([
+  "biblia-da-garotada",
+  "biblia-mulher-naa-laranja",
+  "brinquedo-blocos-104-pecas",
+  "biblia-letra-extragigante-indice-preta",
+  "biblia-letra-gigante-indice-azul",
+  "biblia-arc-mulher-supergigante-rosa-marrom",
+  "comentario-exegetico-de-atos",
+  "minha-primeira-biblia-meninas",
+  "minha-primeira-biblia-meninos",
+  "minha-primeira-biblia-palavras-ilustradas",
+  "minha-primeira-biblia-ilustrada",
+  "oracao-para-a-cura-emocional"
+]);
 
 const isProductActive = (product) => !inactiveCatalogSlugs.has(product.slug) && product.cpadKitDisabled !== true;
 
 const getProductCartAvailability = (product) => {
+  if (!product || !isProductActive(product)) return { configured:false, stock:0, available:false };
   if (typeof window !== 'undefined' && window.ChiRhoCpad?.availability) return window.ChiRhoCpad.availability(product);
   const configured = product?.testeCarrinho === true
     && typeof product.preco === "number"
@@ -2379,20 +2394,25 @@ const createProductCard = (product) => `
 const renderProducts = (selector, products) => {
   const container = document.querySelector(selector);
   if (!container) return;
-  container.innerHTML = products.map(createProductCard).join("");
+  container.innerHTML = products.filter(isProductActive).map(createProductCard).join("");
 };
 
-renderProducts("#featured-products", catalogProducts.filter((product) => product.destaque).slice(0, 4));
-renderProducts(
-  "#featured-books",
-  catalogProducts
-    .filter((product) => product.maisVendidoLivro && isProductActive(product))
-    .sort((first, second) => (first.ordemLivro ?? 999) - (second.ordemLivro ?? 999))
-    .slice(0, 5)
-);
-renderProducts("#popular-products", catalogProducts.filter((product) => product.maisVendido).slice(0, 4));
-renderProducts("#children-products", catalogProducts.filter((product) => product.infantil).slice(0, 4));
-renderProducts("#toy-products", catalogProducts.filter((product) => product.destaqueInfantil).slice(0, 4));
+const homeProductSelections = {
+  "#featured-products": ["biblia-media-letra-gigante-harpa", "biblia-estudo-pentecostal", "biblia-harpa-floral-aquarela-gigante", "biblia-naa-mulher-pink-grande"],
+  "#featured-books": ["herois-da-fe", "uma-garota-segundo-o-coracao-de-deus", "orando-a-palavra", "como-ter-o-coracao-de-maria-no-mundo-de-marta", "historia-dos-hebreus"],
+  "#popular-products": ["biblia-aplicacao-pessoal-nvt", "biblia-estudo-cronologica", "biblia-estudo-spurgeon", "biblia-pregador-pentecostal"],
+  "#home-casa-products": ["casa-carregador-kapbom-ka-5005", "casa-balanca-digital-cozinha-10kg", "casa-bomba-eletrica-garrafa-agua"],
+  "#toy-products": ["brinquedo-caminhao-bombeiro-resgate", "brinquedo-caminhao-bau-46cm", "brinquedo-caminhao-boi-4-bois", "brinquedo-caminhao-bombeiro-escada"]
+};
+const renderHomeProducts = () => {
+  for (const [selector, slugs] of Object.entries(homeProductSelections)) {
+    const products = slugs.map((slug) => catalogProducts.find((product) => product.slug === slug))
+      .filter((product) => product && isProductActive(product)
+        && (!Number.isInteger(product.estoque) || product.estoque > 0));
+    renderProducts(selector, products);
+  }
+};
+renderHomeProducts();
 
 const catalogGrid = document.querySelector("#catalog-products");
 const resultCount = document.querySelector("#catalog-result-count");
