@@ -1,5 +1,6 @@
 import { kitSummary } from './lib/kit-pricing.mjs';
 import { initialKits } from './data/cpad-kits.mjs';
+import { casaKits } from './data/casa-kits.mjs';
 import { COMPANY } from './seo/company.mjs';
 
 let registry = [], registryLoaded = false, checkoutReady = false;
@@ -48,11 +49,16 @@ function matchesFilters(product) {
 
 function updateKits() {
   const inventory = inventoryMap();
-  for (const kit of registryLoaded ? registry : initialKits.map(item => ({ ...item, active:false }))) {
+  const cpadKits = registryLoaded ? registry : initialKits.map(item => ({ ...item, active:false }));
+  for (const kit of [...cpadKits, ...casaKits]) {
+    const isCasa = kit.pricing_mode === 'sum_current_prices';
     let product = catalogProducts.find(item => item.slug === kit.slug);
     if (!product) {
-      product = { id:kit.slug, slug:kit.slug, categoria:'Kits CPAD', categoriaSlug:'cpad-kits', editora:'CPAD',
-        perfil:'Seleção com 30% de desconto', kitComponents:kit.components, destaque:false, maisVendido:false };
+      product = { id:kit.slug, slug:kit.slug,
+        categoria:isCasa ? 'Kits Casa' : 'Kits CPAD', categoriaSlug:isCasa ? 'utilidades-domesticas' : 'cpad-kits',
+        ...(isCasa ? { casa:true } : { editora:'CPAD' }),
+        perfil:isCasa ? 'Fone + carregador em uma compra' : 'Seleção com 30% de desconto',
+        kitPricingMode:kit.pricing_mode, kitComponents:kit.components, destaque:false, maisVendido:false };
       catalogProducts.push(product);
     }
     Object.assign(product, { nome:kit.name, descricao:kit.description, kitComponents:kit.components,
@@ -78,7 +84,8 @@ function refreshViews() {
     .filter(product => product && isProductActive(product)
       && (!inventoryHydrated || availability(product).available)));
   const chargerOfferSlug = 'casa-carregador-kapbom-ka-5005';
-  const offerPriority = product => product.slug === chargerOfferSlug ? 0 : product.ofertaHome ? 1 : 2;
+  const offerPriority = product => product.slug === chargerOfferSlug ? 0
+    : product.kitPricingMode === 'sum_current_prices' ? 1 : product.ofertaHome ? 2 : 3;
   renderProducts('#cpad-offer-products', catalogProducts.filter(product =>
     product.slug === chargerOfferSlug ||
     product.ofertaHome ||
@@ -157,4 +164,4 @@ try {
 window.ChiRhoCpadReady = registryLoaded;
 refreshViews();
 const direct = new URLSearchParams(location.search).get('produto');
-if (direct && registry.some(kit => kit.slug === direct)) openProductDialog(direct,{syncUrl:false});
+if (direct && [...registry, ...casaKits].some(kit => kit.slug === direct)) openProductDialog(direct,{syncUrl:false});
