@@ -1,5 +1,8 @@
 {
   "functions": {
+    "api/product-feed.js": {
+      "includeFiles": "{script.js,catalog-pricing-overrides.js}"
+    },
     "api/seo-page.js": {
       "includeFiles": "{index.html,catalogo-cpad.html,catalogo-biblias.html,catalogo-infantil.html,catalogo-casa.html,quem-somos.html,politica-de-privacidade.html,termos-de-uso.html,trocas-e-devolucoes.html,politica-de-entrega.html,script.js,catalog-pricing-overrides.js}"
     }

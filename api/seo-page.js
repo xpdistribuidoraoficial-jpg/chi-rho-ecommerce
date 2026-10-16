@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import { activeProducts } from '../seo/catalog.mjs';
 import { getMetadata, pages } from '../seo/metadata.mjs';
 import { renderPage } from '../seo/render.mjs';
+import { loadShippingCatalog } from '../data/shipping-products.mjs';
 
 // Fixed allowlist: requests cannot choose arbitrary files. No credentials or DB.
 const templates = Object.fromEntries(Object.keys(pages).map((file) => [file, fs.readFileSync(new URL(`../${file}`, import.meta.url), 'utf8')]));
@@ -12,7 +13,12 @@ export default {
     const url = new URL(request.url);
     const file = url.searchParams.get('__seo_page');
     if (!Object.hasOwn(templates, file)) return new Response('Página não encontrada', { status: 404, headers: { 'X-Robots-Tag': 'noindex' } });
-    const meta = getMetadata(file, url.searchParams, activeProducts);
+    let products = activeProducts;
+    if (url.searchParams.has('produto')) {
+      const { products: live } = await loadShippingCatalog();
+      products = activeProducts.map(product => ({ ...product, preco: live[product.slug]?.price ?? null }));
+    }
+    const meta = getMetadata(file, url.searchParams, products);
     const preview = process.env.VERCEL_ENV === 'preview';
     if (preview) meta.noindex = true;
     return new Response(request.method === 'HEAD' ? null : renderPage(templates[file], meta), {

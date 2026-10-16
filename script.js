@@ -2625,6 +2625,7 @@ const formatCurrency = (value) => Number(value).toLocaleString("pt-BR", {
 const formatDeliveryTime = (value) => {
   const deliveryTime = String(value || "").trim();
   if (!deliveryTime) return "Prazo a confirmar";
+  if (/retirada/i.test(deliveryTime)) return deliveryTime;
   if (/dia/i.test(deliveryTime)) return deliveryTime;
   return `${deliveryTime} ${deliveryTime === "1" ? "dia útil" : "dias úteis"}`;
 };
@@ -2652,7 +2653,7 @@ const PICKUP_VENDOR_POSTCODE = "21210250";
 const PICKUP_VENDOR_SERVICE = Object.freeze({
   carrier: "Retirada com o vendedor",
   carrierCode: "PICKUP_VENDOR",
-  description: "Retirada grátis • Retirada a combinar após a confirmação do pagamento",
+  description: "Retirada grátis • Rua Maria do Carmo, 202 — Penha Circular — Rio de Janeiro/RJ — CEP 21210-250",
   serviceCode: "PICKUP_VENDOR",
   deliveryTime: "Retirada a combinar após a confirmação do pagamento",
   price: 0
@@ -2878,7 +2879,7 @@ const openProductDialog = (slug, { syncUrl = true } = {}) => {
   const addCartButton = productDialogElement.querySelector("#product-dialog-add-cart");
   if (addCartButton) addCartButton.disabled = !canUseTestCart;
   const buyNowButton = productDialogElement.querySelector("#product-dialog-buy-now");
-  if (buyNowButton) buyNowButton.disabled = true;
+  if (buyNowButton) buyNowButton.disabled = !canUseTestCart;
   if (productDialogPostcode) {
     productDialogPostcode.disabled = !canUseTestCart;
     productDialogPostcode.value = "";
@@ -2894,6 +2895,7 @@ const openProductDialog = (slug, { syncUrl = true } = {}) => {
   }
 
   if (usesFullDialog && syncUrl) setBookDialogUrl(product.slug);
+  document.dispatchEvent(new CustomEvent('chi-rho-commerce', { detail: { name: 'view_item', items: [{ product, quantity: 1 }] } }));
 };
 
 document.addEventListener("click", (event) => {
@@ -3170,6 +3172,7 @@ const updateTestCartQuantity = (slug, requestedQuantity) => {
 
   const quantity = clampProductCartQuantity(product, requestedQuantity, { allowZero: true });
   const existingItem = testCart.find((item) => item.slug === slug);
+  const previousQuantity = existingItem?.quantity || 0;
 
   if (quantity === 0) {
     testCart = testCart.filter((item) => item.slug !== slug);
@@ -3183,6 +3186,10 @@ const updateTestCartQuantity = (slug, requestedQuantity) => {
   resetCartShipping("Carrinho alterado. Escolha novamente entrega ou retirada.");
   window.dispatchEvent(new Event("chi-rho-cart-changed"));
   renderTestCart();
+  const delta = quantity - previousQuantity;
+  if (delta) document.dispatchEvent(new CustomEvent('chi-rho-commerce', { detail: {
+    name: delta > 0 ? 'add_to_cart' : 'remove_from_cart', items: [{ product, quantity: Math.abs(delta) }]
+  } }));
   return quantity;
 };
 
@@ -3274,6 +3281,9 @@ const renderTestCart = ({ pruneUnavailable = inventoryHydrated } = {}) => {
 
 const openTestCart = () => {
   renderTestCart();
+  document.dispatchEvent(new CustomEvent('chi-rho-commerce', { detail: { name: 'view_cart',
+    items: testCart.map(item => ({ product: getTestCartProduct(item.slug), quantity: item.quantity })).filter(item => item.product)
+  } }));
   if (typeof testCartDialog.showModal === "function") {
     if (!testCartDialog.open) testCartDialog.showModal();
   } else {
@@ -3375,7 +3385,7 @@ document.addEventListener("click", (event) => {
 
   if (event.target.closest("[data-cart-close]")) testCartDialog.close();
 
-  const addCartButton = event.target.closest("#product-dialog-add-cart");
+  const addCartButton = event.target.closest("#product-dialog-add-cart, #product-dialog-buy-now");
   if (addCartButton && !addCartButton.disabled) {
     const slug = productDialogElement?.dataset.productSlug;
     const quantity = Number(productDialogQuantity?.textContent) || 1;

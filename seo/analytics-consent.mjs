@@ -67,6 +67,14 @@ const loadGoogleAnalytics = () => {
   document.head.appendChild(script);
 };
 
+// Commerce calls never load Analytics or retain an event queue without consent.
+export const trackAnalyticsEvent = (name, parameters) => {
+  if (typeof window === 'undefined' || readConsent()?.analytics !== true) return false;
+  loadGoogleAnalytics();
+  window.gtag('event', name, parameters);
+  return true;
+};
+
 const expireAnalyticsCookies = () => {
   document.cookie.split(';').map((item) => item.split('=')[0].trim()).filter((name) => name === '_ga' || name.startsWith('_ga_')).forEach((name) => {
     document.cookie = `${name}=; Max-Age=0; path=/; SameSite=Lax`;
@@ -93,6 +101,7 @@ const applyConsent = (analytics, { persist = true } = {}) => {
   if (analytics) loadGoogleAnalytics();
   else disableAnalytics();
   closeBanner();
+  window.dispatchEvent(new CustomEvent('chi-rho-analytics-consent', { detail: { analytics: Boolean(analytics) } }));
 };
 
 const createPreferencesDialog = () => {
@@ -171,7 +180,7 @@ const createBanner = () => {
 };
 
 const ensureFooterPreferences = () => {
-  const policies = document.querySelector('.footer-policies');
+  const policies = document.querySelector('.footer-policies, .checkout-footer .container');
   if (!policies || policies.querySelector('[data-cookie-settings]')) return;
   const button = document.createElement('button');
   button.type = 'button';

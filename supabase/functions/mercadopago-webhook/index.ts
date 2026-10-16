@@ -1,3 +1,4 @@
+import { sendOrderEmail } from "./mailer.ts";
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 
 const PUBLIC_KEY="sb_publishable_ipNBmuf0pUOZRzzlpU8kWw_Md1Y5FuE";
@@ -55,7 +56,7 @@ Deno.serve(async(request)=>{
   const orderCode=String(payment?.external_reference||"").slice(0,40);
   if(!mapped||!orderCode){console.error("Mercado Pago event missing supported status or reference");return json({received:true,ignored:true},200);}
   const headers={apikey:serviceKey,Authorization:`Bearer ${serviceKey}`,"Content-Type":"application/json"};
-  const orderResponse=await fetch(`${supabaseUrl}/rest/v1/orders?code=eq.${encodeURIComponent(orderCode)}&select=id,grand_total,currency&limit=1`,{headers});
+  const orderResponse=await fetch(`${supabaseUrl}/rest/v1/orders?code=eq.${encodeURIComponent(orderCode)}&select=id,code,customer_name,customer_email,grand_total,currency,shipping_carrier_code&limit=1`,{headers});
   const orders=orderResponse.ok?await orderResponse.json():[];
   if(!orders[0]){console.error("Mercado Pago order reference not found");return json({received:true,orderFound:false},200);}
   const order=orders[0],metadataOrderId=String(payment?.metadata?.order_id||"");
@@ -74,5 +75,12 @@ Deno.serve(async(request)=>{
   if(!apply.ok){const error=await apply.json().catch(()=>({}));console.error("Payment state update failed",apply.status,error?.code||"unknown");
     return json({error:"Evento recebido, mas não processado."},503);}
   const applied=await apply.json().catch(()=>[]),result=Array.isArray(applied)?applied[0]:applied;
+  if(mapped==="pago" && result?.event_processed && order.customer_email){
+    await sendOrderEmail({
+      event:"payment_confirmed",orderId:String(order.id),orderCode:String(order.code||orderCode),
+      to:String(order.customer_email),customerName:String(order.customer_name||""),total:Number(order.grand_total),
+      isPickup:order.shipping_carrier_code==="PICKUP_VENDOR"
+    }).catch((emailError)=>console.error("Payment email error",emailError instanceof Error?emailError.message:"unknown"));
+  }
   return json({received:true,processed:Boolean(result?.event_processed)},200);
 });

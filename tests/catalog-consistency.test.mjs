@@ -145,11 +145,12 @@ test("listas de produtos usam dois cards compactos por linha no mobile", () => {
   assert.match(source, /getProductCardCartMarkup\(product\)/);
 });
 
-test("home mobile integra marca, conteúdo e ações ao banner sem trocar os destinos", () => {
+test("home mobile integra marca e banner com acesso direto às ofertas", () => {
   assert.match(homeHtml, /class="header-cart-link" aria-label="Carrinho"/);
   assert.match(homeHtml, /<h1><span>Tudo para sua<\/span><em>casa, sua família<\/em><span>e sua fé\.<\/span><\/h1>/);
-  assert.match(homeHtml, /href="#universos" class="btn btn-primary">Comprar agora →<\/a>/);
-  assert.match(homeHtml, /href="#ofertas" class="btn btn-outline">Ver ofertas<\/a>/);
+  assert.match(homeHtml, /href="#ofertas" class="btn btn-primary">Comprar ofertas →<\/a>/);
+  assert.match(homeHtml, /href="#universos" class="btn btn-outline">Explorar catálogos<\/a>/);
+  assert.ok(homeHtml.indexOf('id="ofertas"') < homeHtml.indexOf('id="universos"'));
   assert.match(homeHtml, /banner-home-mobile\.webp/);
   assert.match(homeHtml, /fetchpriority="high"/);
 

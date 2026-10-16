@@ -1,6 +1,8 @@
 import { getAttribution } from "./seo/attribution.mjs";
 import { shippingProducts, baseShippingProducts, shippingKits } from "./data/shipping-products.mjs";
 import { priceCart } from "./lib/kit-pricing.mjs";
+import { PICKUP_INSTRUCTIONS } from "./data/pickup.mjs";
+import { trackCommerce } from "./seo/ecommerce.mjs";
 
 const CART_STORAGE_KEY = "chi-rho-test-cart-v1";
 const SHIPPING_STORAGE_KEY = "chi-rho-test-shipping-v1";
@@ -206,7 +208,7 @@ if (cart.length === 0 || !shipping || !cartPricing) {
   deliveryLabel.textContent = isPickup ? "RETIRADA SELECIONADA" : "ENTREGA SELECIONADA";
   deliveryService.textContent = `${shipping.service.carrier} • ${shipping.service.description}`;
   deliveryTime.textContent = isPickup
-    ? "Retirada a combinar com a CHI RHO após a confirmação do pagamento. O endereço será informado pela equipe."
+    ? PICKUP_INSTRUCTIONS
     : `${formatDeliveryTime(shipping.service.deliveryTime)} para o CEP ${formatPostcode(shipping.cep)}`;
   delivery.replaceChildren(deliveryLabel, deliveryService, deliveryTime);
   const checkoutForm = document.querySelector("#checkout-form");
@@ -231,6 +233,14 @@ if (cart.length === 0 || !shipping || !cartPricing) {
   if (discountRow) { discountRow.hidden = cartPricing.referenceDiscount <= 0; discountRow.querySelector('dd').textContent = `− ${formatCurrency(cartPricing.referenceDiscount)}`; }
   document.querySelector("[data-checkout-shipping-price]").textContent = isPickupOrder ? "Grátis" : formatCurrency(shipping.service.price);
   document.querySelector("[data-checkout-total]").textContent = formatCurrency(total);
+  let checkoutTracked = false;
+  const trackCheckout = () => {
+    if (checkoutTracked) return;
+    checkoutTracked = trackCommerce('begin_checkout', cart);
+    if (checkoutTracked) trackCommerce('add_shipping_info', cart, { shipping_tier: isPickupOrder ? 'Retirada grátis' : shipping.service.carrier });
+  };
+  trackCheckout();
+  window.addEventListener('chi-rho-analytics-consent', trackCheckout);
 }
 
 document.querySelector("[data-whatsapp-input]")?.addEventListener("input", (event) => {
@@ -259,10 +269,13 @@ const checkPaymentAvailability = async () => {
     paymentButton.disabled = !paymentAvailable;
     paymentButton.textContent = paymentAvailable ? "Finalizar pagamento" : "Pagamento em configuração";
   }
+  return paymentAvailable;
 };
 
-paymentButton?.addEventListener("click", async () => {
-  if (!createdOrder || !paymentAvailable) return;
+let paymentOpening = false;
+const openPayment = async () => {
+  if (!createdOrder || !paymentAvailable || paymentOpening) return;
+  paymentOpening = true;
   paymentButton.disabled = true;
   paymentButton.textContent = "Abrindo Mercado Pago…";
   paymentStatus.textContent = "Validando valores, estoque e frete no servidor…";
@@ -274,14 +287,18 @@ paymentButton?.addEventListener("click", async () => {
     if (!response.ok) throw new Error(data.error || "Não foi possível iniciar o pagamento.");
     const paymentUrl = new URL(data.paymentUrl);
     if (paymentUrl.protocol !== "https:") throw new Error("A URL de pagamento recebida não é segura.");
+    trackCommerce('add_payment_info', cart, { payment_type: 'Mercado Pago' });
     window.location.assign(paymentUrl.href);
   } catch (error) {
     paymentStatus.textContent = error?.name === "TimeoutError" ? "O Mercado Pago demorou mais que o esperado. Tente novamente." : error.message;
     paymentStatus.className = "checkout-form-status is-error";
     paymentButton.disabled = !paymentAvailable;
     paymentButton.textContent = "Finalizar pagamento";
+  } finally {
+    paymentOpening = false;
   }
-});
+};
+paymentButton?.addEventListener("click", openPayment);
 
 checkPaymentAvailability();
 
@@ -366,6 +383,7 @@ document.querySelector("#checkout-form")?.addEventListener("submit", async (even
         checkoutSnapshot: {
           items: cart.map((item) => ({
             product_name: item.product.name,
+            slug: item.slug,
             sku: item.product.sku,
             image_url: item.product.image,
             quantity: item.quantity,
@@ -403,13 +421,16 @@ document.querySelector("#checkout-form")?.addEventListener("submit", async (even
     paymentButton.disabled = !paymentAvailable;
     paymentButton.textContent = paymentAvailable ? "Finalizar pagamento" : "Pagamento em configuração";
     form.querySelector(".checkout-payment-preview")?.scrollIntoView({ behavior: "smooth", block: "center" });
+    // The customer's Continue action creates the order and opens Checkout Pro.
+    // The visible payment button remains available for a safe retry on failure.
+    if (paymentAvailable || await checkPaymentAvailability()) await openPayment();
   } catch (error) {
     status.textContent = error?.name === "TimeoutError"
       ? "O registro demorou mais que o esperado. Tente novamente; o mesmo pedido não será duplicado."
       : error.message;
     status.className = "checkout-form-status is-error";
     submitButton.disabled = false;
-    submitButton.textContent = "Registrar pedido e continuar";
+    submitButton.textContent = "Continuar para pagamento";
   }
 });
 
