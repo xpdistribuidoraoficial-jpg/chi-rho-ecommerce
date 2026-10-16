@@ -2622,7 +2622,7 @@ const requestShippingQuote = async (cep, itens) => {
   return data;
 };
 
-const PICKUP_VENDOR_POSTCODE = "25525660";
+const PICKUP_VENDOR_POSTCODE = "21210250";
 const PICKUP_VENDOR_SERVICE = Object.freeze({
   carrier: "Retirada com o vendedor",
   carrierCode: "PICKUP_VENDOR",

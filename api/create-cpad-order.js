@@ -39,12 +39,12 @@ const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const slugPattern = /^[a-z0-9][a-z0-9-]{0,119}$/;
 const PICKUP_ADDRESS = Object.freeze({
-  postal_code: "25525660",
-  street: "Rua Bento Siqueira",
-  number: "668",
-  complement: "LT 6, CS 7",
-  district: "Retirada CHI RHO",
-  city: "São João de Meriti",
+  postal_code: "21210250",
+  street: "Rua Maria do Carmo",
+  number: "220",
+  complement: "",
+  district: "Penha Circular",
+  city: "Rio de Janeiro",
   state: "RJ"
 });
 
