@@ -74,9 +74,9 @@ test("catálogo mantém pendências comerciais fora do checkout", () => {
     activeProducts.findIndex((candidate) => candidate.slug === product.slug) !== index
   );
 
-  assert.equal(catalogProducts.length, 77);
-  assert.equal(activeProducts.length, 65);
-  assert.equal(orderableProducts.length, 4);
+  assert.equal(catalogProducts.length, 78);
+  assert.equal(activeProducts.length, 66);
+  assert.equal(orderableProducts.length, 5);
   assert.equal(missingPrice.length, 13);
   assert.equal(zeroPrice.length, 0);
   assert.equal(duplicateSlugs.length, 0);
