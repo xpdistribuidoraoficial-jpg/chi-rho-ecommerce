@@ -37,7 +37,7 @@ const slugPattern = /^[a-z0-9][a-z0-9-]{0,119}$/;
 const PICKUP_ADDRESS = Object.freeze({
   postal_code: "21210250",
   street: "Rua Maria do Carmo",
-  number: "220",
+  number: "202",
   complement: "",
   district: "Penha Circular",
   city: "Rio de Janeiro",
