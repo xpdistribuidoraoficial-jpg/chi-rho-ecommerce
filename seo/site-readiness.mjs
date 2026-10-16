@@ -1,5 +1,6 @@
 import './analytics-consent.mjs';
 import './attribution.mjs';
+import './ecommerce.mjs';
 import { COMPANY, COMPANY_ADDRESS_DISPLAY } from './company.mjs';
 
 const LEGAL_LINKS = [

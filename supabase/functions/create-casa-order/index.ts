@@ -1,3 +1,4 @@
+import { sendOrderEmail } from "./mailer.ts";
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 
 const SITE_ORIGIN = "https://chi-rho-ecommerce.vercel.app";
@@ -158,9 +159,9 @@ const getVerifiedShipping = async (body: any, items: Array<{ slug: string; quant
     return {
       carrier: "Retirada com o vendedor",
       carrier_code: "PICKUP_VENDOR",
-      service: "Retirar com o vendedor",
+      service: "Retirada grátis",
       service_code: "PICKUP_VENDOR",
-      delivery_time: "Retirada a combinar",
+      delivery_time: "Rua Maria do Carmo, 202 - Penha Circular - Rio de Janeiro/RJ - CEP 21210-250",
       price: 0,
       quoted_at: new Date().toISOString()
     };
@@ -298,6 +299,15 @@ Deno.serve(async (request: Request) => {
     }
 
     const order = Array.isArray(databaseData) ? databaseData[0] : databaseData;
+    await sendOrderEmail({
+      event: "order_created",
+      orderId: String(order.order_id),
+      orderCode: String(order.order_code),
+      to: customer.email,
+      customerName: customer.name,
+      total: Number(order.order_total),
+      isPickup
+    }).catch((emailError) => console.error("Order email error", emailError instanceof Error ? emailError.message : "unknown"));
     return jsonResponse({
       order: {
         id: order.order_id,
