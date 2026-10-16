@@ -31,6 +31,7 @@ export const categories = {
   'livros-cristaos': ['Livros Cristãos', 'catalogo-biblias.html', 'Conheça os livros cristãos da CHI RHO. Confira autores, editoras, descrições e preços cadastrados de cada título.'],
   'brinquedos-infantis': ['Brinquedos', 'catalogo-infantil.html', 'Explore os brinquedos da CHI RHO: caminhões, tratores, ônibus e blocos de montar. Veja fotos reais, detalhes e preços cadastrados.'],
   'cozinha': ['Cozinha', 'catalogo-casa.html', 'Conheça os produtos para cozinha da CHI RHO. Confira imagens, medidas, características e preços das utilidades do catálogo.'],
+  'papelaria-arte': ['Papelaria e Arte', 'catalogo-casa.html', 'Canetas e materiais para desenho, lettering e trabalhos criativos. Conheça os produtos de Papelaria e Arte da CHI RHO.'],
   'utilidades-domesticas': ['Utilidades Domésticas', 'catalogo-casa.html', 'Explore utilidades domésticas na CHI RHO, com imagens e informações dos produtos para a rotina da casa.']
 };
 export const categoryPath = (slug) => categories[slug] ? `/${categories[slug][1]}?categoria=${slug}` : '/catalogo-biblias.html';

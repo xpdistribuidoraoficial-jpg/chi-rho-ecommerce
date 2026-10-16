@@ -1439,6 +1439,38 @@ const catalogProducts = [
     brinquedo: true
   },
   {
+    id: "casa-canetas-marcador-ponta-dupla-60-cores",
+    slug: "casa-canetas-marcador-ponta-dupla-60-cores",
+    sku: "CASA-MARCADOR-60-CORES",
+    nome: "Conjunto Canetas Marcador Ponta Dupla Permanente — 60 Cores com Estojo",
+    categoria: "Papelaria e Arte",
+    categoriaSlug: "papelaria-arte",
+    imagem: "assets/products/canetas-marcador-60-cores-conjunto.webp",
+    imagens: [
+      "assets/products/canetas-marcador-60-cores-conjunto.webp",
+      "assets/products/canetas-marcador-60-cores-detalhe.webp",
+      "assets/products/canetas-marcador-60-cores-estojo.webp"
+    ],
+    videos: [
+      { src: "assets/products/marker-60-cores-demonstracao.mp4", titulo: "Conheça o conjunto e o estojo" },
+      { src: "assets/products/marker-60-cores-pontas.mp4", titulo: "Veja as pontas dos marcadores" }
+    ],
+    descricao: "Explore sua criatividade com 60 cores de marcadores permanentes e um estojo com zíper para organizar e transportar o conjunto. Cada caneta tem ponta dupla: uma fina para detalhes e outra chanfrada para preenchimentos e traços mais largos. A tinta à base de álcool oferece cores intensas para desenhos, ilustrações, lettering, trabalhos escolares e artesanato. O corpo em plástico é leve e prático de manusear. Ideal para quem está começando ou quer ampliar sua paleta de cores. Acompanha 60 canetas e 1 estojo. Teste a tinta no papel antes de usar e proteja a folha seguinte durante a pintura.",
+    perfil: "Desenho, lettering e trabalhos criativos",
+    marca: "Touch",
+    cor: "60 cores sortidas",
+    recursos: "Ponta fina e ponta chanfrada; tinta à base de álcool; estojo com zíper",
+    preco: 14.94,
+    fontePreco: "Preço final definido pelo lojista; R$ 25,94 é referência externa do Mercado Livre, não preço anterior da CHI RHO",
+    fonteLogisticaUrl: "https://www.carrefour.com.br/produto/conjunto-de-canetas-marcadoras-60-cores-touch-touch-334555278",
+    logisticaObservacao: "Referência comercial de conjunto Touch de 60 cores: 0,886 kg e 17 × 10 × 18 cm. Conferir o lote e a embalagem antes da expedição.",
+    estoque: 10,
+    testeCarrinho: true,
+    destaque: false,
+    maisVendido: false,
+    casa: true
+  },
+  {
     id: "casa-carregador-kapbom-ka-5005-5g-30w-lightning",
     slug: "casa-carregador-kapbom-ka-5005-5g-30w-lightning",
     sku: "KA-5005-5G-LIGHTNING",
@@ -2756,6 +2788,39 @@ const setProductDialogText = (selector, value, fallback) => {
   if (element) element.textContent = value || fallback;
 };
 
+const setProductDialogVideos = (product) => {
+  const previous = productDialogElement?.querySelector(".product-dialog-videos");
+  previous?.querySelectorAll("video").forEach(video => video.pause());
+  previous?.remove();
+  if (!Array.isArray(product.videos) || !product.videos.length) return;
+  const description = productDialogElement?.querySelector("#product-dialog-description");
+  if (!description) return;
+  const details = document.createElement("details");
+  details.className = "product-dialog-videos";
+  const summary = document.createElement("summary");
+  summary.textContent = "Ver vídeos do produto";
+  details.appendChild(summary);
+  product.videos.filter(item => item.src?.startsWith("assets/products/") && item.src.endsWith(".mp4")).forEach((item, index) => {
+    const figure = document.createElement("figure");
+    const video = document.createElement("video");
+    video.src = item.src;
+    video.controls = true;
+    video.playsInline = true;
+    video.preload = "none";
+    video.poster = product.imagem;
+    video.setAttribute("aria-label", item.titulo || `Vídeo ${index + 1} do produto`);
+    video.textContent = "Seu navegador não consegue reproduzir este vídeo.";
+    const caption = document.createElement("figcaption");
+    caption.textContent = item.titulo || `Vídeo ${index + 1}`;
+    figure.append(video, caption);
+    details.appendChild(figure);
+  });
+  details.addEventListener("toggle", () => {
+    if (!details.open) details.querySelectorAll("video").forEach(video => video.pause());
+  });
+  description.after(details);
+};
+
 const setProductDialogDetails = (product) => {
   const details = [
     product.kitComponents ? { label: "Composição", value: product.kitComponents.map(item => `${item.quantity} × ${catalogProducts.find(p => p.slug === item.slug)?.nome || item.slug}`).join(" + ") } : null,
@@ -2827,6 +2892,7 @@ const openProductDialog = (slug, { syncUrl = true } = {}) => {
   productDialogElement.dataset.category = product.categoriaSlug;
   productDialogElement.dataset.productSlug = product.slug;
   setProductDialogGallery(product);
+  setProductDialogVideos(product);
   productDialogElement.querySelector("#product-dialog-category").textContent =
     [product.categoria, product.autor || product.marca, product.editora].filter(Boolean).join(" • ");
   productDialogElement.querySelector("#product-dialog-title").textContent = product.nome;
@@ -2950,6 +3016,7 @@ productDialogPostcode?.addEventListener("keydown", (event) => {
 });
 
 productDialogElement?.addEventListener("close", () => {
+  productDialogElement.querySelectorAll("video").forEach(video => video.pause());
   if (new URLSearchParams(window.location.search).has("produto")) setBookDialogUrl(null);
 });
 
