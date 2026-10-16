@@ -1439,6 +1439,32 @@ const catalogProducts = [
     brinquedo: true
   },
   {
+    id: "casa-carregador-kapbom-ka-5005-5g-30w-lightning",
+    slug: "casa-carregador-kapbom-ka-5005-5g-30w-lightning",
+    sku: "KA-5005-5G-LIGHTNING",
+    nome: "Carregador USB-C KAPBOM 30W + Cabo Lightning — KA-5005-5G",
+    categoria: "Utilidades Domésticas",
+    categoriaSlug: "utilidades-domesticas",
+    imagem: "assets/products/kapbom-ka-5005-5g-30w-conjunto.png",
+    imagens: [
+      "assets/products/kapbom-ka-5005-5g-30w-conjunto.png",
+      "assets/products/kapbom-ka-5005-5g-30w-embalagem.png",
+      "assets/products/kapbom-ka-5005-5g-30w-foto-original.png"
+    ],
+    descricao: "Carregador branco com saída USB-C e cabo USB-C para Lightning incluído. Modelo KAPBOM KA-5005-5G, com potência de 30W informada na embalagem. O cabo atende iPhones com entrada Lightning; para aparelhos Samsung e outros dispositivos com entrada USB-C, utilize um cabo compatível vendido separadamente. A potência efetiva depende do aparelho, do cabo e dos protocolos suportados. Imagens de estúdio ilustrativas baseadas na embalagem; foto original disponível na galeria.",
+    perfil: "Carregador + cabo Lightning",
+    marca: "KAPBOM",
+    ean: "7897732350052",
+    preco: 16.99,
+    fontePreco: "Preço final definido pelo lojista: R$ 2,00 acima do carregador KA-5005 avulso",
+    estoque: 20,
+    testeCarrinho: true,
+    ofertaHome: true,
+    destaque: false,
+    maisVendido: false,
+    casa: true
+  },
+  {
     id: "casa-fone-bluetooth-visor-bateria",
     slug: "casa-fone-bluetooth-visor-bateria",
     sku: "CASA-FONE-BT-VISOR-PRETO",
@@ -2749,6 +2775,7 @@ const setProductDialogDetails = (product) => {
     product.harpa ? { label: "Harpa Cristã", value: product.harpa } : null,
     product.indice ? { label: "Índice", value: product.indice } : null,
     product.isbn ? { label: "ISBN / GTIN", value: product.isbn } : null,
+    product.ean ? { label: "EAN", value: product.ean } : null,
     product.recursos ? { label: "Recursos", value: product.recursos } : null,
     product.pendencias ? { label: "Validação pendente", value: product.pendencias } : null
   ].filter((detail) => detail?.value);
