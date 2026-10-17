@@ -11,6 +11,8 @@ declare
   v_label_claim uuid;
   v_duplicate_blocked boolean:=false;
   v_blocked boolean;
+  v_invoice jsonb:='{"key":"33260142300391000100550010000001231123456786","number":"123","series":"1","issuedAt":"2026-01-01T12:00:00-03:00","value":44.9,"freight":15,"issuerDocument":"42300391000100","recipientDocument":"52998224725","protocol":"123456789012345","statusCode":"100","source":"contador","environment":"production","xmlPath":"PLACEHOLDER"}';
+  v_path text;
   v_parcel jsonb:='{"weightKg":1.2,"lengthCm":25,"widthCm":20,"heightCm":10}';
 begin
   update public.inventory set stock_total=greatest(stock_total,stock_reserved+50),unit_price=29.90,weight_kg=0.5,length_cm=20,width_cm=15,height_cm=5,category='Cozinha' where product_slug='casa-balanca-digital-cozinha-10kg';
@@ -57,6 +59,25 @@ begin
   if not v_blocked then raise exception 'TEST_PICKUP_NOT_BLOCKED'; end if;
   update public.orders set shipping_carrier_code='COR' where id=v_order;
 
+  v_blocked:=false;
+  begin perform public.claim_shipping_label(v_order,v_admin);
+  exception when others then v_blocked:=position('INVOICE_REQUIRED' in sqlerrm)>0; end;
+  if not v_blocked then raise exception 'TEST_INVOICE_REQUIRED'; end if;
+  v_path:=v_order::text||'/'||gen_random_uuid()::text||'.xml';
+  insert into storage.objects(bucket_id,name) values('order-invoices',v_path);
+  v_invoice:=jsonb_set(v_invoice,'{xmlPath}',to_jsonb(v_path));
+  v_blocked:=false;
+  begin perform public.record_order_invoice(v_order,v_admin,v_invoice||'{"value":1}'::jsonb);
+  exception when others then v_blocked:=position('INVOICE_INVALID' in sqlerrm)>0; end;
+  if not v_blocked then raise exception 'TEST_INVOICE_TOTAL_NOT_CHECKED'; end if;
+  perform public.record_order_invoice(v_order,v_admin,v_invoice);
+  v_blocked:=false;
+  begin perform public.record_order_invoice(v_order,v_admin,v_invoice);
+  exception when others then v_blocked:=position('INVOICE_ALREADY_REGISTERED' in sqlerrm)>0; end;
+  if not v_blocked then raise exception 'TEST_INVOICE_REPLACED'; end if;
+  if has_function_privilege('anon','public.record_order_invoice(uuid,uuid,jsonb)','EXECUTE')
+    or has_function_privilege('authenticated','public.record_order_invoice(uuid,uuid,jsonb)','EXECUTE')
+    or exists(select 1 from storage.buckets where id='order-invoices' and public) then raise exception 'TEST_INVOICE_PUBLIC_ACCESS'; end if;
   v_label_claim:=public.claim_shipping_label(v_order,v_admin);
   perform public.fail_shipping_label(v_order,v_label_claim,v_admin,'LABEL_RECONCILIATION_REQUIRED');
   v_blocked:=false;

@@ -56,3 +56,7 @@
 .admin-pagination button:disabled{opacity:.5;cursor:not-allowed}
 @media(max-width:720px){.admin-search-filters{grid-template-columns:repeat(2,minmax(0,1fr))}.admin-search-filters label:first-child{grid-column:1/-1}}
 @media(max-width:359px){.admin-search-filters{grid-template-columns:minmax(0,1fr)}}
+
+.admin-pickup-confirmation[hidden]{display:none}
+.admin-invoice-form{display:grid;gap:1rem}
+.admin-detail-field strong{overflow-wrap:anywhere}

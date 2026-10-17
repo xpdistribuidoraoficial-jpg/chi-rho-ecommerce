@@ -1,6 +1,11 @@
+import { XMLParser, XMLValidator } from "npm:fast-xml-parser@5.11.2";
+import { invoiceDocuments } from "../_shared/invoice-documents.mjs";
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { buildOrderFilters, PAGE_SIZE } from "./order-filters.mjs";
 import { generateShippingLabel, labelConfiguration, shouldGenerateLabel } from "../_shared/frenet-label.mjs";
+
+const invoiceParser=new XMLParser({ignoreAttributes:false,removeNSPrefix:true,parseTagValue:false,parseAttributeValue:false,processEntities:false});
+const parseInvoice=(xml:string)=>{if(XMLValidator.validate(xml)!==true)throw new Error("INVALID_XML");return invoiceParser.parse(xml);};
 
 const SITE_ORIGIN="https://www.chirho.com.br";
 const ROOT_ORIGIN="https://chirho.com.br";
@@ -48,10 +53,16 @@ Deno.serve(async(request)=>{
   const headers={apikey:serviceKey,Authorization:`Bearer ${serviceKey}`,"Content-Type":"application/json"};
   const requestUrl=new URL(request.url);
 
+  const action=requestUrl.searchParams.get("action");
+  if((request.method==="POST"&&action==="invoice")||(request.method==="GET"&&action==="invoice-document")){
+    const result=await invoiceDocuments({request,url,serviceKey,adminId:admin.id,parse:parseInvoice});
+    return response(result.body,result.status,origin);
+  }
+
   if(request.method==="GET"&&requestUrl.searchParams.get("action")==="detail"){
     const id=safe(requestUrl.searchParams.get("id"),36);
     if(!/^[0-9a-f-]{36}$/i.test(id)) return response({error:"Pedido inválido."},400,origin);
-    const orderSelect="id,code,customer_name,customer_email,customer_whatsapp,customer_phone,tax_id,postal_code,street,address_number,complement,district,city,state,shipping_carrier,shipping_carrier_code,shipping_service,shipping_service_code,shipping_delivery_time,shipping_price,shipping_quote_id,subtotal,discount,grand_total,financial_status,operational_status,payment_method,payment_external_id,tracking_code,tracking_url,label_url,shipping_label_provider,shipping_label_id,label_status,label_last_error,shipping_package,label_created_at,label_valid_through,declaration_url,shipped_at,reservation_expires_at,cancellation_reason,pickup_signature_path,pickup_confirmed_at,pickup_confirmed_by,pickup_receiver_name,attribution_channel,attribution_source,attribution_medium,attribution_campaign,attribution_content,attribution_term,attribution_referrer,attribution_landing_path,attribution_device,created_at,updated_at";
+    const orderSelect="id,code,customer_name,customer_email,customer_whatsapp,customer_phone,tax_id,postal_code,street,address_number,complement,district,city,state,shipping_carrier,shipping_carrier_code,shipping_service,shipping_service_code,shipping_delivery_time,shipping_price,shipping_quote_id,subtotal,discount,grand_total,financial_status,operational_status,payment_method,payment_external_id,tracking_code,tracking_url,label_url,shipping_label_provider,shipping_label_id,label_status,label_last_error,shipping_package,fiscal_invoice,label_created_at,label_valid_through,declaration_url,shipped_at,reservation_expires_at,cancellation_reason,pickup_signature_path,pickup_confirmed_at,pickup_confirmed_by,pickup_receiver_name,attribution_channel,attribution_source,attribution_medium,attribution_campaign,attribution_content,attribution_term,attribution_referrer,attribution_landing_path,attribution_device,created_at,updated_at";
     const [orderResult,itemsResult,historyResult,paymentHistoryResult,inventoryResult,auditResult]=await Promise.all([
       fetch(`${url}/rest/v1/orders?id=eq.${id}&select=${orderSelect}&limit=1`,{headers}),
       fetch(`${url}/rest/v1/order_items?order_id=eq.${id}&select=id,product_slug,sku,product_name,image_url,unit_price,quantity,line_total&order=id`,{headers}),

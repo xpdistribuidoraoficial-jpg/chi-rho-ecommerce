@@ -1,11 +1,12 @@
 import test from 'node:test';
+import {invoice} from './fixtures/invoice.mjs';
 import assert from 'node:assert/strict';
 import {generateShippingLabel,labelCapability,labelConfiguration,shouldGenerateLabel,validPackage} from '../supabase/functions/_shared/frenet-label.mjs';
 
 const config={token:'test-client',partnerToken:'test-partner',sellerCep:'21210250',printFormat:'A4'};
 const order={id:'order-1',code:'CHR-TEST',financial_status:'pago',operational_status:'pronto_para_envio',
   shipping_carrier_code:'COR',shipping_service_code:'03298',shipping_service:'PAC',shipping_carrier:'Correios',
-  shipping_price:15,subtotal:119.94,discount:35.98,grand_total:98.96,
+  shipping_price:15,subtotal:119.94,discount:35.98,grand_total:98.96,fiscal_invoice:invoice,
   customer_name:'Test',customer_email:'test@invalid.local',customer_phone:'21999999999',tax_id:'52998224725',
   postal_code:'20040002',street:'Rua Teste',address_number:'1',district:'Centro',city:'Rio de Janeiro',state:'RJ',
   shipping_package:{weightKg:1.2,lengthCm:25,widthCm:20,heightCm:10}};
@@ -66,6 +67,7 @@ test('successful label uses documented array/ItemId/service fields and exact dis
   const h=makeHarness();const result=await h.run();
   assert.equal(result.ok,true);assert.equal(h.state.paidCalls,1);
   assert.ok(Array.isArray(h.state.payload));const shipment=h.state.payload[0];
+  assert.equal(shipment.Order.Invoice.Key,invoice.key);assert.equal(shipment.Order.Invoice.Value,98.96);
   assert.equal(shipment.Quotation.ShippingServiceCode,'03298');
   assert.equal(shipment.Quotation.ShippingPrice,14.5);
   assert.equal(shipment.Order.Value,98.96);
@@ -93,7 +95,7 @@ test('missing configuration never claims or contacts a provider',async()=>{
   assert.equal(result.code,'LABEL_NOT_CONFIGURED');assert.equal(calls,0);
 });
 test('invalid package, pickup, totals, or increased/unavailable freight never purchase a label',async()=>{
-  for(const options of [{order:{shipping_package:null}},{order:{shipping_carrier_code:'PICKUP_VENDOR'}},
+  for(const options of [{order:{fiscal_invoice:null}},{order:{shipping_package:null}},{order:{shipping_carrier_code:'PICKUP_VENDOR'}},
     {order:{grand_total:1}},{order:{customer_phone:'1'}},{order:{tax_id:'1'}},
     {quotePrice:15.01},{quotePrice:'invalid'},{service:{ServiceCode:'SEDEX'}},{service:{Error:true}},
     {claimError:'ORDER_NOT_PAID'},{claimError:'STOCK_NOT_COMMITTED'}]){
@@ -101,7 +103,7 @@ test('invalid package, pickup, totals, or increased/unavailable freight never pu
   }
 });
 test('multiple units reconcile rounding once without changing quantity or merchandise totals',async()=>{
-  const h=makeHarness({order:{subtotal:30,discount:1,grand_total:44},
+  const h=makeHarness({order:{subtotal:30,discount:1,grand_total:44,fiscal_invoice:{...invoice,value:44}},
     items:[{id:'multi',product_slug:'p',unit_price:10,quantity:3,line_total:30}]});
   assert.equal((await h.run()).ok,true);
   assert.equal(h.state.payload[0].Order.Items.reduce((s,i)=>s+Math.round(i.Price*100),0),2900);

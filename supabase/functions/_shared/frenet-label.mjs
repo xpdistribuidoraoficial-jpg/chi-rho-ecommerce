@@ -1,3 +1,5 @@
+import {validInvoiceKey} from './order-invoice.mjs';
+
 // Server-only: one financial submission per claim. Uncertain results stay locked.
 const digits = value => String(value || '').replace(/\D/g, '');
 const cents = value => Math.round(Number(value) * 100);
@@ -33,6 +35,7 @@ const messages = {
   ORDER_NOT_READY: 'O pedido precisa estar pronto para envio.',
   PICKUP_ORDER: 'Pedidos de retirada não geram etiqueta.',
   SHIPPING_PACKAGE_REQUIRED: 'Confira o peso e as medidas do pacote antes de emitir a etiqueta.',
+  INVOICE_REQUIRED: 'Vincule a NF-e emitida pelo contador antes de solicitar a etiqueta.',
   STOCK_NOT_COMMITTED: 'A baixa de estoque ainda não foi confirmada.',
   ADDRESS_INCOMPLETE: 'Complete o endereço do destinatário.',
   RECIPIENT_DOCUMENT_MISSING: 'Confira o CPF ou CNPJ do destinatário.',
@@ -65,7 +68,7 @@ export async function generateShippingLabel({url, serviceKey, adminId, orderId, 
   if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(requestKey)) return failure('LABEL_IN_PROGRESS',503);
   let submitted = false;
   try {
-    const select = 'id,code,customer_name,customer_email,customer_whatsapp,customer_phone,tax_id,postal_code,street,address_number,complement,district,city,state,shipping_carrier,shipping_carrier_code,shipping_service,shipping_service_code,shipping_delivery_time,shipping_price,subtotal,discount,grand_total,shipping_package';
+    const select = 'id,code,customer_name,customer_email,customer_whatsapp,customer_phone,tax_id,postal_code,street,address_number,complement,district,city,state,shipping_carrier,shipping_carrier_code,shipping_service,shipping_service_code,shipping_delivery_time,shipping_price,subtotal,discount,grand_total,shipping_package,fiscal_invoice';
     const read = async path => {
       const result = await fetcher(`${url}/rest/v1/${path}`, {headers, signal: AbortSignal.timeout(8000)});
       if (!result.ok) throw new Error('ORDER_DATA_MISSING');
@@ -79,6 +82,9 @@ export async function generateShippingLabel({url, serviceKey, adminId, orderId, 
     if (!order || !items.length) throw new Error('ORDER_DATA_MISSING');
     if (order.shipping_carrier_code === 'PICKUP_VENDOR') throw new Error('PICKUP_ORDER');
     if (!validPackage(parcel)) throw new Error('SHIPPING_PACKAGE_REQUIRED');
+    const invoice=order.fiscal_invoice;
+    if(!validInvoiceKey(invoice?.key)||invoice.environment!=='production'||invoice.issuerDocument!=='42300391000100'
+      ||invoice.recipientDocument!==digits(order.tax_id)||cents(invoice.value)!==cents(order.grand_total)||cents(invoice.freight)!==cents(order.shipping_price))throw new Error('INVOICE_REQUIRED');
     const document = digits(order.tax_id), phone = digits(order.customer_phone || order.customer_whatsapp);
     if (!/^\d{11}$|^\d{14}$/.test(document)) throw new Error('RECIPIENT_DOCUMENT_MISSING');
     if (!/^\d{10,11}$/.test(phone)) throw new Error('RECIPIENT_PHONE_MISSING');
@@ -113,6 +119,7 @@ export async function generateShippingLabel({url, serviceKey, adminId, orderId, 
     });
     for(let index=0;index<goodsCents-allocated;index++) orderItems[index].Price=money(orderItems[index].Price+0.01);
     const payload = [{Order: {Id: order.code, Value: money(order.grand_total), UseFrenetRegistration: true, Items: orderItems,
+      Invoice:{Key:invoice.key,Number:invoice.number,Series:invoice.series,Value:invoice.value,Date:invoice.issuedAt},
       To: {Name: order.customer_name, Email: order.customer_email, Phone: phone, Document: document,
         Address: {ZipCode: digits(order.postal_code), City: order.city, Street: order.street, AddressNumber: order.address_number,
           AddressComplement: order.complement || '', AddressQuarter: order.district, AddressState: order.state, Country: 'BR'}}},
