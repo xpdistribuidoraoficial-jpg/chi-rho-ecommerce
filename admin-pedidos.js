@@ -79,6 +79,23 @@ const uploadPickupConfirmation=async(formData)=>{
   if(!response.ok)throw new Error(data.error||"Não foi possível confirmar a retirada.");
   return data;
 };
+const uploadInvoice=async formData=>{
+  let session;try{session=await ensureSession();}catch{clearSession();throw new Error("AUTH_REQUIRED");}
+  const response=await fetch(`${ADMIN_ENDPOINT}?action=invoice`,{method:"POST",
+    headers:{apikey:PUBLIC_KEY,Authorization:`Bearer ${session.access_token}`,"X-Admin-Portal":ADMIN_PORTAL},body:formData});
+  const data=await response.json().catch(()=>({}));
+  if(response.status===401){clearSession();throw new Error("AUTH_REQUIRED");}
+  if(!response.ok)throw new Error(data.error||"Não foi possível vincular a nota. Reabra o pedido para conferir antes de tentar novamente.");
+  return data;
+};
+const openInvoiceDocument=async(orderId,kind,message)=>{
+  const preview=window.open("","_blank");if(preview){preview.opener=null;preview.document.body.textContent="Carregando documento…";}
+  try{
+    const data=await request(`?action=invoice-document&id=${encodeURIComponent(orderId)}&kind=${kind}`),url=safeUrl(data.url);
+    if(!url)throw new Error("Não foi possível abrir o documento.");
+    if(preview)preview.location.href=url;else message.textContent="Permita a abertura de novas abas para consultar o documento.";
+  }catch(error){preview?.close();message.textContent=error.message;}
+};
 const loadLabelCapability=async()=>{try{const data=await apiRequest(LABEL_ENDPOINT);labelCapability={
     available:data.available===true,
     message:data.available===true?"Emissão Frenet disponível.":"A emissão aguarda a homologação do Partner Token da Frenet."
@@ -162,13 +179,45 @@ const loadDetail=async id=>{if(!dialog.open)dialog.showModal();const content=doc
       if(entry.note)item.append(node("small","",entry.note));timeline.append(item);});
     if(!timeline.children.length)timeline.append(node("li","admin-history-empty","Nenhuma alteração registrada."));history.append(timeline);
     const actions=section("Ações administrativas"),buttons=node("div","admin-actions");
+    const invoice=order.fiscal_invoice,invoiceBox=node("div","admin-pickup-confirmation");invoiceBox.hidden=true;
+    invoiceBox.id=`invoice-${order.id}`;
+    const invoiceToggle=button("Nota fiscal","btn btn-secondary",()=>{invoiceBox.hidden=!invoiceBox.hidden;invoiceToggle.setAttribute("aria-expanded",String(!invoiceBox.hidden));});
+    invoiceToggle.setAttribute("aria-expanded","false");invoiceToggle.setAttribute("aria-controls",invoiceBox.id);
+    const invoiceStatus=node("p","admin-action-note");invoiceStatus.setAttribute("role","status");
+    invoiceBox.append(node("h4","","Nota fiscal (NF-e)"),node("p","admin-action-note","O contador emite a NF-e. Aqui você vincula o XML e, se disponível, o DANFE em PDF. A validade fiscal deve ser conferida com ele."));
+    if(invoice){
+      const fiscalGrid=node("div","admin-detail-grid");fiscalGrid.append(field("Número / série",`${invoice.number} / ${invoice.series}`),field("Emitida em",date(invoice.issuedAt)),field("Valor",money(invoice.value)),field("Chave de acesso",invoice.key));
+      const fiscalActions=node("div","admin-actions");fiscalActions.append(button("Baixar XML","btn btn-secondary",()=>openInvoiceDocument(order.id,"xml",invoiceStatus)));
+      if(invoice.danfePath)fiscalActions.append(button("Imprimir DANFE","btn btn-secondary",()=>openInvoiceDocument(order.id,"danfe",invoiceStatus)));
+      else invoiceBox.append(node("p","admin-action-note","DANFE não anexado. Solicite o PDF ao contador para impressão."));
+      invoiceBox.append(fiscalGrid,fiscalActions);
+    }else if(order.financial_status==="pago"&&order.operational_status!=="cancelado"&&!["gerando","gerada"].includes(order.label_status)&&!order.shipping_label_id){
+      const fiscalForm=node("form","admin-invoice-form"),xmlInput=node("input"),pdfInput=node("input"),fiscalConfirmed=node("input");
+      xmlInput.type=pdfInput.type="file";xmlInput.accept=".xml,application/xml,text/xml";xmlInput.required=true;pdfInput.accept=".pdf,application/pdf";
+      [["XML da NF-e (até 2 MB)",xmlInput],["DANFE em PDF (opcional, até 5 MB)",pdfInput]].forEach(([title,input])=>{const wrapper=node("label","admin-pickup-field");wrapper.append(node("span","",title),input);fiscalForm.append(wrapper);});
+      const fiscalConfirmation=node("label","admin-action-note");fiscalConfirmed.type="checkbox";fiscalConfirmed.required=true;
+      fiscalConfirmation.append(fiscalConfirmed,document.createTextNode(" Conferi com o contador que esta NF-e está válida, autorizada e corresponde a este pedido."));
+      const saveInvoice=button("Vincular NF-e do contador","btn btn-primary",null);saveInvoice.type="submit";fiscalForm.append(fiscalConfirmation,saveInvoice);
+      fiscalForm.addEventListener("submit",async event=>{
+        event.preventDefault();if(!fiscalForm.reportValidity())return;const xml=xmlInput.files?.[0],pdf=pdfInput.files?.[0];
+        if(!xml||xml.size>2*1024*1024||pdf?.size>5*1024*1024){invoiceStatus.textContent="Confira os limites de tamanho dos arquivos.";return;}
+        saveInvoice.disabled=true;invoiceStatus.textContent="Conferindo e vinculando a nota…";
+        try{const form=new FormData();form.append("orderId",order.id);form.append("confirmed","true");form.append("xml",xml);if(pdf)form.append("danfe",pdf);
+          await uploadInvoice(form);await loadDetail(order.id);status.textContent="NF-e do contador vinculada ao pedido.";
+        }catch(error){invoiceStatus.textContent=error.message;saveInvoice.disabled=false;}
+      });invoiceBox.append(fiscalForm);
+    }else invoiceBox.append(node("p","admin-action-note",order.financial_status!=="pago"?"Aguarde o pagamento antes de vincular a nota.":"Não é possível alterar documentos com etiqueta em processamento, já gerada ou pedido cancelado."));
+    invoiceBox.append(invoiceStatus);buttons.append(invoiceToggle,invoiceBox);
     if(order.operational_status==="novo"&&order.financial_status==="pago")buttons.append(button("Iniciar separação","btn btn-primary",()=>updateOrder(order.id,"em_separacao",order)));
     if(isPickup&&order.operational_status==="em_separacao"){
       buttons.append(button("Pronto para retirada","btn btn-primary",()=>updateOrder(order.id,"pronto_para_envio",order)));
     }
     if(!isPickup&&order.financial_status==="pago"&&["em_separacao","pronto_para_envio"].includes(order.operational_status)
       &&!["gerada","gerando"].includes(order.label_status)){
-      const parcelForm=node("form","admin-pickup-confirmation"),parcelInputs={};
+      const parcelForm=node("form","admin-pickup-confirmation"),parcelInputs={};parcelForm.hidden=true;parcelForm.id=`parcel-${order.id}`;
+      const labelToggle=button("Emitir etiqueta Frenet","btn btn-primary",()=>{parcelForm.hidden=!parcelForm.hidden;labelToggle.setAttribute("aria-expanded",String(!parcelForm.hidden));});
+      labelToggle.setAttribute("aria-expanded","false");labelToggle.setAttribute("aria-controls",parcelForm.id);buttons.append(labelToggle);
+      if(!invoice)parcelForm.append(node("p","admin-action-note","Primeiro, vincule a NF-e emitida pelo contador no botão Nota fiscal."));
       parcelForm.setAttribute("aria-label","Conferência do pacote para envio");
       parcelForm.append(node("p","admin-action-note","Informe o peso e as medidas reais de uma caixa já fechada. Para vários volumes ou pacotes acima de 30 kg, organize a emissão diretamente na Frenet."));
       [["weightKg","Peso total (kg)",30],["lengthCm","Comprimento (cm)",200],["widthCm","Largura (cm)",200],["heightCm","Altura (cm)",200]].forEach(([key,title,max])=>{
@@ -181,13 +230,13 @@ const loadDetail=async id=>{if(!dialog.open)dialog.showModal();const content=doc
       confirmation.append(confirmed,document.createTextNode(" Conferi o pacote e os dados do destinatário. Ao confirmar, a loja solicitará a etiqueta usando o saldo da Frenet quando a integração estiver liberada."));
       parcelForm.append(confirmation,node("p","admin-action-note",`Frete cobrado: ${money(order.shipping_price)}. Uma nova cotação será conferida; aumentos bloqueiam a emissão automática.`));
       if(!labelCapability.available)parcelForm.append(node("p","admin-action-note",labelCapability.message));
-      const prepare=button(order.operational_status==="em_separacao"?"Confirmar pacote e preparar envio":"Confirmar pacote e solicitar etiqueta","btn btn-primary",null);
-      prepare.type="submit";parcelForm.append(prepare);
+      const prepare=button("Confirmar pacote e emitir etiqueta","btn btn-primary",null);
+      prepare.type="submit";prepare.disabled=!invoice||!labelCapability.available;parcelForm.append(prepare);
       parcelForm.addEventListener("submit",async event=>{
-        event.preventDefault();if(!parcelForm.reportValidity())return;
+        event.preventDefault();if(!invoice||!labelCapability.available||!parcelForm.reportValidity())return;
         const shippingPackage=Object.fromEntries(Object.entries(parcelInputs).map(([key,input])=>[key,Number(input.value)]));
         prepare.disabled=true;
-        try{await updateOrder(order.id,"pronto_para_envio",order,shippingPackage);}finally{prepare.disabled=false;}
+        try{await updateOrder(order.id,"pronto_para_envio",order,shippingPackage);}finally{prepare.disabled=!invoice||!labelCapability.available;}
       });buttons.append(parcelForm);
     }
     if(isPickup&&order.operational_status==="pronto_para_envio"){
