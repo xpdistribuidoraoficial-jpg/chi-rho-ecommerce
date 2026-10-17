@@ -163,8 +163,32 @@ const loadDetail=async id=>{if(!dialog.open)dialog.showModal();const content=doc
     if(!timeline.children.length)timeline.append(node("li","admin-history-empty","Nenhuma alteração registrada."));history.append(timeline);
     const actions=section("Ações administrativas"),buttons=node("div","admin-actions");
     if(order.operational_status==="novo"&&order.financial_status==="pago")buttons.append(button("Iniciar separação","btn btn-primary",()=>updateOrder(order.id,"em_separacao",order)));
-    if(order.operational_status==="em_separacao"){
-      buttons.append(button(isPickup?"Pronto para retirada":"Marcar como pronto para envio","btn btn-primary",()=>updateOrder(order.id,"pronto_para_envio",order)));
+    if(isPickup&&order.operational_status==="em_separacao"){
+      buttons.append(button("Pronto para retirada","btn btn-primary",()=>updateOrder(order.id,"pronto_para_envio",order)));
+    }
+    if(!isPickup&&order.financial_status==="pago"&&["em_separacao","pronto_para_envio"].includes(order.operational_status)
+      &&!["gerada","gerando"].includes(order.label_status)){
+      const parcelForm=node("form","admin-pickup-confirmation"),parcelInputs={};
+      parcelForm.setAttribute("aria-label","Conferência do pacote para envio");
+      parcelForm.append(node("p","admin-action-note","Informe o peso e as medidas reais de uma caixa já fechada. Para vários volumes ou pacotes acima de 30 kg, organize a emissão diretamente na Frenet."));
+      [["weightKg","Peso total (kg)",30],["lengthCm","Comprimento (cm)",200],["widthCm","Largura (cm)",200],["heightCm","Altura (cm)",200]].forEach(([key,title,max])=>{
+        const wrapper=node("label","admin-pickup-field"),input=node("input");
+        input.type="number";input.min="0.01";input.max=String(max);input.step="0.01";input.required=true;input.name=key;
+        if(order.shipping_package?.[key])input.value=String(order.shipping_package[key]);
+        wrapper.append(node("span","",title),input);parcelForm.append(wrapper);parcelInputs[key]=input;
+      });
+      const confirmation=node("label","admin-action-note"),confirmed=node("input");confirmed.type="checkbox";confirmed.required=true;
+      confirmation.append(confirmed,document.createTextNode(" Conferi o pacote e os dados do destinatário. Ao confirmar, a loja solicitará a etiqueta usando o saldo da Frenet quando a integração estiver liberada."));
+      parcelForm.append(confirmation,node("p","admin-action-note",`Frete cobrado: ${money(order.shipping_price)}. Uma nova cotação será conferida; aumentos bloqueiam a emissão automática.`));
+      if(!labelCapability.available)parcelForm.append(node("p","admin-action-note",labelCapability.message));
+      const prepare=button(order.operational_status==="em_separacao"?"Confirmar pacote e preparar envio":"Confirmar pacote e solicitar etiqueta","btn btn-primary",null);
+      prepare.type="submit";parcelForm.append(prepare);
+      parcelForm.addEventListener("submit",async event=>{
+        event.preventDefault();if(!parcelForm.reportValidity())return;
+        const shippingPackage=Object.fromEntries(Object.entries(parcelInputs).map(([key,input])=>[key,Number(input.value)]));
+        prepare.disabled=true;
+        try{await updateOrder(order.id,"pronto_para_envio",order,shippingPackage);}finally{prepare.disabled=false;}
+      });buttons.append(parcelForm);
     }
     if(isPickup&&order.operational_status==="pronto_para_envio"){
       const pickupBox=node("div","admin-pickup-confirmation");
@@ -194,9 +218,12 @@ const loadDetail=async id=>{if(!dialog.open)dialog.showModal();const content=doc
       });
       pickupBox.append(intro,nameLabel,photoLabel,confirm);buttons.append(pickupBox);
     }
-    if(!isPickup&&order.operational_status==="pronto_para_envio"&&order.label_status!=="gerada"){
-      const generate=button(order.label_status==="gerando"?"Etiqueta em processamento":labelCapability.available?"Gerar etiqueta":"Etiqueta aguardando homologação","btn btn-primary",()=>generateLabel(order.id));
-      generate.disabled=order.label_status==="gerando"||!labelCapability.available;generate.title=labelCapability.available?"Gerar etiqueta na Frenet":labelCapability.message;buttons.append(generate);
+    if(!isPickup&&order.label_status==="gerando"){
+      buttons.append(node("p","admin-action-note",order.label_last_error==="LABEL_RECONCILIATION_REQUIRED"
+        ?"Confira este pedido na Frenet: a resposta da emissão não foi confirmada. Uma nova compra de etiqueta está bloqueada."
+        :"Etiqueta em processamento. Uma segunda solicitação está bloqueada; se não atualizar, confira o pedido na Frenet."));
+    }else if(!isPickup&&order.label_status==="falhou"){
+      buttons.append(node("p","admin-action-note","A emissão não foi concluída. Confira embalagem, endereço, serviço, valor do frete e configuração antes de solicitar novamente."));
     }
     if(!isPickup&&order.label_status==="gerada"){
       buttons.append(button("Imprimir etiqueta","btn btn-secondary",()=>openDocument(order.label_url)));
@@ -255,15 +282,15 @@ const openCustomerUpdate=(order,newStatus,preopenedWindow=null)=>{
   return true;
 };
 
-const updateOrder=async(orderId,newStatus,order=null)=>{
+const updateOrder=async(orderId,newStatus,order=null,shippingPackage=null)=>{
   const messageWindow=order?window.open("","_blank"):null;
   if(messageWindow){messageWindow.document.title="CHI RHO";messageWindow.document.body.textContent="Preparando mensagem ao cliente…";}
   status.textContent="Atualizando pedido…";
   try{
-    await request("",{method:"PATCH",body:JSON.stringify({orderId,status:newStatus})});
+    const result=await request("",{method:"PATCH",body:JSON.stringify({orderId,status:newStatus,...(shippingPackage?{shippingPackage}:{})})});
     const messagePrepared=order?openCustomerUpdate(order,newStatus,messageWindow):false;
     await Promise.all([loadOrders(),loadDetail(orderId)]);
-    status.textContent=messagePrepared?"Pedido atualizado. A mensagem ao cliente foi preparada no WhatsApp.":"Pedido atualizado.";
+    status.textContent=["Pedido atualizado.",result.shippingLabel?.message,messagePrepared?"A mensagem ao cliente foi preparada no WhatsApp.":""].filter(Boolean).join(" ");
   }catch(error){
     messageWindow?.close();
     status.textContent=error.message;

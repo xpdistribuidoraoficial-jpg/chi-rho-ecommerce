@@ -1,5 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { buildOrderFilters, PAGE_SIZE } from "./order-filters.mjs";
+import { generateShippingLabel, labelConfiguration, shouldGenerateLabel } from "../_shared/frenet-label.mjs";
 
 const SITE_ORIGIN="https://www.chirho.com.br";
 const ROOT_ORIGIN="https://chirho.com.br";
@@ -50,7 +51,7 @@ Deno.serve(async(request)=>{
   if(request.method==="GET"&&requestUrl.searchParams.get("action")==="detail"){
     const id=safe(requestUrl.searchParams.get("id"),36);
     if(!/^[0-9a-f-]{36}$/i.test(id)) return response({error:"Pedido inválido."},400,origin);
-    const orderSelect="id,code,customer_name,customer_email,customer_whatsapp,customer_phone,tax_id,postal_code,street,address_number,complement,district,city,state,shipping_carrier,shipping_carrier_code,shipping_service,shipping_service_code,shipping_delivery_time,shipping_price,shipping_quote_id,subtotal,discount,grand_total,financial_status,operational_status,payment_method,payment_external_id,tracking_code,tracking_url,label_url,shipping_label_provider,shipping_label_id,label_status,label_created_at,label_valid_through,declaration_url,shipped_at,reservation_expires_at,cancellation_reason,pickup_signature_path,pickup_confirmed_at,pickup_confirmed_by,pickup_receiver_name,attribution_channel,attribution_source,attribution_medium,attribution_campaign,attribution_content,attribution_term,attribution_referrer,attribution_landing_path,attribution_device,created_at,updated_at";
+    const orderSelect="id,code,customer_name,customer_email,customer_whatsapp,customer_phone,tax_id,postal_code,street,address_number,complement,district,city,state,shipping_carrier,shipping_carrier_code,shipping_service,shipping_service_code,shipping_delivery_time,shipping_price,shipping_quote_id,subtotal,discount,grand_total,financial_status,operational_status,payment_method,payment_external_id,tracking_code,tracking_url,label_url,shipping_label_provider,shipping_label_id,label_status,label_last_error,shipping_package,label_created_at,label_valid_through,declaration_url,shipped_at,reservation_expires_at,cancellation_reason,pickup_signature_path,pickup_confirmed_at,pickup_confirmed_by,pickup_receiver_name,attribution_channel,attribution_source,attribution_medium,attribution_campaign,attribution_content,attribution_term,attribution_referrer,attribution_landing_path,attribution_device,created_at,updated_at";
     const [orderResult,itemsResult,historyResult,paymentHistoryResult,inventoryResult,auditResult]=await Promise.all([
       fetch(`${url}/rest/v1/orders?id=eq.${id}&select=${orderSelect}&limit=1`,{headers}),
       fetch(`${url}/rest/v1/order_items?order_id=eq.${id}&select=id,product_slug,sku,product_name,image_url,unit_price,quantity,line_total&order=id`,{headers}),
@@ -200,17 +201,37 @@ Deno.serve(async(request)=>{
   if(request.method==="PATCH"){
     let body:any;try{body=await request.json();}catch{return response({error:"Ação inválida."},400,origin);}
     const orderId=safe(body?.orderId,36),status=safe(body?.status,30);
-    const rpc=await fetch(`${url}/rest/v1/rpc/update_order_operation`,{method:"POST",headers,body:JSON.stringify({
+    if(!uuid.test(orderId)) return response({error:"Pedido inválido."},400,origin);
+    let shipping=false;
+    if(status==="pronto_para_envio"){
+      const targetResponse=await fetch(`${url}/rest/v1/orders?id=eq.${orderId}&select=shipping_carrier_code&limit=1`,{headers,signal:AbortSignal.timeout(8000)});
+      if(!targetResponse.ok) return response({error:"Não foi possível consultar o pedido."},503,origin);
+      const targetRows=await targetResponse.json();
+      if(!targetRows[0]) return response({error:"Pedido não encontrado."},404,origin);
+      shipping=targetRows[0].shipping_carrier_code!=="PICKUP_VENDOR";
+    }
+    const rpcName=shipping?"prepare_order_shipping":"update_order_operation";
+    const rpcBody=shipping?{target_order_id:orderId,actor_user_id:admin.id,package_details:body?.shippingPackage||null,
+      action_note:safe(body?.note,500)||null}:{
       target_order_id:orderId,new_operational_status:status,actor_user_id:admin.id,
       tracking_code_value:safe(body?.trackingCode,120)||null,
       tracking_url_value:safe(body?.trackingUrl,500)||null,
       action_note:safe(body?.note,500)||null
-    })});
+    };
+    const rpc=await fetch(`${url}/rest/v1/rpc/${rpcName}`,{method:"POST",headers,body:JSON.stringify(rpcBody)});
     const data=await rpc.json().catch(()=>({}));
     if(!rpc.ok){console.error("Admin order update failed",rpc.status,data?.code||"unknown");
-      return response({error:String(data?.message||"").includes("INVALID_OPERATIONAL_TRANSITION")
-        ?"Esta mudança não é permitida para o estado atual do pedido.":"Não foi possível atualizar o pedido."},400,origin);}
-    return response({order:data},200,origin);
+      const errorMessage=String(data?.message||"");
+      return response({error:errorMessage.includes("SHIPPING_PACKAGE_REQUIRED")?"Confira o peso e as medidas do pacote."
+        :errorMessage.includes("LABEL_IN_PROGRESS")?"Confira a emissão anterior na Frenet antes de tentar novamente."
+        :errorMessage.includes("ORDER_NOT_PAID")?"Aguarde a confirmação do pagamento."
+        :errorMessage.includes("INVALID_OPERATIONAL_TRANSITION")?"Esta mudança não é permitida para o estado atual do pedido."
+        :"Não foi possível atualizar o pedido."},400,origin);}
+    const updated=Array.isArray(data)?data[0]:data;
+    const shippingLabel=status==="pronto_para_envio"&&shouldGenerateLabel(updated)
+      ?await generateShippingLabel({url,serviceKey,adminId:admin.id,orderId,config:labelConfiguration(name=>Deno.env.get(name))})
+      :null;
+    return response({order:updated,shippingLabel},200,origin);
   }
   return response({error:"Método não permitido."},405,origin);
 });
