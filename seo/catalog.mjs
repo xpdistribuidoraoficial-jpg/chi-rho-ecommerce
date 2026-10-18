@@ -20,7 +20,7 @@ const SEO_EXCLUDED_SLUGS = new Set([
 ]);
 
 const COLLAR_SLUG = 'colarinho-clerical-palheta-pastores-pacote-7';
-const COLLAR_IMAGE = 'assets/products/colarinho-clerical-palheta-pastores-pacote-7.webp';
+const COLLAR_IMAGE = 'assets/products/colarinho-clerical-palheta-pastores-pacote-7-camisa.jpg';
 
 // Read-only SEO projection aligned with the operational catalog.
 const source = fs.readFileSync(new URL('../script.js', import.meta.url), 'utf8');

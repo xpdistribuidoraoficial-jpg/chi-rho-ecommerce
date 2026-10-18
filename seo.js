@@ -3,7 +3,7 @@ import { getMetadata, pages, productPath, jsonLd } from './seo/metadata.mjs';
 const INVENTORY_ENDPOINT = 'https://sailabcmcqdzrqhqztqs.supabase.co/functions/v1/inventory-status';
 const INVENTORY_PUBLIC_KEY = 'sb_publishable_ipNBmuf0pUOZRzzlpU8kWw_Md1Y5FuE';
 const COLLAR_SLUG = 'colarinho-clerical-palheta-pastores-pacote-7';
-const COLLAR_IMAGE = 'assets/products/colarinho-clerical-palheta-pastores-pacote-7.webp';
+const COLLAR_IMAGE = 'assets/products/colarinho-clerical-palheta-pastores-pacote-7-camisa.jpg';
 
 if (typeof catalogProducts !== 'undefined') {
   const collar = catalogProducts.find((product) => product.slug === 'brinquedo-kit-caminhoes-basculantes');
