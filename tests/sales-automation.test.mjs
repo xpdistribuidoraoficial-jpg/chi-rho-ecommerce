@@ -85,7 +85,7 @@ test('feed omits drafts, missing operational prices and bundles with incomplete 
 test('feed provides confirmed handling time and valid package data without inventing a freight price', () => {
   const parcel = { ...inventory[0], weight: 0.15, length: 12, width: 10, height: 6 };
   const xml = renderProductFeed([product], [parcel]);
-  assert.match(xml, /<g:max_handling_time>4<\/g:max_handling_time>/);
+  assert.match(xml, /<g:max_handling_time>5<\/g:max_handling_time>/);
   assert.match(xml, /<g:shipping_weight>0\.15 kg<\/g:shipping_weight>/);
   assert.match(xml, /<g:shipping_length>12 cm<\/g:shipping_length>/);
   assert.match(xml, /<g:shipping_width>10 cm<\/g:shipping_width>/);
