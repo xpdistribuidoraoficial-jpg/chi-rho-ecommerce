@@ -65,12 +65,13 @@ function updateKits() {
       cpadKitDisabled: !kit.active, kitActive: !!kit.active,
       imagem:catalogProducts.find(item => item.slug === kit.components[0].slug)?.imagem || 'assets/logo-chi-rho.png',
       imagens:kit.components.map(component => catalogProducts.find(item => item.slug === component.slug)?.imagem).filter(Boolean),
-      sku:kit.slug, testeCarrinho:false, estoque:0, preco:null, precoOriginal:null,
+      sku:kit.slug, testeCarrinho:false, estoque:0, inventoryConfirmed:false, preco:null, precoOriginal:null,
       statusPreco:!kit.active ? 'Seleção em preparação' : !checkoutReady ? 'Pagamento em configuração' : 'Verificando disponibilidade…' });
     try {
       const summary = kitSummary(kit, inventory);
       if (kit.active && registryLoaded && kit.components.every(component => catalogProducts.find(item => item.slug === component.slug)?.testeCarrinho))
-        Object.assign(product,{preco:summary.price,precoOriginal:summary.original,estoque:summary.stock,testeCarrinho:checkoutReady});
+        Object.assign(product,{preco:summary.price,precoOriginal:summary.original,estoque:summary.stock,testeCarrinho:checkoutReady,
+          inventoryConfirmed:kit.components.every(component => catalogProducts.find(item => item.slug === component.slug)?.inventoryConfirmed === true)});
     } catch { /* A draft is shown without a fabricated price or inventory. */ }
   }
 }
