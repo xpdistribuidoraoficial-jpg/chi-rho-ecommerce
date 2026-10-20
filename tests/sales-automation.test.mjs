@@ -72,7 +72,9 @@ test('product feed uses live prices, valid GTIN, exact product URL and safe XML'
   assert.match(xml, /<g:gtin>7897732350052<\/g:gtin>/);
   assert.match(xml, /Carregador &amp; cabo/);
   assert.match(xml, /USB-C &lt;Lightning&gt;/);
-  assert.match(renderProductFeed([product], [{ ...inventory[0], available: 0 }]), /out_of_stock/);
+  for (const available of [0, -1, null, undefined, 0.5]) {
+    assert.doesNotMatch(renderProductFeed([product], [{ ...inventory[0], available }]), /<item>/);
+  }
 });
 
 test('feed omits drafts, missing operational prices and bundles with incomplete media', () => {

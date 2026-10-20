@@ -49,10 +49,13 @@ const refreshReleasedCatalog = async () => {
 
     const inventory = new Map(data.inventory.map((item) => [item.slug, item]));
     catalogProducts.forEach((product) => {
+      if (product.kitComponents) return;
+      product.inventoryConfirmed = false;
       const item = inventory.get(product.slug);
       if (!item || !Number.isFinite(Number(item.unitPrice)) || Number(item.unitPrice) <= 0) return;
       product.preco = Number(item.unitPrice);
       product.estoque = Number.isInteger(item.available) ? Math.max(0, item.available) : 0;
+      product.inventoryConfirmed = Number.isInteger(item.available) && item.available >= 0;
       product.testeCarrinho = true;
     });
 
@@ -91,7 +94,8 @@ if (base && typeof catalogProducts !== 'undefined') {
     const key = location.pathname + location.search;
     if (key === previousKey) return;
     previousKey = key;
-    const meta = getMetadata(file, new URLSearchParams(location.search), products);
+    const meta = getMetadata(file, new URLSearchParams(location.search), products.filter((product) =>
+      !product.inventoryConfirmed || isProductVisible(product)));
     document.title = meta.title;
     const values = {
       'meta[name="description"]': meta.description,
@@ -120,6 +124,7 @@ if (base && typeof catalogProducts !== 'undefined') {
   window.addEventListener('popstate', update);
   window.addEventListener('hashchange', update);
   window.addEventListener('load', update);
+  window.addEventListener('chi-rho-inventory-updated', () => queueMicrotask(() => { previousKey = ''; update(); }));
 }
 
 const CUSTOMER_PURCHASES_URL = 'https://www.chirho.com.br/minhas-compras.html';

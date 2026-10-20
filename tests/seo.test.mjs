@@ -8,6 +8,27 @@ import { renderPage, sitemapUrls } from '../seo/render.mjs';
 import endpoint from '../api/seo-page.js';
 import middleware, { config } from '../middleware.js';
 
+test('produto zerado deixa de ser anunciado no HTML e volta após reposição', async t => {
+  const originalFetch = globalThis.fetch;
+  t.after(() => { globalThis.fetch = originalFetch; });
+  let available = 0;
+  globalThis.fetch = async (url, options) => {
+    const response = await originalFetch(url, options);
+    if (!String(url).includes('/functions/v1/inventory-status')) return response;
+    const data = await response.json();
+    return Response.json({ ...data, inventory: data.inventory.map(item => item.slug === 'casa-carregador-kapbom-ka-5005'
+      ? { ...item, available } : item) });
+  };
+  const request = () => new Request('https://www.chirho.com.br/api/seo-page?__seo_page=catalogo-casa.html&produto=casa-carregador-kapbom-ka-5005');
+  const soldOut = await endpoint.fetch(request());
+  assert.equal(soldOut.status, 404);
+  assert.match(await soldOut.text(), /name="robots" content="noindex, follow/);
+  available = 2;
+  const restocked = await endpoint.fetch(request());
+  assert.equal(restocked.status, 200);
+  assert.match(await restocked.text(), /Carregador Rápido USB-C KAPBOM KA-5005/);
+});
+
 const read = (file) => fs.readFileSync(new URL(`../${file}`, import.meta.url), 'utf8');
 const paths = sitemapUrls(activeProducts, categories);
 

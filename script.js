@@ -2356,6 +2356,13 @@ const inactiveCatalogSlugs = new Set([
 
 const isProductActive = (product) => !inactiveCatalogSlugs.has(product.slug) && product.cpadKitDisabled !== true;
 
+// Public cards require a confirmed, positive balance. Keep the record for restocking
+// and use physical stock here, not the quantity already selected in this cart.
+const isProductVisible = (product) => Boolean(product) && isProductActive(product)
+  && product.inventoryConfirmed === true
+  && Number.isInteger(product.estoque) && product.estoque > 0
+  && typeof product.preco === "number" && Number.isFinite(product.preco) && product.preco > 0;
+
 const getProductCartAvailability = (product) => {
   if (!product || !isProductActive(product)) return { configured:false, stock:0, available:false };
   if (typeof window !== 'undefined' && window.ChiRhoCpad?.availability) return window.ChiRhoCpad.availability(product);
@@ -2480,7 +2487,7 @@ const createProductCard = (product) => `
 const renderProducts = (selector, products) => {
   const container = document.querySelector(selector);
   if (!container) return;
-  container.innerHTML = products.filter(isProductActive).map(createProductCard).join("");
+  container.innerHTML = products.filter(isProductVisible).map(createProductCard).join("");
 };
 
 const homeProductSelections = {
@@ -2524,7 +2531,7 @@ const setCatalogFilter = (filter = "todas", query = "") => {
 
   const normalizedQuery = query.trim().toLocaleLowerCase("pt-BR");
   const filteredProducts = catalogProducts.filter((product) => {
-    if (!isProductActive(product)) return false;
+    if (!isProductVisible(product)) return false;
     const productCategorySlugs = getProductCategorySlugs(product);
     const matchesCategory = (filter === "cpad" && product.editora === "CPAD")
       || (filter === "cpad-biblias" && product.editora === "CPAD" && product.categoriaSlug.startsWith("biblias"))
@@ -2883,7 +2890,10 @@ const closeProductDialog = () => {
 
 const openProductDialog = (slug, { syncUrl = true } = {}) => {
   const product = catalogProducts.find((item) => item.slug === slug && isProductActive(item));
-  if (!product || !productDialogElement) return;
+  if (!product || !isProductVisible(product) || !productDialogElement) {
+    if (productDialogElement?.open) closeProductDialog();
+    return;
+  }
 
   const image = productDialogElement.querySelector("#product-dialog-image");
   const isChristianBook = product.categoriaSlug === "livros-cristaos";
@@ -3367,6 +3377,7 @@ const refreshAvailableInventory = async () => {
     const data = await response.json();
     if (!response.ok || !Array.isArray(data.inventory)) throw new Error("INVENTORY_UNAVAILABLE");
 
+    catalogProducts.filter((product) => !product.kitComponents).forEach((product) => { product.inventoryConfirmed = false; });
     data.inventory.forEach((item) => {
       const product = catalogProducts.find((candidate) => candidate.slug === item.slug);
       if (!product) return;
@@ -3375,12 +3386,14 @@ const refreshAvailableInventory = async () => {
       if (!Number.isFinite(unitPrice) || unitPrice <= 0 || !Number.isInteger(available)) return;
       product.preco = unitPrice;
       product.estoque = Math.max(0, available);
+      product.inventoryConfirmed = true;
       product.testeCarrinho = true;
       if (item.sku) product.sku = item.sku;
     });
 
     inventoryHydrated = true;
     window.dispatchEvent(new Event("chi-rho-inventory-updated"));
+    renderHomeProducts();
     const activeFilter = document.querySelector(".catalog-filter.is-active")?.dataset.filter;
     if (catalogGrid) setCatalogFilter(activeFilter || requestedCategory, requestedQuery);
     renderTestCart({ pruneUnavailable: true });
@@ -3513,7 +3526,16 @@ refreshAvailableInventory();
 const requestedProductSlug = new URLSearchParams(window.location.search).get("produto");
 const legacyProductSlug = window.location.hash.length > 1 ? window.location.hash.slice(1) : "";
 const initialProductSlug = requestedProductSlug || legacyProductSlug;
+let initialProductOpened = false;
+const openInitialProduct = () => {
+  if (initialProductOpened || !initialProductSlug) return;
+  const product = catalogProducts.find((item) => item.slug === initialProductSlug);
+  if (!isProductVisible(product)) return;
+  initialProductOpened = true;
+  openProductDialog(initialProductSlug, { syncUrl: false });
+};
 if (initialProductSlug && catalogProducts.some((product) => product.slug === initialProductSlug && isProductActive(product))) {
-  window.addEventListener("load", () => openProductDialog(initialProductSlug, { syncUrl: false }), { once: true });
+  window.addEventListener("load", openInitialProduct, { once: true });
 }
+window.addEventListener("chi-rho-inventory-updated", () => queueMicrotask(openInitialProduct));
 
