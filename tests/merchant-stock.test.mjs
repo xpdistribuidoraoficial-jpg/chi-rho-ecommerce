@@ -41,3 +41,25 @@ test('títulos do Merchant diferenciam as duas Bíblias Cronológicas por ediç�
   assert.equal((xml.match(/<g:price>352\.00 BRL<\/g:price>/g) || []).length, 2);
   assert.equal((xml.match(/<item>/g) || []).length, 2);
 });
+
+test('Bíblias CPAD com capa do fabricante e estoque positivo entram no feed', () => {
+  const image = 'https://cpad.vtexassets.com/arquivos/ids/168685-800-auto?width=800&height=auto';
+  const product = { slug: 'biblia-defesa-fe-luxo-preta', nome: 'Bíblia de Estudo em Defesa da Fé — Grande Luxo Preta',
+    descricao: 'Edição ARC da CPAD em couro sintético, capa preta.', imagem: image };
+  const xml = renderProductFeed([product], [{ slug: product.slug, available: 5, unitPrice: 119.99 }]);
+  assert.match(xml, /<g:id>biblia-defesa-fe-luxo-preta<\/g:id>/);
+  assert.match(xml, /<g:title>Bíblia de Estudo em Defesa da Fé CPAD ARC Grande Luxo Preta<\/g:title>/);
+  assert.match(xml, /<g:price>119\.99 BRL<\/g:price>/);
+  assert.match(xml, /<g:image_link>https:\/\/cpad\.vtexassets\.com\/arquivos\/ids\/168685-800-auto\?width=800&amp;height=auto<\/g:image_link>/);
+});
+
+test('feed continua excluindo imagem externa não verificada, rascunho e falta de estoque', () => {
+  const product = { slug: 'biblia-defesa-fe-luxo-vinho', nome: 'Bíblia de Estudo em Defesa da Fé — Grande Luxo Vinho',
+    descricao: 'Edição ARC da CPAD, capa vinho.',
+    imagem: 'https://cpad.vtexassets.com/arquivos/ids/168687-800-auto?width=800' };
+  const live = [{ slug: product.slug, available: 5, unitPrice: 119.99 }];
+  assert.equal((renderProductFeed([{ ...product, imagem: 'https://third-party.example/image.jpg' }], live).match(/<item>/g) || []).length, 0);
+  assert.equal((renderProductFeed([{ ...product, imagem: 'http://cpad.vtexassets.com/arquivos/ids/168687-800-auto' }], live).match(/<item>/g) || []).length, 0);
+  assert.equal((renderProductFeed([{ ...product, descricao: 'Imagem definitiva e estoque em confirmação' }], live).match(/<item>/g) || []).length, 0);
+  assert.equal((renderProductFeed([product], [{ ...live[0], available: 0 }]).match(/<item>/g) || []).length, 0);
+});
