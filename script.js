@@ -2586,10 +2586,52 @@ const getProductCategorySlugs = (product) => [
   ...(product.categoriasComplementares || [])
 ];
 
+// Match Portuguese terms with or without accents, including decomposed Unicode input.
+const normalizeCatalogSearch = (value) => String(value ?? "")
+  .normalize("NFD")
+  .replace(/\p{M}/gu, "")
+  .toLocaleLowerCase("pt-BR")
+  .replace(/[^\p{L}\p{N}]+/gu, " ")
+  .trim()
+  .replace(/\s+/g, " ");
+
+const catalogSearchStopWords = new Set(["a", "as", "o", "os", "de", "da", "do", "das", "dos", "e", "com", "para", "por", "em", "no", "na", "um", "uma"]);
+const catalogSearchTerm = (word) => word === "cores" ? "cor"
+  : word.length > 3 && word.endsWith("s") ? word.slice(0, -1) : word;
+const catalogSearchTokens = (value) => normalizeCatalogSearch(value).split(" ")
+  .filter(word => word && !catalogSearchStopWords.has(word)).map(catalogSearchTerm);
+
+// A single typo is accepted only in longer words; codes and short terms stay exact.
+const catalogSearchNearWord = (query, word) => {
+  if (query.length < 5 || word.length < 5 || /\d/.test(query + word)
+    || Math.abs(query.length - word.length) > 1) return false;
+  let index = 0;
+  while (index < Math.min(query.length, word.length) && query[index] === word[index]) index++;
+  if (query.length === word.length) {
+    return query.slice(index + 1) === word.slice(index + 1)
+      || (query[index] === word[index + 1] && query[index + 1] === word[index]
+        && query.slice(index + 2) === word.slice(index + 2));
+  }
+  return query.length > word.length
+    ? query.slice(index + 1) === word.slice(index)
+    : query.slice(index) === word.slice(index + 1);
+};
+const matchesCatalogSearch = (product, query) => {
+  const requested = catalogSearchTokens(query);
+  if (!requested.length) return !normalizeCatalogSearch(query);
+  const words = catalogSearchTokens([
+    product.nome, product.categoria, product.descricao, product.perfil,
+    product.autor, product.editora, product.marca, product.cor, product.traducao,
+    product.acabamento, product.sku, product.isbn, product.gtin,
+    product.ean, ...(product.palavrasChave || [])
+  ].join(" "));
+  return requested.every(term => words.some(word => word.includes(term))
+    || words.some(word => catalogSearchNearWord(term, word)));
+};
+
 const setCatalogFilter = (filter = "todas", query = "") => {
   if (!catalogGrid) return;
 
-  const normalizedQuery = query.trim().toLocaleLowerCase("pt-BR");
   const filteredProducts = catalogProducts.filter((product) => {
     if (!isProductVisible(product)) return false;
     const productCategorySlugs = getProductCategorySlugs(product);
@@ -2604,10 +2646,7 @@ const setCatalogFilter = (filter = "todas", query = "") => {
     const matchesCatalog = matchesCategory
       || (filter === "casa" && product.casa)
       || (filter === "fe" && productCategorySlugs.some((slug) => faithCategorySlugs.has(slug)));
-    const searchText = [product.nome, product.categoria, product.descricao, product.perfil, product.autor, product.editora, product.marca]
-      .join(" ")
-      .toLocaleLowerCase("pt-BR");
-    return matchesCatalog && (!normalizedQuery || searchText.includes(normalizedQuery))
+    return matchesCatalog && matchesCatalogSearch(product, query)
       && (!filter.startsWith("cpad") || window.ChiRhoCpad?.matchesFilters(product) !== false);
   }).sort((first, second) => filter.startsWith("cpad")
     ? Number(getProductCartAvailability(second).available) - Number(getProductCartAvailability(first).available)
