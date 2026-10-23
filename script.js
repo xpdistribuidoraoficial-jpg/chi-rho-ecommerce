@@ -506,7 +506,7 @@ const catalogProducts = [
     categoria: "Bíblias de Estudo",
     categoriaSlug: "biblias-de-estudo",
     imagem: "https://cpad.vtexassets.com/arquivos/ids/168685-800-auto?aspect=true&height=auto&v=638935589835600000&width=800",
-    descricao: "Edição ARC, acabamento luxo preto. Imagem definitiva e estoque em confirmação.",
+    descricao: "Edição ARC da Bíblia de Estudo em Defesa da Fé, editora CPAD, com acabamento Grande Luxo em couro sintético, capa preta.",
     perfil: "Apologética e formação",
     editora: "CPAD",
     precoOriginal: 199.99,
