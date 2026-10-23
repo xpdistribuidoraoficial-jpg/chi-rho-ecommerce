@@ -26,7 +26,9 @@ test('produto zerado deixa de ser anunciado no HTML e volta após reposição', 
   available = 2;
   const restocked = await endpoint.fetch(request());
   assert.equal(restocked.status, 200);
-  assert.match(await restocked.text(), /Carregador Rápido USB-C KAPBOM KA-5005/);
+  const restockedHtml = await restocked.text();
+  assert.match(restockedHtml, /Carregador Rápido USB-C KAPBOM KA-5005/);
+  assert.match(restockedHtml, /https:\/\/schema.org\/InStock/);
 });
 
 const read = (file) => fs.readFileSync(new URL(`../${file}`, import.meta.url), 'utf8');
@@ -86,6 +88,16 @@ test('todas as 80 URLs recebem canonical próprio e HTML 200 antes do JavaScript
     const schema = JSON.parse(html.match(/id="chi-rho-schema">([\s\S]*?)<\/script>/)[1]);
     assert.equal(schema['@graph'].filter((s) => s['@type'] === 'Product').length, meta.product ? 1 : 0);
   }
+});
+
+test('schema declara disponibilidade somente com estoque vivo confirmado', () => {
+  const product = activeProducts.find(p => p.slug === 'biblia-estudo-cronologica');
+  const live = productSchema({ ...product, preco: 352, estoque: 5, estoqueConfirmado: true });
+  assert.equal(live.offers.availability, 'https://schema.org/InStock');
+  const unverified = productSchema({ ...product, preco: 352, estoque: 5, estoqueConfirmado: false });
+  assert.equal(unverified.offers.availability, undefined);
+  const zero = productSchema({ ...product, preco: 352, estoque: 0, estoqueConfirmado: true });
+  assert.equal(zero.offers.availability, undefined);
 });
 
 test('schemas usam somente preço, marca, imagens e identificadores reais', () => {
