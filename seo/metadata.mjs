@@ -57,7 +57,10 @@ export function productSchema(product) {
   if (gtin) schema[`gtin${gtin.length}`] = gtin;
   if (typeof product.preco === 'number' && Number.isFinite(product.preco) && product.preco > 0) {
     schema.offers = { '@type': 'Offer', url, price: product.preco.toFixed(2), priceCurrency: 'BRL' };
-    // Static stock can lag live reservations. Do not infer availability from it.
+    // Only server-verified live inventory may assert InStock; static catalog stock may be stale.
+    if (product.estoqueConfirmado === true && Number.isInteger(product.estoque) && product.estoque > 0) {
+      schema.offers.availability = 'https://schema.org/InStock';
+    }
   }
   return schema;
 }

@@ -17,7 +17,8 @@ export default {
     if (url.searchParams.has('produto')) {
       const { products: live } = await loadShippingCatalog();
       products = activeProducts.map(product => ({ ...product, preco: live[product.slug]?.price ?? null,
-        estoque: live[product.slug]?.stock ?? null })).filter(product => product.estoque !== 0);
+        estoque: live[product.slug]?.stock ?? null,
+        estoqueConfirmado: Number.isInteger(live[product.slug]?.stock) && live[product.slug].stock > 0 })).filter(product => product.estoque !== 0);
     }
     const meta = getMetadata(file, url.searchParams, products);
     const preview = process.env.VERCEL_ENV === 'preview';
