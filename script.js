@@ -1083,7 +1083,8 @@ const catalogProducts = [
     perfil: "Comentário bíblico",
     editora: "CPAD",
     ordemLivro: 16,
-    preco: 416.49,
+    preco: 349.99,
+    precoPix: 330.00,
     estoque: null,
     destaque: false,
     maisVendido: false,
@@ -2295,8 +2296,9 @@ const bookCatalogUpdates = Object.freeze({
   },
   "comentario-biblico-beacon-antigo-testamento": {
     precoOriginal: 489.99,
-    preco: 416.49,
-    fontePreco: "Casa Publicadora das Assembleias de Deus (CPAD)",
+    preco: 349.99,
+    precoPix: 303.18,
+    fontePreco: "Preço de venda definido pelo lojista",
     fontePrecoUrl: "https://www.cpad.com.br/comentario-biblico-beacon-antigo-testamento/p",
     dataConsultaPreco: "2026-08-24",
     acabamento: "Capa dura — coleção com 5 volumes",
@@ -2473,6 +2475,11 @@ const getProductPriceMarkup = (product) => {
   if (product.kitComponents) return `
     <del class="product-price-original">Preço cheio dos componentes: ${formatProductPrice(product.precoOriginal)}</del>
     <span class="product-price-current">No kit: ${formatProductPrice(product.preco)}</span>`;
+
+  if (typeof product.precoPix === "number" && product.precoPix > 0 && product.precoPix < product.preco) return `
+    ${product.precoOriginal > product.preco ? `<del class="product-price-original">De: ${formatProductPrice(product.precoOriginal)}</del>` : ''}
+    <span class="product-price-current">${formatProductPrice(product.precoPix)} no Pix</span>
+    <small class="product-price-card">Ou ${formatProductPrice(product.preco)} no cartão, com parcelamento pelo Mercado Pago.</small>`;
 
   const hasRealDiscount =
     typeof product.precoOriginal === "number" && product.precoOriginal > product.preco;

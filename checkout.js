@@ -1,5 +1,6 @@
 import { getAttribution } from "./seo/attribution.mjs";
 import { shippingProducts, baseShippingProducts, shippingKits } from "./data/shipping-products.mjs";
+import { paymentOffers, hasPaymentOffer, applyPaymentOffer } from "./data/payment-offers.mjs";
 import { priceCart } from "./lib/kit-pricing.mjs";
 import { PICKUP_INSTRUCTIONS } from "./data/pickup.mjs";
 import { trackCommerce } from "./seo/ecommerce.mjs";
@@ -10,7 +11,7 @@ const LAST_ORDER_STORAGE_KEY = "chi-rho-last-order-v1";
 const ORDER_ENDPOINT = cartHasKits() ? "/api/create-cpad-order" : "https://sailabcmcqdzrqhqztqs.supabase.co/functions/v1/create-casa-order";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_ipNBmuf0pUOZRzzlpU8kWw_Md1Y5FuE";
 const PAYMENT_ENDPOINT = cartHasKits() ? "/api/mercadopago/cpad-preference" : "/api/mercadopago/create-preference";
-function cartHasKits(){try{return JSON.parse(localStorage.getItem(CART_STORAGE_KEY)||"[]").some(item=>shippingKits.some(kit=>kit.slug===item.slug));}catch{return false;}}
+function cartHasKits(){try{return JSON.parse(localStorage.getItem(CART_STORAGE_KEY)||"[]").some(item=>shippingKits.some(kit=>kit.slug===item.slug)||Boolean(paymentOffers[item.slug]));}catch{return false;}}
 let createdOrder = null;
 let paymentAvailable = false;
 
@@ -155,8 +156,35 @@ const fillAddressByPostcode = async (form, postcode) => {
 
 const cart = loadCart();
 const shipping = loadShipping();
+const hasPaymentPricing = hasPaymentOffer(cart);
+let selectedPaymentMethod = "pix";
+let baseCartPricing = null;
 let cartPricing = null;
-try { cartPricing = priceCart(cart.map(item => ({slug:item.slug,quantity:item.quantity})),baseShippingProducts,shippingKits); } catch {}
+try { baseCartPricing = priceCart(cart.map(item => ({slug:item.slug,quantity:item.quantity})),baseShippingProducts,shippingKits); cartPricing = hasPaymentPricing ? applyPaymentOffer(baseCartPricing, selectedPaymentMethod) : baseCartPricing; } catch {}
+const refreshPaymentSummary = () => {
+  if (!baseCartPricing) return;
+  cartPricing = hasPaymentPricing ? applyPaymentOffer(baseCartPricing, selectedPaymentMethod) : baseCartPricing;
+  const row = document.querySelector('[data-checkout-pix-discount-row]');
+  if (row) {
+    row.hidden = !(cartPricing.pixDiscount > 0);
+    row.querySelector('dd').textContent = `− ${formatCurrency(cartPricing.pixDiscount || 0)}`;
+  }
+  const total = document.querySelector('[data-checkout-total]');
+  if (total && shipping) total.textContent = formatCurrency(cartPricing.totalProducts + shipping.service.price);
+};
+const paymentChoices = document.querySelector('[data-checkout-payment-choices]');
+if (paymentChoices) {
+  paymentChoices.hidden = !hasPaymentPricing;
+  paymentChoices.querySelectorAll('input').forEach(input => input.addEventListener('change', () => {
+    if (createdOrder) return;
+    selectedPaymentMethod = input.value;
+    refreshPaymentSummary();
+  }));
+}
+if (hasPaymentPricing) {
+  document.querySelector('[data-payment-description]').textContent = 'Escolha Pix com desconto ou cartão. As parcelas e eventuais juros serão apresentados pelo Mercado Pago.';
+  document.querySelector('[data-payment-methods-description]').textContent = 'Pix com QR Code ou cartão com parcelamento.';
+}
 let cartOrigin = '/catalogo-biblias.html';
 try {
   const storedOrigin = sessionStorage.getItem('chi-rho-cart-origin');
@@ -230,9 +258,10 @@ if (cart.length === 0 || !shipping || !cartPricing) {
 
   document.querySelector("[data-checkout-subtotal]").textContent = formatCurrency(cartPricing.referenceSubtotal);
   const discountRow = document.querySelector('[data-checkout-discount-row]');
-  if (discountRow) { discountRow.hidden = cartPricing.referenceDiscount <= 0; discountRow.querySelector('dd').textContent = `− ${formatCurrency(cartPricing.referenceDiscount)}`; }
+  if (discountRow) { discountRow.hidden = baseCartPricing.referenceDiscount <= 0; discountRow.querySelector('dd').textContent = `− ${formatCurrency(baseCartPricing.referenceDiscount)}`; }
   document.querySelector("[data-checkout-shipping-price]").textContent = isPickupOrder ? "Grátis" : formatCurrency(shipping.service.price);
   document.querySelector("[data-checkout-total]").textContent = formatCurrency(total);
+  refreshPaymentSummary();
   let checkoutTracked = false;
   const trackCheckout = () => {
     if (checkoutTracked) return;
@@ -333,6 +362,7 @@ document.querySelector("#checkout-form")?.addEventListener("submit", async (even
   if (!cartPricing) { status.textContent = "Revise os produtos e o estoque no carrinho."; return; }
   const payload = {
     clientRequestId: checkoutRequestId,
+    ...(hasPaymentPricing ? {paymentMethod:selectedPaymentMethod} : {}),
     customer: {
       name: form.elements.name.value,
       email: form.elements.email.value,
@@ -356,6 +386,7 @@ document.querySelector("#checkout-form")?.addEventListener("submit", async (even
   };
 
   submitButton.disabled = true;
+  paymentChoices?.querySelectorAll("input").forEach(input => { input.disabled = true; });
   submitButton.textContent = "Registrando pedido…";
   status.textContent = isPickupOrder
     ? "Confirmando a retirada e salvando o pedido com segurança…"
@@ -376,6 +407,7 @@ document.querySelector("#checkout-form")?.addEventListener("submit", async (even
     const result = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(result.error || "Não foi possível registrar o pedido.");
     createdOrder = result.order;
+    paymentChoices?.querySelectorAll("input").forEach(input => { input.disabled = true; });
 
     try {
       sessionStorage.setItem(LAST_ORDER_STORAGE_KEY, JSON.stringify({
@@ -430,6 +462,7 @@ document.querySelector("#checkout-form")?.addEventListener("submit", async (even
       : error.message;
     status.className = "checkout-form-status is-error";
     submitButton.disabled = false;
+    if (!createdOrder) paymentChoices?.querySelectorAll("input").forEach(input => { input.disabled = false; });
     submitButton.textContent = "Continuar para pagamento";
   }
 });

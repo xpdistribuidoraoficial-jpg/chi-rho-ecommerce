@@ -2,6 +2,8 @@ import {loadShippingCatalog} from '../data/shipping-products.mjs';
 import {signedAction,sameOrigin} from '../lib/cpad-database.mjs';
 import {paymentReadiness} from '../lib/cpad-payment-readiness.mjs';
 
+import { applyPaymentOffer, hasPaymentOffer } from '../data/payment-offers.mjs';
+
 import { priceCart } from "../lib/kit-pricing.mjs";
 
 const SITE_ORIGIN = "https://www.chirho.com.br";
@@ -65,9 +67,10 @@ const validTaxId = (value        ) => {
   return value.endsWith(`${first}${second}`);
 };
 
-const getCartPricing = async (requestedItems) => {
+const getCartPricing = async (requestedItems, paymentMethod) => {
   const catalog=await loadShippingCatalog();
-  return priceCart(requestedItems,catalog.baseProducts,catalog.kits);
+  const pricing = priceCart(requestedItems,catalog.baseProducts,catalog.kits);
+  return hasPaymentOffer(pricing.lines) ? applyPaymentOffer(pricing, paymentMethod) : pricing;
 };
 
 const validateContact = (body     ) => {
@@ -198,7 +201,7 @@ export default { async fetch(request) {
     const customer = validateContact(body);
     const isPickup = cleanText(body?.shipping?.service?.carrierCode, 80) === "PICKUP_VENDOR";
     const address = isPickup ? { ...PICKUP_ADDRESS } : validateAddress(body);
-    const pricing = await getCartPricing(body?.items);
+    const pricing = await getCartPricing(body?.items, body?.paymentMethod);
     const items = pricing.items;
     const subtotal = pricing.subtotal;
     const shipping = await getVerifiedShipping(body, items, address.postal_code);
@@ -216,7 +219,8 @@ export default { async fetch(request) {
 
     const databaseData=await signedAction({
       action:'order',client_request_id:clientRequestId,customer,address,shipping,subtotal,
-      discount:pricing.discount,kits:pricing.kits,items,attribution
+      discount:pricing.discount,kits:pricing.kits,items,attribution,
+      ...(pricing.paymentMethod ? {payment_method:pricing.paymentMethod} : {})
     });
 
     const order = Array.isArray(databaseData) ? databaseData[0] : databaseData;
@@ -236,6 +240,8 @@ export default { async fetch(request) {
     const code = error instanceof Error ? error.message : "UNKNOWN";
     console.error("Order creation failed", code);
     const messages                         = {
+      ORDER_PAYMENT_MISMATCH: "Este pedido já foi registrado com outra forma ou valor. Atualize a página para iniciar uma nova compra.",
+      INVALID_PAYMENT_METHOD: "Escolha Pix ou cartão para confirmar o preço do Beacon. Se necessário, atualize esta página.",
       INVALID_KIT: "A composição deste kit precisa ser atualizada.",
       KIT_INACTIVE: "Este kit não está disponível para compra.",
       KIT_COMPONENT_UNAVAILABLE: "Um componente deste kit não está disponível.",
