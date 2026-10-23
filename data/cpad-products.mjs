@@ -6,6 +6,7 @@ export const cpadProductSlugs = [
   "biblia-aplicacao-pessoal-nvt",
   "biblia-assembleia-de-deus-capa-luxo",
   "biblia-estudo-cronologica",
+  "biblia-estudo-cronologica-tricolor",
   "biblia-estudo-defesa-da-fe",
   "panorama-da-biblia",
   "herois-da-fe",
@@ -18,6 +19,7 @@ export const cpadProductSlugs = [
   "israel-gogue-e-o-anticristo",
   "tempo-do-fim",
   "comentario-biblico-beacon-antigo-testamento",
+  "comentario-biblico-beacon-novo-testamento",
   "comentario-exegetico-de-atos",
   "teologia-sistematica-stanley-horton"
 ];
