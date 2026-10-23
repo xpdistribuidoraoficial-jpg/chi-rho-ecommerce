@@ -29,3 +29,15 @@ test('produto retorna ao feed quando estoque positivo volta a constar no invent�
   assert.match(xml, /<g:id>biblia-esgotada<\/g:id>/);
   assert.match(xml, /<g:price>49.90 BRL<\/g:price>/);
 });
+
+test('títulos do Merchant diferenciam as duas Bíblias Cronológicas por edição e capa', () => {
+  const editions = [
+    { slug: 'biblia-estudo-cronologica', nome: 'Bíblia de Estudo Cronológica Aplicação Pessoal Tarja Marrom', descricao: 'Bíblia ARC CPAD', imagem: 'assets/products/biblia-estudo-cronologica-01.webp' },
+    { slug: 'biblia-estudo-cronologica-tricolor', nome: 'Bíblia de Estudo Cronológica Aplicação Pessoal — Tricolor (Tarja Verde)', descricao: 'Bíblia ARC CPAD', imagem: 'assets/products/biblia-estudo-cronologica-tricolor-01.jpg' }
+  ];
+  const xml = renderProductFeed(editions, editions.map(p => ({ slug: p.slug, available: 5, unitPrice: 352 })));
+  assert.match(xml, /<g:title>Bíblia de Estudo Cronológica Aplicação Pessoal CPAD ARC — Tarja Marrom<\/g:title>/);
+  assert.match(xml, /<g:title>Bíblia de Estudo Cronológica Aplicação Pessoal CPAD ARC — Tricolor \(Tarja Verde\)<\/g:title>/);
+  assert.equal((xml.match(/<g:price>352\.00 BRL<\/g:price>/g) || []).length, 2);
+  assert.equal((xml.match(/<item>/g) || []).length, 2);
+});
