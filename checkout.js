@@ -245,6 +245,12 @@ if (cart.length === 0 || !shipping || !cartPricing) {
     ? PICKUP_INSTRUCTIONS
     : `${formatDeliveryTime(shipping.service.deliveryTime)} para o CEP ${formatPostcode(shipping.cep)}`;
   delivery.replaceChildren(deliveryLabel, deliveryService, deliveryTime);
+  if (!isPickup && shipping.service.freeShipping === true) {
+    deliveryLabel.textContent = "🚚 FRETE GRÁTIS BRASIL";
+    const description = document.createElement("small");
+    description.textContent = "Compre a partir de R$ 100,00 em produtos, após os descontos, e receba com frete grátis na entrega econômica. Informe seu CEP para consultar a disponibilidade e o prazo de entrega.";
+    delivery.append(description);
+  }
   const checkoutForm = document.querySelector("#checkout-form");
   const addressCard = document.querySelector("[data-checkout-address-card]");
   const confirmationText = document.querySelector("[data-checkout-confirmation-text]");

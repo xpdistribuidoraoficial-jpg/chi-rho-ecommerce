@@ -2837,10 +2837,19 @@ const renderShippingServices = (container, services, { selectable = false, onSel
     const deadline = document.createElement("small");
     const price = document.createElement("b");
 
-    title.textContent = [service.carrier, service.description].filter(Boolean).join(" • ");
-    deadline.textContent = formatDeliveryTime(service.deliveryTime);
+    title.textContent = service.freeShipping === true ? "🚚 Frete Grátis Brasil"
+      : [service.carrier, service.description].filter(Boolean).join(" • ");
+    deadline.textContent = service.freeShipping === true
+      ? `${service.carrier} • ${String(service.description || '').replace(/^Frete grátis • /, '')} • ${formatDeliveryTime(service.deliveryTime)}`
+      : formatDeliveryTime(service.deliveryTime);
     price.textContent = service.price === 0 ? "Grátis" : formatCurrency(service.price);
-    copy.append(title, deadline);
+    copy.append(title);
+    if (service.freeShipping === true) {
+      const description = document.createElement("small");
+      description.textContent = "Compre a partir de R$ 100,00 em produtos, após os descontos, e receba com frete grátis na entrega econômica. Informe seu CEP para consultar a disponibilidade e o prazo de entrega.";
+      copy.append(description);
+    }
+    copy.append(deadline);
     option.append(copy, price);
     container.appendChild(option);
   });
