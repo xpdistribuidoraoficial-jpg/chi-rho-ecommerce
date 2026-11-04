@@ -242,6 +242,7 @@ export default { async fetch(request) {
     const messages                         = {
       ORDER_PAYMENT_MISMATCH: "Este pedido já foi registrado com outra forma ou valor. Atualize a página para iniciar uma nova compra.",
       INVALID_PAYMENT_METHOD: "Escolha Pix ou cartão para confirmar o preço do Beacon. Se necessário, atualize esta página.",
+      KIT_PRICE_ABOVE_AVULSO: "Os componentes deste kit estão mais baratos separadamente. Escolha os produtos avulsos no catálogo.",
       INVALID_KIT: "A composição deste kit precisa ser atualizada.",
       KIT_INACTIVE: "Este kit não está disponível para compra.",
       KIT_COMPONENT_UNAVAILABLE: "Um componente deste kit não está disponível.",

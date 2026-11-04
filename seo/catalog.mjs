@@ -45,8 +45,8 @@ if (collar) {
     descricao: 'Pacote com 7 palhetas de colarinho clerical no tamanho 24 × 3 cm, indicado para uso com camisa clerical por pastores e ministros.',
     perfil: 'Uso ministerial',
     sku: 'MIN-COLARINHO-24X3-PCT7',
-    preco: 28,
-    precoOriginal: null,
+    preco: 19,
+    precoOriginal: 28.00,
     estoque: 5,
     testeCarrinho: true,
     destaque: false,
@@ -70,7 +70,13 @@ if (defense) {
 for (const kit of [...initialKits, ...casaKits].filter(item => item.active)) {
   const isCasa = kit.pricing_mode === 'sum_current_prices';
   const inventory = Object.fromEntries(products.map(product => [product.slug,{price:product.preco,stock:0}]));
-  const summary = kitSummary(kit,inventory);
+  let summary;
+  try { summary = kitSummary(kit,inventory); }
+  catch (error) {
+    // A promoção avulsa pode ficar mais barata que o kit fixo; não anuncie o kit.
+    if (error.message === 'KIT_PRICE_ABOVE_AVULSO') continue;
+    throw error;
+  }
   products.push({slug:kit.slug,nome:kit.name,descricao:kit.description,
     ...(isCasa ? {casa:true} : {editora:'CPAD'}),categoria:isCasa?'Kits Casa':'Kits CPAD',categoriaSlug:isCasa?'utilidades-domesticas':'cpad-kits',
     kitPricingMode:kit.pricing_mode,

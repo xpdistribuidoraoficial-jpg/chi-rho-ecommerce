@@ -15,7 +15,7 @@ begin
     foreach method in array array['pix','card'] loop
       begin
       select stock_available into before_stock from public.inventory where product_slug=slug;
-      price:=case when method='card' then 349.99 when slug like '%antigo%' then 303.18 else 330.00 end;
+      price:=case when method='card' then 349.99 when slug like '%antigo%' then 280.00 else 290.00 end;
       discount_value:=349.99-price;
       payload:=jsonb_build_object('action','order','environment','production','signed_at',extract(epoch from now())*1000,
         'client_request_id',gen_random_uuid(),'payment_method',method,
