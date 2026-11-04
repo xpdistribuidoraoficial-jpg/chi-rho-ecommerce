@@ -2469,6 +2469,11 @@ const getProductPriceMarkup = (product) => {
     return `<span class="product-price-current product-price-pending">${getProductStatus(product)}</span>`;
   }
 
+  if (typeof product.precoPix === "number" && product.precoPix > 0 && product.precoPix < product.preco) return `
+    ${product.precoOriginal > product.preco ? `<del class="product-price-original">De: ${formatProductPrice(product.precoOriginal)}</del>` : ''}
+    <span class="product-price-current">${formatProductPrice(product.precoPix)} no Pix</span>
+    <small class="product-price-card">Ou ${formatProductPrice(product.preco)} no cartão, com parcelamento pelo Mercado Pago.</small>`;
+
   if (product.kitComponents && product.kitPricingMode === 'sum_current_prices') return `
     ${product.precoOriginal > product.preco ? `<del class="product-price-original">Avulsos em oferta: ${formatProductPrice(product.precoOriginal)}</del>` : ''}
     <span class="product-price-current">No kit: ${formatProductPrice(product.preco)}</span>`;
@@ -2476,10 +2481,7 @@ const getProductPriceMarkup = (product) => {
     <del class="product-price-original">Preço cheio dos componentes: ${formatProductPrice(product.precoOriginal)}</del>
     <span class="product-price-current">No kit: ${formatProductPrice(product.preco)}</span>`;
 
-  if (typeof product.precoPix === "number" && product.precoPix > 0 && product.precoPix < product.preco) return `
-    ${product.precoOriginal > product.preco ? `<del class="product-price-original">De: ${formatProductPrice(product.precoOriginal)}</del>` : ''}
-    <span class="product-price-current">${formatProductPrice(product.precoPix)} no Pix</span>
-    <small class="product-price-card">Ou ${formatProductPrice(product.preco)} no cartão, com parcelamento pelo Mercado Pago.</small>`;
+
 
   const hasRealDiscount =
     typeof product.precoOriginal === "number" && product.precoOriginal > product.preco;
@@ -2536,7 +2538,7 @@ const createProductCard = (product) => `
       ${product.kitComponents && product.imagens?.length > 1
         ? `<div class="cpad-kit-composition">${product.imagens.slice(0,2).map((image,index) => `${index ? '<b aria-hidden="true">+</b>' : ''}<img src="${image}" alt="${catalogProducts.find(p => p.imagem === image)?.nome || product.nome}" loading="lazy">`).join('')}</div>`
         : `<img src="${product.imagem}" alt="${product.nome}" loading="lazy" />`}
-      ${product.kitComponents ? `<strong class="catalog-product-badge">${product.kitPricingMode === 'sum_current_prices' ? 'Kit Casa' : '30% OFF'}</strong>` : product.maisVendidoLivro ? '<strong class="catalog-product-badge">Mais vendido</strong>' : ""}
+      ${product.kitComponents ? `<strong class="catalog-product-badge">${product.kitPricingMode === 'sum_current_prices' ? (product.casa ? 'Kit Casa' : 'Kit CPAD') : '30% OFF'}</strong>` : product.maisVendidoLivro ? '<strong class="catalog-product-badge">Mais vendido</strong>' : ""}
       <span>${product.perfil}</span>
     </div>
     <div class="catalog-product-content">
@@ -2670,7 +2672,7 @@ const setCatalogFilter = (filter = "todas", query = "") => {
       "cpad-biblias": "Bíblias CPAD",
       "cpad-livros": "Livros CPAD",
       "cpad-harpas": "Harpas Cristãs",
-      "cpad-kits": "Kits CPAD — 30% OFF",
+      "cpad-kits": "Kits CPAD — preços promocionais",
       todas: "Bíblias e livros cristãos",
       fe: "Bíblias e livros cristãos",
       biblias: "Bíblias",
@@ -2937,7 +2939,7 @@ const setProductDialogVideos = (product) => {
 const setProductDialogDetails = (product) => {
   const details = [
     product.kitComponents ? { label: "Composição", value: product.kitComponents.map(item => `${item.quantity} × ${catalogProducts.find(p => p.slug === item.slug)?.nome || item.slug}`).join(" + ") } : null,
-    product.kitComponents ? { label: "Economia no kit", value: typeof product.preco === "number" ? formatProductPrice(product.precoOriginal - product.preco) : "Cadastro em preparação" } : null,
+    product.kitComponents && product.precoOriginal > product.preco ? { label: "Economia no kit", value: typeof product.preco === "number" ? formatProductPrice(product.precoOriginal - product.preco) : "Cadastro em preparação" } : null,
     product.autor ? { label: "Autor", value: product.autor } : null,
     product.editora ? { label: "Editora", value: product.editora } : null,
     product.marca ? { label: "Marca", value: product.marca } : null,

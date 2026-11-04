@@ -68,7 +68,7 @@ if (defense) {
 }
 
 for (const kit of [...initialKits, ...casaKits].filter(item => item.active)) {
-  const isCasa = kit.pricing_mode === 'sum_current_prices';
+  const isCasa = kit.slug.startsWith('kit-casa-');
   const inventory = Object.fromEntries(products.map(product => [product.slug,{price:product.preco,stock:0}]));
   let summary;
   try { summary = kitSummary(kit,inventory); }

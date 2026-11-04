@@ -11,7 +11,7 @@ import {activeProducts} from '../seo/catalog.mjs';
 
 const at='comentario-biblico-beacon-antigo-testamento',nt='comentario-biblico-beacon-novo-testamento';
 const inventory=Object.fromEntries([at,nt].map(slug=>[slug,{name:slug,price:349.99,stock:5,sku:slug}]));
-inventory['biblia-estudo-pentecostal']={name:'Pentecostal',price:280.49,stock:5,sku:'PENT'};
+inventory['biblia-estudo-pentecostal']={name:'Pentecostal',price:199.90,stock:5,sku:'PENT'};
 const origin='https://chi-rho-ecommerce-test.vercel.app';
 const token='e5d28d7c-2463-4ffd-a63e-35eeedcc21e6',id='f963a4f2-1321-4f6e-8f4a-36101ba11212';
 const secret='unit-test-signing-fixture';
@@ -25,12 +25,12 @@ test('preços Pix e cartão conferem com vitrine e quantidades em centavos',()=>
     assert.equal(cents(applyPaymentOffer(base,'card').totalProducts),34999*3);
   }
 });
-test('kit e Beacon avulso compartilham estoque sem acumular desconto Pix no kit',()=>{
+test('kit e Beacon avulso compartilham estoque com Pix dos componentes aplicado uma única vez',()=>{
   const cart=[{slug:'kit-cpad-estudo-palavra',quantity:1},{slug:at,quantity:2},{slug:nt,quantity:1}];
   const pricing=applyPaymentOffer(priceCart(cart,inventory,initialKits),'pix');
-  assert.equal(pricing.pixDiscount,199.97);
-  assert.equal(cents(pricing.totalProducts),57399+28000*2+29000);
-  assert.equal(pricing.kits[0].unit_total,573.99);
+  assert.equal(pricing.pixDiscount,269.96);
+  assert.equal(cents(pricing.totalProducts),47990+28000*2+29000);
+  assert.equal(pricing.kits[0].unit_total,549.89);
   const charged=paymentItems(pricing.items,pricing.discount);
   assert.equal(charged.reduce((sum,item)=>sum+cents(item.unit_price)*item.quantity,0),cents(pricing.totalProducts));
   assert.throws(()=>applyPaymentOffer(pricing,'forged'),/INVALID_PAYMENT_METHOD/);

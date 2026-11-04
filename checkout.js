@@ -156,7 +156,7 @@ const fillAddressByPostcode = async (form, postcode) => {
 
 const cart = loadCart();
 const shipping = loadShipping();
-const hasPaymentPricing = hasPaymentOffer(cart);
+const hasPaymentPricing = hasPaymentOffer(cart, shippingKits);
 let selectedPaymentMethod = "pix";
 let baseCartPricing = null;
 let cartPricing = null;

@@ -15,7 +15,7 @@ export default { async fetch(request) {
       const inventory=await inventoryResponse.json();
       let checkoutReady=false;
       try { const health=await signedAction({action:'health'}); checkoutReady=health?.available===true&&(await paymentReadiness()).ready; } catch {}
-      return output({kits:await kitResponse.json(),checkoutReady,products:inventory.inventory.filter(item=>cpadProductSlugs.includes(item.slug))
+      return output({kits:(await kitResponse.json()).map(kit=>({...kit,...(kit.discount_percent===0?{pricing_mode:'sum_current_prices'}:{})})),checkoutReady,products:inventory.inventory.filter(item=>cpadProductSlugs.includes(item.slug))
         .map(item=>({product_slug:item.slug,product_name:item.name}))});
     }
     if(request.method==='PATCH') {
