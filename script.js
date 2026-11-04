@@ -324,6 +324,7 @@ const catalogProducts = [
   {
     id: "biblia-estudo-pentecostal",
     slug: "biblia-estudo-pentecostal",
+    ofertaHome: true,
     nome: "Bíblia de Estudo Pentecostal",
     categoria: "Bíblias de Estudo",
     categoriaSlug: "biblias-de-estudo",
@@ -1055,6 +1056,7 @@ const catalogProducts = [
   {
     id: "comentario-biblico-beacon-antigo-testamento",
     slug: "comentario-biblico-beacon-antigo-testamento",
+    ofertaHome: true,
     nome: "Comentário Bíblico Beacon — Antigo Testamento, 5 volumes",
     categoria: "Livros Cristãos",
     categoriaSlug: "livros-cristaos",
@@ -1072,6 +1074,7 @@ const catalogProducts = [
   {
     id: "comentario-biblico-beacon-novo-testamento",
     slug: "comentario-biblico-beacon-novo-testamento",
+    ofertaHome: true,
     nome: "Comentário Bíblico Beacon — Novo Testamento, 5 volumes",
     categoria: "Livros Cristãos",
     categoriaSlug: "livros-cristaos",
@@ -1607,6 +1610,7 @@ const catalogProducts = [
   {
     id: "casa-balanca-digital-cozinha-10kg",
     slug: "casa-balanca-digital-cozinha-10kg",
+    ofertaHome: true,
     nome: "Balança Digital de Cozinha 10 kg",
     categoria: "Cozinha",
     categoriaSlug: "cozinha",
@@ -1629,6 +1633,7 @@ const catalogProducts = [
   {
     id: "casa-bomba-eletrica-garrafa-agua",
     slug: "casa-bomba-eletrica-garrafa-agua",
+    ofertaHome: true,
     nome: "Bomba Elétrica USB para Garrafão de Água",
     categoria: "Utilidades Domésticas",
     categoriaSlug: "utilidades-domesticas",
@@ -2562,7 +2567,7 @@ const renderProducts = (selector, products) => {
 const homeProductSelections = {
   "#featured-products": ["biblia-media-letra-gigante-harpa", "biblia-estudo-pentecostal", "biblia-harpa-floral-aquarela-gigante", "biblia-naa-mulher-pink-grande"],
   "#featured-books": ["herois-da-fe", "uma-garota-segundo-o-coracao-de-deus", "orando-a-palavra", "como-ter-o-coracao-de-maria-no-mundo-de-marta", "historia-dos-hebreus"],
-  "#popular-products": ["biblia-aplicacao-pessoal-nvt", "biblia-estudo-cronologica", "biblia-estudo-spurgeon", "biblia-pregador-pentecostal"],
+  "#popular-products": ["biblia-estudo-cronologica-tricolor", "biblia-estudo-cronologica", "biblia-estudo-spurgeon", "biblia-pregador-pentecostal"],
   "#home-casa-products": ["casa-carregador-kapbom-ka-5005", "casa-balanca-digital-cozinha-10kg", "casa-bomba-eletrica-garrafa-agua"],
   "#toy-products": ["brinquedo-caminhao-bombeiro-resgate", "brinquedo-caminhao-bau-46cm", "brinquedo-caminhao-boi-4-bois", "brinquedo-caminhao-bombeiro-escada"]
 };
@@ -2834,7 +2839,7 @@ const renderShippingServices = (container, services, { selectable = false, onSel
 
     title.textContent = [service.carrier, service.description].filter(Boolean).join(" • ");
     deadline.textContent = formatDeliveryTime(service.deliveryTime);
-    price.textContent = formatCurrency(service.price);
+    price.textContent = service.price === 0 ? "Grátis" : formatCurrency(service.price);
     copy.append(title, deadline);
     option.append(copy, price);
     container.appendChild(option);
@@ -3197,6 +3202,7 @@ testCartDialog.innerHTML = `
     </header>
     <div class="test-cart-items" aria-live="polite"></div>
     <footer class="test-cart-footer">
+      <p class="cart-shipping-offer" data-cart-shipping-offer aria-live="polite">Frete grátis Brasil a partir de R$ 100,00 em produtos após descontos.</p>
       <section class="test-cart-shipping" aria-labelledby="test-cart-shipping-title">
         <label id="test-cart-shipping-title" for="test-cart-postcode">Entrega ou retirada</label>
         <div class="test-cart-shipping-field">
@@ -3251,7 +3257,7 @@ const renderCartTotals = () => {
   const shippingPrice = selectedCartShipping?.price || 0;
   testCartDialog.querySelector("[data-cart-subtotal]").textContent = formatCurrency(testCartSubtotal + testCartDiscount);
   testCartDialog.querySelector("[data-cart-shipping-price]").textContent = selectedCartShipping
-    ? (selectedCartShipping.carrierCode === "PICKUP_VENDOR" ? "Grátis" : formatCurrency(shippingPrice))
+    ? (shippingPrice === 0 ? "Grátis" : formatCurrency(shippingPrice))
     : "Escolha entrega ou retirada";
   testCartDialog.querySelector("[data-cart-total]").textContent = formatCurrency(testCartSubtotal + shippingPrice);
   const discountRow = testCartDialog.querySelector("[data-cart-discount-row]");
@@ -3402,6 +3408,12 @@ const renderTestCart = ({ pruneUnavailable = inventoryHydrated } = {}) => {
   const totalQuantity = testCart.reduce((total, item) => total + item.quantity, 0);
   const subtotal = validItems.reduce((total, item) => total + item.product.preco * item.quantity, 0);
   testCartSubtotal = subtotal;
+  const promoTotal=validItems.reduce((sum,item)=>sum+(item.product.precoPix ?? item.product.preco)*item.quantity,0);
+  const remaining=window.ChiRhoShippingOffer?.remaining(promoTotal);
+  const offerNote=testCartDialog.querySelector('[data-cart-shipping-offer]');
+  if(offerNote && remaining!==undefined) offerNote.textContent=remaining===0
+    ? 'Você atingiu o frete grátis Brasil! Informe o CEP e selecione a entrega grátis.'
+    : `Faltam ${formatCurrency(remaining)} em produtos para o frete grátis Brasil.`;
   testCartDiscount = validItems.reduce((sum, item) => sum + (item.product.kitComponents ? (item.product.precoOriginal - item.product.preco) * item.quantity : 0), 0);
 
   document.querySelectorAll('a[href$="#carrinho"]').forEach((link) => {

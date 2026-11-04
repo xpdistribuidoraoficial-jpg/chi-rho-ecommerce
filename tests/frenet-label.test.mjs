@@ -109,3 +109,12 @@ test('multiple units reconcile rounding once without changing quantity or mercha
   assert.equal(h.state.payload[0].Order.Items.reduce((s,i)=>s+Math.round(i.Price*100),0),2900);
   assert.equal(h.state.payload[0].Order.Items.reduce((s,i)=>s+i.Quantity,0),3);
 });
+
+test('frete grátis confirmado cobra transporte da loja e mantém zero para o cliente',async()=>{
+ const merchandise=119.94;
+ const h=makeHarness({order:{shipping_price:0,discount:0,grand_total:merchandise,shipping_service:'Frete grátis • PAC',fiscal_invoice:{...invoice,value:merchandise,freight:0}}});
+ assert.equal((await h.run()).ok,true);assert.equal(h.state.paidCalls,1);
+ assert.equal(h.state.payload[0].Quotation.PlatformShippingPrice,0);assert.equal(h.state.payload[0].Quotation.ShippingPrice,14.5);
+ const below=makeHarness({order:{shipping_price:0,grand_total:83.96,shipping_service:'Frete grátis • PAC',fiscal_invoice:{...invoice,value:83.96,freight:0}}});
+ assert.equal((await below.run()).code,'SHIPPING_PRICE_INCREASED');assert.equal(below.state.paidCalls,0);
+});

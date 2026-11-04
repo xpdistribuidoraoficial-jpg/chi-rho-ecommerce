@@ -141,7 +141,7 @@ const getVerifiedShipping = async (body     , items                             
       "Content-Type": "application/json",
       "Origin": SITE_ORIGIN
     },
-    body: JSON.stringify({ cep: postcode, itens: items }),
+    body: JSON.stringify({ cep: postcode, itens: body.items, paymentMethod:body.paymentMethod||'pix' }),
     signal: AbortSignal.timeout(15000)
   });
   const quote = await quoteResponse.json().catch(() => ({}));
@@ -157,6 +157,7 @@ const getVerifiedShipping = async (body     , items                             
       : String(service.carrier || "") === carrier && String(service.description || "") === description
   ));
   if (!verified || !Number.isFinite(verified.price)) throw new Error("INVALID_SHIPPING");
+  if (!Number.isFinite(selected.price) || Math.round(selected.price*100)!==Math.round(verified.price*100)) throw new Error("SHIPPING_PRICE_CHANGED");
 
   return {
     carrier: cleanText(verified.carrier, 120),
@@ -250,6 +251,7 @@ export default { async fetch(request) {
       OUT_OF_STOCK: "A quantidade solicitada é maior que o estoque disponível.",
       INVALID_CUSTOMER: "Confira o nome, o e-mail e o WhatsApp.",
       INVALID_ADDRESS: "Confira o endereço de entrega.",
+      SHIPPING_PRICE_CHANGED: "O frete mudou após a atualização do carrinho ou da forma de pagamento. Volte ao carrinho e calcule novamente.",
       INVALID_SHIPPING: "O frete selecionado não pôde ser validado. Volte ao carrinho e faça uma nova cotação.",
       SHIPPING_UNAVAILABLE: "Não foi possível confirmar o frete neste momento.",
       INVALID_REQUEST_ID: "Não foi possível identificar esta tentativa de pedido.",

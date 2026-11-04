@@ -1022,3 +1022,5 @@ body:has(.test-cart-dialog[open]){overflow:hidden}
 [data-checkout-payment-choices] label { display:flex; align-items:flex-start; gap:10px; margin:12px 0; cursor:pointer; }
 [data-checkout-payment-choices] input { width:auto; flex:0 0 auto; margin-top:4px; accent-color:#199f98; }
 [data-checkout-payment-choices] p, .product-price-card { display:block; font-size:13px; line-height:1.5; color:#52656b; }
+
+.cart-shipping-offer{margin:0 0 14px;padding:12px 14px;border-radius:10px;background:#e8f7f3;color:#07554b;font-size:14px;font-weight:600;line-height:1.5}

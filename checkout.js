@@ -1,3 +1,4 @@
+import { shippingWithOffer } from './supabase/functions/_shared/shipping-offer.mjs';
 import { getAttribution } from "./seo/attribution.mjs";
 import { shippingProducts, baseShippingProducts, shippingKits } from "./data/shipping-products.mjs";
 import { paymentOffers, hasPaymentOffer, applyPaymentOffer } from "./data/payment-offers.mjs";
@@ -8,9 +9,9 @@ import { trackCommerce } from "./seo/ecommerce.mjs";
 const CART_STORAGE_KEY = "chi-rho-test-cart-v1";
 const SHIPPING_STORAGE_KEY = "chi-rho-test-shipping-v1";
 const LAST_ORDER_STORAGE_KEY = "chi-rho-last-order-v1";
-const ORDER_ENDPOINT = cartHasKits() ? "/api/create-cpad-order" : "https://sailabcmcqdzrqhqztqs.supabase.co/functions/v1/create-casa-order";
+const ORDER_ENDPOINT = "/api/create-cpad-order";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_ipNBmuf0pUOZRzzlpU8kWw_Md1Y5FuE";
-const PAYMENT_ENDPOINT = cartHasKits() ? "/api/mercadopago/cpad-preference" : "/api/mercadopago/create-preference";
+const PAYMENT_ENDPOINT = "/api/mercadopago/cpad-preference";
 function cartHasKits(){try{return JSON.parse(localStorage.getItem(CART_STORAGE_KEY)||"[]").some(item=>shippingKits.some(kit=>kit.slug===item.slug)||Boolean(paymentOffers[item.slug]));}catch{return false;}}
 let createdOrder = null;
 let paymentAvailable = false;
@@ -164,6 +165,11 @@ try { baseCartPricing = priceCart(cart.map(item => ({slug:item.slug,quantity:ite
 const refreshPaymentSummary = () => {
   if (!baseCartPricing) return;
   cartPricing = hasPaymentPricing ? applyPaymentOffer(baseCartPricing, selectedPaymentMethod) : baseCartPricing;
+  if(shipping) {
+    shipping.service=shippingWithOffer(shipping.service,cartPricing.totalProducts);
+    const shippingPrice=document.querySelector('[data-checkout-shipping-price]');
+    if(shippingPrice) shippingPrice.textContent=shipping.service.price===0?'Grátis':formatCurrency(shipping.service.price);
+  }
   const row = document.querySelector('[data-checkout-pix-discount-row]');
   if (row) {
     row.hidden = !(cartPricing.pixDiscount > 0);

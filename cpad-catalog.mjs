@@ -1,3 +1,5 @@
+import { FREE_SHIPPING_MINIMUM,remainingForFreeShipping } from './supabase/functions/_shared/shipping-offer.mjs';
+window.ChiRhoShippingOffer={minimum:FREE_SHIPPING_MINIMUM,remaining:remainingForFreeShipping};
 import { applyPaymentOffer } from './data/payment-offers.mjs';
 import { priceCart, kitSummary } from './lib/kit-pricing.mjs';
 import { initialKits } from './data/cpad-kits.mjs';
@@ -8,7 +10,7 @@ let registry = [], registryLoaded = false, checkoutReady = false;
 const isCpadPage = document.body.dataset.cpadPage === 'true';
 const featuredStudyBibleSlugs = [
   'biblia-estudo-pentecostal',
-  'biblia-aplicacao-pessoal-nvt',
+  'biblia-estudo-cronologica-tricolor',
   'biblia-estudo-cronologica',
   'biblia-estudo-defesa-da-fe'
 ];

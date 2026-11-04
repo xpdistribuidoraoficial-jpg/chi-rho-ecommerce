@@ -1,3 +1,4 @@
+import { merchantPaysShipping } from './shipping-offer.mjs';
 import {validInvoiceKey} from './order-invoice.mjs';
 
 // Server-only: one financial submission per claim. Uncertain results stay locked.
@@ -108,7 +109,7 @@ export async function generateShippingLabel({url, serviceKey, adminId, orderId, 
     if (!service) throw new Error('SHIPPING_SERVICE_UNAVAILABLE');
     const currentPrice = price(service.ShippingPrice);
     if (!Number.isFinite(currentPrice) || currentPrice < 0) throw new Error('SHIPPING_QUOTE_FAILED');
-    if (cents(currentPrice) > cents(order.shipping_price)) throw new Error('SHIPPING_PRICE_INCREASED');
+    if (cents(currentPrice) > cents(order.shipping_price) && !merchantPaysShipping(order)) throw new Error('SHIPPING_PRICE_INCREASED');
     // Allocate the already-applied order discount once, with exact cent reconciliation.
     const units=items.flatMap(item=>Array.from({length:item.quantity},(_,index)=>({item,index,full:cents(item.unit_price)})));
     let allocated=0;
