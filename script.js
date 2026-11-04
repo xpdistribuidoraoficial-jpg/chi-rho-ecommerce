@@ -1646,7 +1646,7 @@ const catalogProducts = [
     descricao: "Bomba elétrica universal com recarga USB para servir água diretamente do garrafão com praticidade no dia a dia.",
     perfil: "Praticidade para o lar",
     marca: "Lotus",
-    preco: 7.90,
+    preco: 17.90,
     precoOriginal: 32.90,
     estoque: 5,
     testeCarrinho: true,
