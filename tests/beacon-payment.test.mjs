@@ -28,16 +28,16 @@ test('preços Pix e cartão conferem com vitrine e quantidades em centavos',()=>
 test('kit e Beacon avulso compartilham estoque sem acumular desconto Pix no kit',()=>{
   const cart=[{slug:'kit-cpad-estudo-palavra',quantity:1},{slug:at,quantity:2},{slug:nt,quantity:1}];
   const pricing=applyPaymentOffer(priceCart(cart,inventory,initialKits),'pix');
-  assert.equal(pricing.pixDiscount,113.61);
-  assert.equal(cents(pricing.totalProducts),57399+30318*2+33000);
+  assert.equal(pricing.pixDiscount,199.97);
+  assert.equal(cents(pricing.totalProducts),57399+28000*2+29000);
   assert.equal(pricing.kits[0].unit_total,573.99);
   const charged=paymentItems(pricing.items,pricing.discount);
   assert.equal(charged.reduce((sum,item)=>sum+cents(item.unit_price)*item.quantity,0),cents(pricing.totalProducts));
   assert.throws(()=>applyPaymentOffer(pricing,'forged'),/INVALID_PAYMENT_METHOD/);
 });
 test('preço vivo abaixo da oferta Pix nunca é aumentado nem descontado duas vezes',()=>{
-  const base=priceCart([{slug:at,quantity:1}],{[at]:{...inventory[at],price:299}});
-  assert.equal(applyPaymentOffer(base,'pix').totalProducts,299);
+  const base=priceCart([{slug:at,quantity:1}],{[at]:{...inventory[at],price:279}});
+  assert.equal(applyPaymentOffer(base,'pix').totalProducts,279);
 });
 
 function fixture(t,{order,items,providerResponse}={}) {
@@ -80,17 +80,17 @@ test('servidor ignora preço enviado pelo cliente e assina desconto Pix autoriza
   const body={clientRequestId:id,paymentMethod:'pix',customer:{name:'Teste Beacon',email:'test@example.invalid',whatsapp:'21999999999',taxId:'52998224725'},
     shipping:{service:{carrierCode:'PICKUP_VENDOR'}},items:[{slug:at,quantity:1,price:0.01}]};
   const response=await orderEndpoint.fetch(new Request(origin+'/api/create-cpad-order',{method:'POST',headers:{origin,apikey:'sb_publishable_ipNBmuf0pUOZRzzlpU8kWw_Md1Y5FuE','Content-Type':'application/json'},body:JSON.stringify(body)}));
-  assert.equal(response.status,201);assert.equal((await response.json()).order.total,303.18);
-  const signed=calls.signed.find(p=>p.action==='order');assert.equal(signed.subtotal,349.99);assert.equal(signed.discount,46.81);assert.equal(signed.payment_method,'pix');
+  assert.equal(response.status,201);assert.equal((await response.json()).order.total,280.00);
+  const signed=calls.signed.find(p=>p.action==='order');assert.equal(signed.subtotal,349.99);assert.equal(signed.discount,69.99);assert.equal(signed.payment_method,'pix');
 });
 test('Pix usa a API Pix com valor exato, idempotência e prazo da reserva',async t=>{
-  const order=storedOrder('pix',46.81,303.18);
-  const calls=fixture(t,{order,items:storedItems,providerResponse:{id:123456789,payment_method_id:'pix',transaction_amount:303.18,
+  const order=storedOrder('pix',69.99,280.00);
+  const calls=fixture(t,{order,items:storedItems,providerResponse:{id:123456789,payment_method_id:'pix',transaction_amount:280.00,
     point_of_interaction:{transaction_data:{ticket_url:'https://www.mercadopago.com.br/payments/123456789/ticket?hash=fixture'}}}});
   const response=await paymentEndpoint.fetch(paymentRequest());
   assert.equal(response.status,201);assert.equal(calls.provider.length,1);
   const call=calls.provider[0];assert.ok(call.url.endsWith('/v1/payments'));assert.equal(call.body.payment_method_id,'pix');
-  assert.equal(call.body.transaction_amount,303.18);assert.equal(call.key,id+'-pix');assert.equal(call.body.date_of_expiration,order.reservation_expires_at);
+  assert.equal(call.body.transaction_amount,280.00);assert.equal(call.key,id+'-pix');assert.equal(call.body.date_of_expiration,order.reservation_expires_at);
   assert.equal(calls.signed.at(-1).payment_id,'123456789');
 });
 test('cartão mantém R$349,99 e permite até 12 parcelas sem conceder desconto Pix',async t=>{
@@ -101,12 +101,12 @@ test('cartão mantém R$349,99 e permite até 12 parcelas sem conceder desconto 
   assert.ok(calls.provider[0].body.payment_methods.excluded_payment_types.some(x=>x.id==='bank_transfer'));
 });
 test('Pix existente é reutilizado sem gerar segunda cobrança',async t=>{
-  const order={...storedOrder('pix',46.81,303.18),payment_external_id:'123456789',payment_preference_url:'https://www.mercadopago.com.br/payments/123456789/ticket?hash=fixture'};
+  const order={...storedOrder('pix',69.99,280.00),payment_external_id:'123456789',payment_preference_url:'https://www.mercadopago.com.br/payments/123456789/ticket?hash=fixture'};
   const calls=fixture(t,{order,items:storedItems});
   const response=await paymentEndpoint.fetch(paymentRequest());assert.equal(response.status,200);assert.equal((await response.json()).reused,true);
   assert.equal(calls.provider.length,0);
 });
 test('totais divergentes e Pix com reserva curta falham antes de solicitar cobrança',async t=>{
-  const calls=fixture(t,{order:{...storedOrder('pix',46.81,303.18),reservation_expires_at:new Date(Date.now()+20*60000).toISOString()},items:storedItems});
+  const calls=fixture(t,{order:{...storedOrder('pix',69.99,280.00),reservation_expires_at:new Date(Date.now()+20*60000).toISOString()},items:storedItems});
   const response=await paymentEndpoint.fetch(paymentRequest());assert.equal(response.status,409);assert.equal(calls.provider.length,0);
 });

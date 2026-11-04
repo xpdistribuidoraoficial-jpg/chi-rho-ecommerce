@@ -4,6 +4,7 @@ import fs from "node:fs";
 import test from "node:test";
 import vm from "node:vm";
 
+import { kitSummary } from "../lib/kit-pricing.mjs";
 import { shippingProducts, baseShippingProducts, shippingKits } from "../data/shipping-products.mjs";
 
 const projectRoot = new URL("../", import.meta.url);
@@ -50,6 +51,12 @@ test("somente produtos com fonte logística entram no fluxo de compra", () => {
     for (const field of ["weight", "length", "width", "height"]) assert.ok(product[field] > 0);
   }
   for (const kit of shippingKits.filter((kit) => kit.active)) {
+    try { kitSummary(kit,baseShippingProducts); }
+    catch (error) {
+      assert.equal(error.message,'KIT_PRICE_ABOVE_AVULSO');
+      assert.equal(shippingProducts[kit.slug],undefined);
+      continue;
+    }
     assert.ok(shippingProducts[kit.slug]);
     for (const component of kit.components) assert.ok(baseShippingProducts[component.slug]);
   }

@@ -1,8 +1,8 @@
-// Preços avulsos autorizados pelo lojista em 23/10/2026.
+// Preços avulsos autorizados pelo lojista em 03/11/2026.
 // Kit Estudo da Palavra mantém seu desconto próprio sobre os preços cheios.
 export const paymentOffers = Object.freeze({
-  'comentario-biblico-beacon-antigo-testamento': Object.freeze({ card:349.99, pix:303.18 }),
-  'comentario-biblico-beacon-novo-testamento': Object.freeze({ card:349.99, pix:330.00 })
+  'comentario-biblico-beacon-antigo-testamento': Object.freeze({ card:349.99, pix:280.00 }),
+  'comentario-biblico-beacon-novo-testamento': Object.freeze({ card:349.99, pix:290.00 })
 });
 export const hasPaymentOffer = cart => cart.some(line => Boolean(paymentOffers[line.slug]));
 

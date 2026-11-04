@@ -41,7 +41,7 @@ test('Casa order signs two physical components and exactly R$ 2 discount per kit
     assert.equal(verified.kits[0].discount_amount,2);assert.equal(verified.kits[0].discount_percent,0);
   }finally{globalThis.fetch=oldFetch;for(const key of ['CPAD_CHECKOUT_SIGNING_SECRET','MERCADO_PAGO_ACCESS_TOKEN','MERCADO_PAGO_PUBLIC_KEY','MERCADO_PAGO_TEST_MODE','VERCEL_ENV']){if(env[key]===undefined)delete process.env[key];else process.env[key]=env[key];}}
 });
-test('server recomputes a forged kit basket and signs the verified physical order',async()=>{
+test('promoções avulsas bloqueiam kit mais caro e servidor assina somente os preços vigentes',async()=>{
   const oldFetch=globalThis.fetch,env={...process.env};
   Object.assign(process.env,{CPAD_CHECKOUT_SIGNING_SECRET:secret,MERCADO_PAGO_ACCESS_TOKEN:'fixture',MERCADO_PAGO_PUBLIC_KEY:'fixture',MERCADO_PAGO_TEST_MODE:'true',VERCEL_ENV:'preview'});
   let verified;
@@ -54,7 +54,7 @@ test('server recomputes a forged kit basket and signs the verified physical orde
       const {payload_text,signature}=JSON.parse(options.body);
       assert.equal(signature,createHmac('sha256',secret).update(payload_text).digest('hex'));
       verified=JSON.parse(payload_text);
-      return Response.json({order_id:order.id,order_code:order.code,order_public_token:publicToken,order_total:83.96});
+      return Response.json({order_id:order.id,order_code:order.code,order_public_token:publicToken,order_total:verified.subtotal-verified.discount});
     }
     throw new Error(`Unexpected fetch: ${url}`);
   };
@@ -62,10 +62,13 @@ test('server recomputes a forged kit basket and signs the verified physical orde
     const body={clientRequestId:order.id,customer:{name:'Teste CPAD',email:'test@example.invalid',whatsapp:'21999999999',taxId:'52998224725'},
       shipping:{service:{carrierCode:'PICKUP_VENDOR'}},items:[{slug:initialKits[0].slug,quantity:1,price:0.01,discount:99}]};
     const response=await orderEndpoint.fetch(new Request(origin+'/api/create-cpad-order',{method:'POST',headers:{origin,apikey:'sb_publishable_ipNBmuf0pUOZRzzlpU8kWw_Md1Y5FuE','Content-Type':'application/json'},body:JSON.stringify(body)}));
-    assert.equal(response.status,201);assert.equal((await response.json()).order.total,83.96);
+    assert.equal(response.status,503);assert.equal(verified,undefined);
+    body.items=[{slug:'panorama-da-biblia',quantity:1,price:0.01},{slug:'herois-da-fe',quantity:1,price:0.01}];
+    const individual=await orderEndpoint.fetch(new Request(origin+'/api/create-cpad-order',{method:'POST',headers:{origin,apikey:'sb_publishable_ipNBmuf0pUOZRzzlpU8kWw_Md1Y5FuE','Content-Type':'application/json'},body:JSON.stringify(body)}));
+    assert.equal(individual.status,201);assert.equal((await individual.json()).order.total,74);
     assert.equal(verified.environment,'preview');
-    assert.equal(verified.subtotal,101.95);assert.equal(verified.discount,17.99);
-    assert.equal(verified.items.length,2);assert.equal(verified.kits.length,1);
+    assert.equal(verified.subtotal,74);assert.equal(verified.discount,0);
+    assert.equal(verified.items.length,2);assert.equal(verified.kits.length,0);
     const rejected=await orderEndpoint.fetch(new Request(origin+'/api/create-cpad-order',{method:'POST',headers:{origin:'https://untrusted.example'}}));
     assert.equal(rejected.status,403);
   }finally{globalThis.fetch=oldFetch;for(const key of ['CPAD_CHECKOUT_SIGNING_SECRET','MERCADO_PAGO_ACCESS_TOKEN','MERCADO_PAGO_PUBLIC_KEY','MERCADO_PAGO_TEST_MODE','VERCEL_ENV']){if(env[key]===undefined)delete process.env[key];else process.env[key]=env[key];}}
