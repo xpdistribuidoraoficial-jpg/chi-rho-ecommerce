@@ -1,3 +1,5 @@
+import { applyShippingOffer } from '../supabase/functions/_shared/shipping-offer.mjs';
+import { applyPaymentOffer,hasPaymentOffer } from '../data/payment-offers.mjs';
 import { loadShippingCatalog } from "../data/shipping-products.mjs";
 import { priceCart } from "../lib/kit-pricing.mjs";
 
@@ -81,10 +83,11 @@ export default {
       return jsonResponse({ error: "Informe um CEP válido com 8 números." }, 400);
     }
 
-    let items;
+    let items,pricing;
     try {
       const catalog = await loadShippingCatalog();
-      const pricing = priceCart(body?.itens, catalog.baseProducts, catalog.kits);
+      pricing = priceCart(body?.itens, catalog.baseProducts, catalog.kits);
+      if(hasPaymentOffer(pricing.lines)) pricing=applyPaymentOffer(pricing,body.paymentMethod||'pix');
       items = getValidatedItems(pricing.items, catalog.baseProducts);
     } catch (error) {
       const message = error.message === "OUT_OF_STOCK"
@@ -93,10 +96,7 @@ export default {
       return jsonResponse({ error: message }, 400);
     }
 
-    const invoiceValue = Number(items.reduce(
-      (total, item) => total + item.product.price * item.quantity,
-      0
-    ).toFixed(2));
+    const invoiceValue = pricing.totalProducts;
 
     const quotePayload = {
       SellerCEP: sellerCep,
@@ -143,7 +143,7 @@ export default {
           deliveryTime: String(service.DeliveryTime || "").trim(),
           price: parsePrice(service.ShippingPrice)
         }))
-        .filter((service) => service.price !== null)
+        .filter((service) => service.price !== null && service.price >= 0)
         .sort((first, second) => first.price - second.price);
 
       if (services.length === 0) {
@@ -155,7 +155,8 @@ export default {
 
       return jsonResponse({
         cep: recipientCep,
-        services,
+        services:applyShippingOffer(services,pricing.totalProducts),
+        productsTotal:pricing.totalProducts,
         quotedAt: new Date().toISOString(),
         expiresInMinutes: 15
       });
