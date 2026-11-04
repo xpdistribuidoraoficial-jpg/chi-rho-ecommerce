@@ -1,7 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { priceCart, paymentItems, kitSummary, cents } from '../lib/kit-pricing.mjs';
-import { initialKits } from '../data/cpad-kits.mjs';
+import { initialKits as configuredKits } from '../data/cpad-kits.mjs';
+// Preserve coverage of the supported legacy 30%-on-list pricing mode.
+const initialKits=configuredKits.map(({pricing_mode,...kit})=>({...kit,discount_percent:30}));
 const inventory = {
   'panorama-da-biblia': {name:'Panorama da Bíblia',price:59.46,stock:5,sku:'PAN'},
   'herois-da-fe': {name:'Heróis da Fé',price:42.49,stock:5,sku:'HER'},

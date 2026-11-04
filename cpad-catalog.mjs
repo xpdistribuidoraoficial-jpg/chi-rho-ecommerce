@@ -1,4 +1,5 @@
-import { kitSummary } from './lib/kit-pricing.mjs';
+import { applyPaymentOffer } from './data/payment-offers.mjs';
+import { priceCart, kitSummary } from './lib/kit-pricing.mjs';
 import { initialKits } from './data/cpad-kits.mjs';
 import { casaKits } from './data/casa-kits.mjs';
 import { COMPANY } from './seo/company.mjs';
@@ -51,27 +52,31 @@ function updateKits() {
   const inventory = inventoryMap();
   const cpadKits = registryLoaded ? registry : initialKits.map(item => ({ ...item, active:false }));
   for (const kit of [...cpadKits, ...casaKits]) {
-    const isCasa = kit.pricing_mode === 'sum_current_prices';
+    const isCasa = kit.slug.startsWith('kit-casa-');
     let product = catalogProducts.find(item => item.slug === kit.slug);
     if (!product) {
       product = { id:kit.slug, slug:kit.slug,
         categoria:isCasa ? 'Kits Casa' : 'Kits CPAD', categoriaSlug:isCasa ? 'utilidades-domesticas' : 'cpad-kits',
         ...(isCasa ? { casa:true } : { editora:'CPAD' }),
-        perfil:isCasa ? 'Fone + carregador em uma compra' : 'Seleção com 30% de desconto',
+        perfil:isCasa ? 'Fone + carregador em uma compra' : kit.pricing_mode === 'sum_current_prices' ? 'Seleção com preços promocionais' : 'Seleção com 30% de desconto',
         kitPricingMode:kit.pricing_mode, kitComponents:kit.components, destaque:false, maisVendido:false };
       catalogProducts.push(product);
     }
-    Object.assign(product, { nome:kit.name, descricao:kit.description, kitComponents:kit.components,
+    Object.assign(product, { nome:kit.name, descricao:kit.description, kitPricingMode:kit.pricing_mode, kitComponents:kit.components,
       cpadKitDisabled: !kit.active, kitActive: !!kit.active,
       imagem:catalogProducts.find(item => item.slug === kit.components[0].slug)?.imagem || 'assets/logo-chi-rho.png',
       imagens:kit.components.map(component => catalogProducts.find(item => item.slug === component.slug)?.imagem).filter(Boolean),
-      sku:kit.slug, testeCarrinho:false, estoque:0, inventoryConfirmed:false, preco:null, precoOriginal:null,
+      sku:kit.slug, testeCarrinho:false, estoque:0, inventoryConfirmed:false, preco:null, precoPix:null, precoOriginal:null,
       statusPreco:!kit.active ? 'Seleção em preparação' : !checkoutReady ? 'Pagamento em configuração' : 'Verificando disponibilidade…' });
     try {
       const summary = kitSummary(kit, inventory);
       if (kit.active && registryLoaded && kit.components.every(component => catalogProducts.find(item => item.slug === component.slug)?.testeCarrinho))
         Object.assign(product,{preco:summary.price,precoOriginal:summary.original,estoque:summary.stock,testeCarrinho:checkoutReady,
           inventoryConfirmed:kit.components.every(component => catalogProducts.find(item => item.slug === component.slug)?.inventoryConfirmed === true)});
+      if (kit.active && product.testeCarrinho && kit.pricing_mode === 'sum_current_prices') {
+        const pix=applyPaymentOffer(priceCart([{slug:kit.slug,quantity:1}],inventory,[kit]),'pix').totalProducts;
+        if (pix < summary.price) product.precoPix=pix;
+      }
     } catch { /* A draft is shown without a fabricated price or inventory. */ }
   }
 }

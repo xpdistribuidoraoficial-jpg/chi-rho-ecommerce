@@ -41,7 +41,7 @@ test('Casa order signs two physical components and exactly R$ 2 discount per kit
     assert.equal(verified.kits[0].discount_amount,2);assert.equal(verified.kits[0].discount_percent,0);
   }finally{globalThis.fetch=oldFetch;for(const key of ['CPAD_CHECKOUT_SIGNING_SECRET','MERCADO_PAGO_ACCESS_TOKEN','MERCADO_PAGO_PUBLIC_KEY','MERCADO_PAGO_TEST_MODE','VERCEL_ENV']){if(env[key]===undefined)delete process.env[key];else process.env[key]=env[key];}}
 });
-test('promoções avulsas bloqueiam kit mais caro e servidor assina somente os preços vigentes',async()=>{
+test('kit CPAD e avulsos usam os preços vigentes ignorando valores enviados pelo cliente',async()=>{
   const oldFetch=globalThis.fetch,env={...process.env};
   Object.assign(process.env,{CPAD_CHECKOUT_SIGNING_SECRET:secret,MERCADO_PAGO_ACCESS_TOKEN:'fixture',MERCADO_PAGO_PUBLIC_KEY:'fixture',MERCADO_PAGO_TEST_MODE:'true',VERCEL_ENV:'preview'});
   let verified;
@@ -62,7 +62,9 @@ test('promoções avulsas bloqueiam kit mais caro e servidor assina somente os p
     const body={clientRequestId:order.id,customer:{name:'Teste CPAD',email:'test@example.invalid',whatsapp:'21999999999',taxId:'52998224725'},
       shipping:{service:{carrierCode:'PICKUP_VENDOR'}},items:[{slug:initialKits[0].slug,quantity:1,price:0.01,discount:99}]};
     const response=await orderEndpoint.fetch(new Request(origin+'/api/create-cpad-order',{method:'POST',headers:{origin,apikey:'sb_publishable_ipNBmuf0pUOZRzzlpU8kWw_Md1Y5FuE','Content-Type':'application/json'},body:JSON.stringify(body)}));
-    assert.equal(response.status,503);assert.equal(verified,undefined);
+    assert.equal(response.status,201);assert.equal((await response.json()).order.total,74);
+    assert.equal(verified.kits[0].unit_total,74);assert.equal(verified.kits[0].discount_percent,0);
+    assert.equal(verified.discount,0);
     body.items=[{slug:'panorama-da-biblia',quantity:1,price:0.01},{slug:'herois-da-fe',quantity:1,price:0.01}];
     const individual=await orderEndpoint.fetch(new Request(origin+'/api/create-cpad-order',{method:'POST',headers:{origin,apikey:'sb_publishable_ipNBmuf0pUOZRzzlpU8kWw_Md1Y5FuE','Content-Type':'application/json'},body:JSON.stringify(body)}));
     assert.equal(individual.status,201);assert.equal((await individual.json()).order.total,74);

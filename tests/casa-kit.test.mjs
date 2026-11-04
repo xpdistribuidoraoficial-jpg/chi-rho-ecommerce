@@ -38,18 +38,18 @@ test('Casa kit and avulso quantities share physical stock and exhaust together',
   assert.equal(kitSummary(kit,{...baseProducts,[charger]:{...baseProducts[charger],stock:0}}).stock,0);
 });
 
-test('Casa pricing tracks current prices and CPAD kits above promotional components stay unavailable', async () => {
+test('Casa e CPAD usam preços vigentes sem somar 30% sobre preços promocionais', async () => {
   const {baseProducts,kits}=await loadShippingCatalog();
   const kit=casaKits[0],fone=kit.components[0].slug;
   assert.equal(kitSummary(kit,{...baseProducts,[fone]:{...baseProducts[fone],price:25}}).price,37.99);
   assert.throws(()=>kitSummary({...kit,discount_percent:30},baseProducts),/INVALID_KIT/);
   assert.throws(()=>kitSummary({...kit,discount_amount:-2},baseProducts),/INVALID_KIT/);
   assert.throws(()=>kitSummary({...kit,discount_amount:38.98},baseProducts),/INVALID_DISCOUNT/);
-  assert.throws(()=>kitSummary({...initialKits[0],pricing_mode:'sum_current_prices',discount_percent:0},baseProducts),/INVALID_KIT/);
-  for (const cpad of initialKits.filter(item=>item.active)) {
-    assert.throws(()=>priceCart([{slug:kit.slug,quantity:1},{slug:cpad.slug,quantity:1}],baseProducts,kits),/KIT_PRICE_ABOVE_AVULSO/);
-    assert.ok(!activeProducts.some(product=>product.slug===cpad.slug));
-  }
+  assert.throws(()=>kitSummary({...initialKits[0],discount_percent:30},baseProducts),/INVALID_KIT/);
+  const mixed=priceCart([{slug:kit.slug,quantity:1},{slug:initialKits[0].slug,quantity:1}],baseProducts,kits);
+  assert.equal(mixed.totalProducts,110.98);
+  assert.equal(mixed.discount,2);
+  for (const cpad of initialKits.filter(item=>item.active)) assert.ok(activeProducts.some(product=>product.slug===cpad.slug && product.editora==='CPAD' && !product.casa));
   assert.equal(priceCart([{slug:kit.slug,quantity:1}],baseProducts,kits).totalProducts,36.98);
 });
 
