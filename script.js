@@ -2866,6 +2866,8 @@ const matchesCatalogSearch = (product, query) => {
     || words.some(word => catalogSearchNearWord(term, word)));
 };
 
+let catalogInventoryState = "loading";
+
 const setCatalogFilter = (filter = "todas", query = "") => {
   if (!catalogGrid) return;
 
@@ -2890,9 +2892,16 @@ const setCatalogFilter = (filter = "todas", query = "") => {
       || (first.ordemLivro ?? 999) - (second.ordemLivro ?? 999)
     : (first.ordemLivro ?? 999) - (second.ordemLivro ?? 999));
 
+  const inventoryPending = filteredProducts.length === 0 && catalogInventoryState !== "ready"
+    && !catalogProducts.some(product => product.inventoryConfirmed === true);
+  catalogGrid.setAttribute?.("aria-busy", String(inventoryPending && catalogInventoryState === "loading"));
   catalogGrid.innerHTML = filteredProducts.length
     ? filteredProducts.map(createProductCard).join("")
-    : '<div class="catalog-empty"><strong>Nenhum item publicado nesta categoria.</strong><span>O catálogo está em expansão. Consulte novamente em breve.</span></div>';
+    : inventoryPending
+      ? catalogInventoryState === "error"
+        ? '<div class="catalog-empty"><strong>Não foi possível carregar os produtos.</strong><span>Verifique sua conexão e tente novamente.</span><button type="button" class="btn btn-outline" data-catalog-retry>Tentar novamente</button></div>'
+        : '<div class="catalog-empty"><strong>Carregando produtos…</strong><span>Estamos consultando os preços e o estoque disponível.</span></div>'
+      : '<div class="catalog-empty"><strong>Nenhum item publicado nesta categoria.</strong><span>O catálogo está em expansão. Consulte novamente em breve.</span></div>';
 
   if (catalogTitle) {
     const filterTitles = {
@@ -2921,7 +2930,9 @@ const setCatalogFilter = (filter = "todas", query = "") => {
 
   if (resultCount) {
     const total = filteredProducts.length;
-    resultCount.textContent = `${total} ${total === 1 ? "produto selecionado" : "produtos selecionados"}`;
+    resultCount.textContent = inventoryPending
+      ? catalogInventoryState === "error" ? "Catálogo indisponível no momento" : "Consultando estoque…"
+      : `${total} ${total === 1 ? "produto selecionado" : "produtos selecionados"}`;
   }
 
   filterButtons.forEach((button) => {
@@ -3721,6 +3732,12 @@ const openTestCart = () => {
 };
 
 const refreshAvailableInventory = async () => {
+  const refreshCatalog = () => {
+    const activeFilter = document.querySelector(".catalog-filter.is-active")?.dataset.filter;
+    if (catalogGrid) setCatalogFilter(activeFilter || requestedCategory, requestedQuery);
+  };
+  catalogInventoryState = "loading";
+  refreshCatalog();
   try {
     const response = await fetch(INVENTORY_ENDPOINT, {
       headers: { apikey: INVENTORY_PUBLIC_KEY },
@@ -3744,18 +3761,24 @@ const refreshAvailableInventory = async () => {
     });
 
     inventoryHydrated = true;
+    catalogInventoryState = "ready";
     window.dispatchEvent(new Event("chi-rho-inventory-updated"));
     renderHomeProducts();
-    const activeFilter = document.querySelector(".catalog-filter.is-active")?.dataset.filter;
-    if (catalogGrid) setCatalogFilter(activeFilter || requestedCategory, requestedQuery);
+    refreshCatalog();
     renderTestCart({ pruneUnavailable: true });
   } catch {
     inventoryHydrated = false;
+    catalogInventoryState = "error";
+    refreshCatalog();
     renderTestCart({ pruneUnavailable: false });
   }
 };
 
 document.addEventListener("click", (event) => {
+  if (event.target.closest("[data-catalog-retry]")) {
+    refreshAvailableInventory();
+    return;
+  }
   const cardQuantityAction = event.target.closest("[data-card-quantity-action]");
   if (cardQuantityAction && !cardQuantityAction.disabled) {
     const controls = cardQuantityAction.closest("[data-card-cart-controls]");

@@ -22,6 +22,7 @@ function storefront(inventory = [], fails = false) {
   });
   vm.runInContext(`${definitions}
     let inventoryHydrated = false;
+    let catalogInventoryState = 'loading';
     const INVENTORY_ENDPOINT = '/inventory', INVENTORY_PUBLIC_KEY = 'public';
     const catalogGrid = null, requestedCategory = '', requestedQuery = '';
     const renderTestCart = () => {};

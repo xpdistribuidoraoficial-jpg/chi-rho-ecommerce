@@ -7,21 +7,51 @@ const source = fs.readFileSync(new URL('../script.js', import.meta.url), 'utf8')
 const definitions = source.slice(0, source.indexOf('const toggle'));
 const filters = source.slice(source.indexOf('const faithCategorySlugs ='), source.indexOf('const catalogParams ='));
 
-function storefront() {
+function storefront({ confirmed = true, state = 'ready' } = {}) {
   const grid = { innerHTML: '' }, count = { textContent: '' };
   const context = { window: {}, grid, count };
   vm.runInNewContext(`${definitions}
     const catalogGrid = grid, catalogTitle = null, resultCount = count, filterButtons = [];
     const createProductCard = product => product.slug;
     ${filters}
-    catalogProducts.forEach(product => {
+    catalogInventoryState = ${JSON.stringify(state)};
+    if (${confirmed}) catalogProducts.forEach(product => {
       product.inventoryConfirmed = true;
       product.estoque = 5;
     });
-    globalThis.shop = { setCatalogFilter, catalogProducts };
+    globalThis.shop = { setCatalogFilter, catalogProducts,
+      setInventoryState: state => { catalogInventoryState = state; } };
   `, context);
   return { grid, count, ...context.shop };
 }
+
+test('categoria masculina aguarda estoque e permite recuperar uma falha de consulta', () => {
+  const shop = storefront({ confirmed:false, state:'loading' });
+  shop.setCatalogFilter('biblias-masculinas');
+  assert.match(shop.grid.innerHTML, /Carregando produtos/);
+  assert.doesNotMatch(shop.grid.innerHTML, /Nenhum item/);
+  assert.equal(shop.count.textContent, 'Consultando estoque…');
+  shop.setInventoryState('error');
+  shop.setCatalogFilter('biblias-masculinas');
+  assert.match(shop.grid.innerHTML, /Tentar novamente/);
+  assert.doesNotMatch(shop.count.textContent, /0 produtos/);
+  shop.setInventoryState('loading');
+  shop.setCatalogFilter('biblias-masculinas');
+  assert.match(shop.grid.innerHTML, /Carregando produtos/);
+  Object.assign(shop.catalogProducts.find(p => p.slug === 'biblia-estudo-pentecostal'),
+    { inventoryConfirmed:true, estoque:5 });
+  shop.setInventoryState('ready');
+  shop.setCatalogFilter('biblias-masculinas');
+  assert.equal(shop.grid.innerHTML, 'biblia-estudo-pentecostal');
+  assert.equal(shop.count.textContent, '1 produto selecionado');
+});
+
+test('estoque confirmado vazio continua exibindo o resultado vazio real', () => {
+  const shop = storefront({ confirmed:false, state:'ready' });
+  shop.setCatalogFilter('biblias-masculinas');
+  assert.match(shop.grid.innerHTML, /Nenhum item/);
+  assert.equal(shop.count.textContent, '0 produtos selecionados');
+});
 
 test('cronologica com e sem acento encontra as duas capas do catálogo real', () => {
   const shop = storefront();

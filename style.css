@@ -685,6 +685,7 @@ a{text-decoration:none;color:inherit} button,input{font:inherit}
 .catalog-empty{grid-column:1/-1;min-height:220px;padding:34px;border:1px dashed #bcd4d2;border-radius:18px;display:grid;place-content:center;text-align:center;background:#f7fbfb}
 .catalog-empty strong{color:var(--navy);font-size:20px}
 .catalog-empty span{margin-top:8px;color:var(--muted);font-size:14px}
+.catalog-empty .btn{margin:18px auto 0;min-height:44px}
 .catalog-support{margin:0 auto 78px;padding:38px;border:1px solid #d7e9e7;border-radius:20px;background:linear-gradient(115deg,#ecf8f6,#fbfdfd);display:grid;grid-template-columns:1fr auto;gap:36px;align-items:center}
 .catalog-support h2{font-size:34px}
 .catalog-support p{max-width:790px;margin:0;color:var(--muted);line-height:1.7}
