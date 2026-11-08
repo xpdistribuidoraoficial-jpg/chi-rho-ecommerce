@@ -18,6 +18,8 @@ export const pages = {
   'politica-de-entrega.html': { path: '/politica-de-entrega.html', name: 'Política de Entrega', title: 'Política de Entrega | CHI RHO', description: 'Consulte como funcionam frete, prazo, endereço, rastreamento e tentativas de entrega dos pedidos CHI RHO.' }
 };
 export const categories = {
+  'biblias': ['Bíblias', 'catalogo-biblias.html', 'Encontre Bíblias para leitura, estudo, ministério e presente. Compare traduções, capas e tamanhos de letra na CHI RHO.'],
+  'kits-presentes': ['Kits e Presentes', 'catalogo-casa.html', 'Conheça os kits CPAD e o kit fone com carregador da CHI RHO. Confira a composição, os preços e a disponibilidade de cada kit.'],
   'cpad': ['Materiais CPAD','catalogo-cpad.html','Bíblias, livros e kits CPAD para sua leitura e estudo.'],
   'cpad-biblias': ['Bíblias CPAD','catalogo-cpad.html','Compare as Bíblias CPAD por tradução, letra e presença de Harpa.'],
   'cpad-livros': ['Livros CPAD','catalogo-cpad.html','Livros CPAD para leitura, formação cristã e estudo bíblico.'],

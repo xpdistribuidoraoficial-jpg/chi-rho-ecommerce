@@ -2676,14 +2676,6 @@ const clampProductCartQuantity = (product, requestedQuantity, { allowZero = fals
 const toggle = document.querySelector(".menu-toggle");
 const nav = document.querySelector(".nav-row");
 
-if (toggle && nav) {
-  toggle.addEventListener("click", () => nav.classList.toggle("open"));
-}
-
-document.querySelectorAll(".nav-row a").forEach((link) => {
-  link.addEventListener("click", () => nav?.classList.remove("open"));
-});
-
 const formatProductPrice = (value) =>
   value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
@@ -2880,6 +2872,8 @@ const setCatalogFilter = (filter = "todas", query = "") => {
       || (filter === "cpad-harpas" && product.editora === "CPAD" && product.categoriaSlug === "harpas")
       || (filter === "cpad-kits" && Boolean(product.kitComponents) && product.categoriaSlug === "cpad-kits")
       || (filter === "cpad-ofertas" && ((Boolean(product.kitComponents) && product.categoriaSlug === "cpad-kits") || product.destaqueOfertaCpad))
+      || (filter === "biblias" && productCategorySlugs.some(slug => slug.startsWith("biblias")))
+      || (filter === "kits-presentes" && Boolean(product.kitComponents))
       || filter === "todas"
       || (filter === "infantil" ? product.infantil : productCategorySlugs.includes(filter));
     const matchesCatalog = matchesCategory
@@ -2920,7 +2914,8 @@ const setCatalogFilter = (filter = "todas", query = "") => {
       "biblias-infantis": "Bíblias Infantis",
       infantil: "Infantil",
       "brinquedos-infantis": "Brinquedos Infantis",
-      casa: "Casa",
+      casa: "Casa e Cozinha",
+      "kits-presentes": "Kits e Presentes",
       cozinha: "Cozinha",
       "utilidades-domesticas": "Utilidades Domésticas",
       "livros-cristaos": "Livros Cristãos"

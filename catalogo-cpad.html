@@ -7,6 +7,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="navigation.css" />
+  <script src="navigation.js" defer></script>
 <link rel="stylesheet" href="cpad.css" />
   <title>Materiais CPAD: Bíblias, livros e kits | CHI RHO</title>
   <meta name="description" content="Encontre Bíblias e livros CPAD na CHI RHO. Conheça as seleções para leitura e estudo e os kits com preços promocionais." />
@@ -54,19 +56,63 @@
         <a href="#carrinho" class="header-cart-link" aria-label="Carrinho">🛒<span>Carrinho</span></a>
       </div>
 
-      <button class="menu-toggle" aria-label="Abrir menu">☰</button>
+      <button type="button" class="menu-toggle" aria-label="Abrir menu" aria-expanded="false" aria-controls="store-navigation">☰</button>
     </div>
 
-    <nav class="nav">
-      <div class="container nav-row">
+    <nav class="nav" aria-label="Categorias da loja">
+      <div class="container nav-row" id="store-navigation">
+        <a href="index.html#ofertas" class="offer-link" data-nav-section="ofertas">Ofertas</a>
+        <div class="nav-group" data-nav-section="biblias">
+          <div class="nav-category">
+            <a href="catalogo-biblias.html?categoria=biblias#catalogo" class="nav-primary">Bíblias</a>
+            <button type="button" class="nav-disclosure" aria-label="Abrir categorias de Bíblias" aria-expanded="false" aria-controls="nav-biblias"><span aria-hidden="true">⌄</span></button>
+          </div>
+          <div class="nav-submenu" id="nav-biblias" hidden>
+            <a href="catalogo-biblias.html?categoria=biblias#catalogo">Todas as Bíblias</a>
+            <a href="catalogo-biblias.html?categoria=biblias-de-estudo#catalogo">Bíblias de Estudo</a>
+            <a href="catalogo-biblias.html?categoria=biblias-femininas#catalogo">Bíblias Femininas</a>
+            <a href="catalogo-biblias.html?categoria=biblias-masculinas#catalogo">Bíblias Masculinas</a>
+            <a href="catalogo-biblias.html?categoria=biblias-ministeriais#catalogo">Bíblias Ministeriais</a>
+            <a href="catalogo-biblias.html?categoria=biblias-infantis#catalogo">Bíblias Infantis</a>
+            <a href="catalogo-cpad.html?categoria=cpad-biblias#catalogo">Bíblias CPAD</a>
+          </div>
+        </div>
+        <div class="nav-group" data-nav-section="livros">
+          <div class="nav-category">
+            <a href="catalogo-biblias.html?categoria=livros-cristaos#catalogo" class="nav-primary">Livros Cristãos</a>
+            <button type="button" class="nav-disclosure" aria-label="Abrir categorias de Livros Cristãos" aria-expanded="false" aria-controls="nav-livros"><span aria-hidden="true">⌄</span></button>
+          </div>
+          <div class="nav-submenu" id="nav-livros" hidden>
+            <a href="catalogo-biblias.html?categoria=livros-cristaos#catalogo">Todos os Livros Cristãos</a>
+            <a href="catalogo-cpad.html?categoria=cpad-livros#catalogo">Livros CPAD</a>
+            <a href="catalogo-cpad.html#catalogo">Materiais CPAD</a>
+          </div>
+        </div>
+        <div class="nav-group" data-nav-section="casa">
+          <div class="nav-category">
+            <a href="catalogo-casa.html#catalogo" class="nav-primary">Casa e Cozinha</a>
+            <button type="button" class="nav-disclosure" aria-label="Abrir categorias de Casa e Cozinha" aria-expanded="false" aria-controls="nav-casa"><span aria-hidden="true">⌄</span></button>
+          </div>
+          <div class="nav-submenu" id="nav-casa" hidden>
+            <a href="catalogo-casa.html#catalogo">Toda a Casa e Cozinha</a>
+            <a href="catalogo-casa.html?categoria=cozinha#catalogo">Cozinha</a>
+            <a href="catalogo-casa.html?categoria=utilidades-domesticas#catalogo">Utilidades Domésticas</a>
+            <a href="catalogo-casa.html?categoria=papelaria-arte#catalogo">Papelaria e Arte</a>
+          </div>
+        </div>
+        <a href="catalogo-infantil.html?categoria=brinquedos-infantis#catalogo" data-nav-section="brinquedos">Brinquedos</a>
+        <div class="nav-group" data-nav-section="kits">
+          <div class="nav-category">
+            <a href="catalogo-casa.html?categoria=kits-presentes#catalogo" class="nav-primary">Kits e Presentes</a>
+            <button type="button" class="nav-disclosure" aria-label="Abrir categorias de Kits e Presentes" aria-expanded="false" aria-controls="nav-kits"><span aria-hidden="true">⌄</span></button>
+          </div>
+          <div class="nav-submenu" id="nav-kits" hidden>
+            <a href="catalogo-casa.html?categoria=kits-presentes#catalogo">Todos os Kits e Presentes</a>
+            <a href="catalogo-cpad.html?categoria=cpad-kits#catalogo">Kits CPAD</a>
+            <a href="catalogo-casa.html?produto=kit-casa-fone-carregador#catalogo">Kit Fone + Carregador</a>
+          </div>
+        </div>
         <a href="index.html#universos" class="all-cats">☰ Todas as Categorias</a>
-        <a href="#catalogo" aria-current="page">Fé</a>
-        <a href="catalogo-casa.html#catalogo">Casa</a>
-        <a href="catalogo-casa.html?categoria=cozinha#catalogo">Cozinha</a>
-        <a href="catalogo-infantil.html#catalogo">Infantil</a>
-        <a href="catalogo-infantil.html?categoria=brinquedos-infantis#catalogo">Brinquedos</a>
-        <a href="catalogo-cpad.html?categoria=cpad-kits#catalogo">Presentes</a>
-        <a href="index.html#ofertas" class="offer-link">Ofertas</a>
       </div>
     </nav>
   </header>

@@ -151,13 +151,6 @@ document.querySelectorAll('#contato a.btn').forEach(link => {
   link.href = `https://wa.me/${COMPANY.phone.replace(/\D/g,'')}`;
   link.setAttribute('aria-label','Fale com a CHI RHO pelo WhatsApp');
 });
-document.querySelectorAll('.nav-row').forEach(nav => {
-  if (!nav.querySelector('[data-cpad-link]')) {
-    const link = document.createElement('a'); link.href='catalogo-cpad.html'; link.textContent='CPAD'; link.dataset.cpadLink='true';
-    const faith = [...nav.querySelectorAll('a')].find(item => item.textContent.trim() === 'Fé');
-    if (faith) faith.after(link);
-  }
-});
 populateFilters();
 refreshViews();
 try {

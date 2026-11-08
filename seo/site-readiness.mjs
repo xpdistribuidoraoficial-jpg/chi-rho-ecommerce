@@ -40,7 +40,7 @@ const ensureMainAndSkipLink = () => {
 const enhanceMenuAccessibility = () => {
   const toggle = document.querySelector('.menu-toggle');
   const nav = document.querySelector('.nav-row');
-  if (!toggle || !nav) return;
+  if (!toggle || !nav || document.querySelector('script[src$="navigation.js"]')) return;
   if (!nav.id) nav.id = 'primary-navigation';
   toggle.setAttribute('aria-controls', nav.id);
   toggle.setAttribute('aria-expanded', nav.classList.contains('open') ? 'true' : 'false');

@@ -92,3 +92,27 @@ test('cliente pode buscar por cor, código e palavras em outra ordem', () => {
   shop.setCatalogFilter('todas', '7898203062376');
   assert.match(shop.grid.innerHTML, /Nenhum item/);
 });
+
+test('Todas as Bíblias reúne subcategorias sem incluir os livros', () => {
+  const shop = storefront();
+  shop.setCatalogFilter('biblias');
+  assert.ok(shop.grid.innerHTML.includes('biblia-ara-mulher-letra-grande-pink'));
+  assert.ok(shop.grid.innerHTML.includes('biblia-estudo-pentecostal'));
+  assert.ok(shop.grid.innerHTML.includes('biblia-estudo-cronologica-tricolor'));
+  for (const product of shop.catalogProducts.filter(p => p.categoriaSlug === 'livros-cristaos')) {
+    assert.ok(!shop.grid.innerHTML.includes(product.slug));
+  }
+});
+
+test('Kits e Presentes reúne CPAD e Casa preservando bloqueios e estoque', () => {
+  const shop = storefront();
+  shop.catalogProducts.push(
+    {slug:'kit-casa-confirmado',categoriaSlug:'utilidades-domesticas',kitComponents:[{}],inventoryConfirmed:true,estoque:3,preco:36.98},
+    {slug:'kit-cpad-confirmado',categoriaSlug:'cpad-kits',kitComponents:[{}],inventoryConfirmed:true,estoque:1,preco:74},
+    {slug:'kit-culto-desativado',categoriaSlug:'cpad-kits',kitComponents:[{}],inventoryConfirmed:true,estoque:1,preco:70,cpadKitDisabled:true},
+    {slug:'kit-sem-estoque',categoriaSlug:'cpad-kits',kitComponents:[{}],inventoryConfirmed:true,estoque:0,preco:70},
+  );
+  shop.setCatalogFilter('kits-presentes');
+  assert.equal(shop.grid.innerHTML,'kit-casa-confirmadokit-cpad-confirmado');
+  assert.equal(shop.count.textContent,'2 produtos selecionados');
+});

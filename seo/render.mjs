@@ -21,7 +21,7 @@ export function sitemapUrls(products, categories) {
   return [...new Set([
     ...Object.values(pages).map((p) => p.path),
     ...Object.entries(categories).filter(([key]) => key.startsWith('cpad')).map(([key,c]) => `/${c[1]}?categoria=${key}`),
-    ...Object.entries(categories).filter(([key]) => products.some((p) => p.categoriaSlug === key || p.categoriasComplementares?.includes(key))).map(([key, c]) => `/${c[1]}?categoria=${key}`),
+    ...Object.entries(categories).filter(([key]) => (key === 'kits-presentes' || products.some((p) => p.categoriaSlug === key || p.categoriasComplementares?.includes(key)))).map(([key, c]) => `/${c[1]}?categoria=${key}`),
     ...products.map(productPath)
   ])];
 }
