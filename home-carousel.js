@@ -18,7 +18,7 @@
   function schedule() {
     window.clearTimeout(timer);
     if (paused || hovering || document.hidden || carousel.contains(document.activeElement)) return;
-    timer = window.setTimeout(() => show(current + 1), 7000);
+    timer = window.setTimeout(() => show(current + 1), 3000);
   }
 
   function show(index) {
