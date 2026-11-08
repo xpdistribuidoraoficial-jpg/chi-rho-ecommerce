@@ -73,46 +73,59 @@
   </header>
 
   <main>
-    <section class="shipping-promo container" aria-label="Frete Grátis Brasil">
-      <a class="shipping-promo-art" href="#ofertas" aria-label="Aproveitar ofertas com frete grátis Brasil a partir de R$ 100">
-        <img src="assets/banner-frete-gratis-brasil.webp" width="2172" height="724"
-          alt="CHI RHO: frete grátis para todo o Brasil em compras a partir de R$ 100,00. Aproveite as ofertas."
-          decoding="async" fetchpriority="high" />
-      </a>
-      <div class="shipping-promo-caption">
-        <div>
-          <h2>Frete grátis Brasil a partir de R$ 100</h2>
-          <p>Em produtos, após descontos, na entrega econômica. Consulte prazo e disponibilidade para seu CEP.</p>
+    <section class="home-carousel container" id="inicio" aria-label="Destaques CHI RHO" aria-roledescription="carrossel">
+      <div class="home-carousel-stage" aria-live="off">
+        <div class="shipping-promo home-carousel-slide is-active" id="home-slide-shipping" role="group" aria-roledescription="slide" aria-label="1 de 2: Frete Grátis Brasil">
+          <a class="shipping-promo-art" href="#ofertas" aria-label="Aproveitar ofertas com frete grátis Brasil a partir de R$ 100">
+            <img src="assets/banner-frete-gratis-brasil.webp" width="2172" height="724"
+              alt="CHI RHO: frete grátis para todo o Brasil em compras a partir de R$ 100,00. Aproveite as ofertas."
+              decoding="async" fetchpriority="high" />
+          </a>
+          <div class="shipping-promo-caption">
+            <div>
+              <h2>Frete grátis Brasil a partir de R$ 100</h2>
+              <p>Em produtos, após descontos, na entrega econômica. Consulte prazo e disponibilidade para seu CEP.</p>
+            </div>
+            <a class="btn btn-primary" href="#ofertas">Aproveitar ofertas →</a>
+          </div>
         </div>
-        <a class="btn btn-primary" href="#ofertas">Aproveitar ofertas →</a>
+        <div class="hero home-carousel-slide" id="home-slide-brand" role="group" aria-roledescription="slide" aria-label="2 de 2: Casa, família e fé" aria-hidden="true" inert>
+          <div class="container hero-grid">
+            <div class="hero-copy">
+              <span class="eyebrow">CHI RHO • CASA, FAMÍLIA E FÉ</span>
+              <h1><span>Tudo para sua</span><em>casa, sua família</em><span>e sua fé.</span></h1>
+              <p>Ofertas para sua casa e sua fé. Frete grátis para todo o Brasil a partir de R$ 100 em produtos após descontos.</p>
+
+              <div class="hero-actions">
+                <a href="#ofertas" class="btn btn-primary">Comprar ofertas →</a>
+                <a href="#universos" class="btn btn-outline">Explorar catálogos</a>
+              </div>
+
+              <div class="hero-benefits">
+                <span>💳 Opções de pagamento</span>
+                <span>◈ Condições no PIX</span>
+                <span>🔒 Site seguro</span>
+              </div>
+            </div>
+
+            <div class="hero-media">
+              <picture>
+                <source media="(max-width: 700px)" srcset="assets/banner-home-mobile.webp" type="image/webp" />
+                <source srcset="assets/banner-home.webp" type="image/webp" />
+                <img src="assets/banner-home.png" alt="Casa, família e fé" width="1717" height="916" fetchpriority="high" />
+              </picture>
+            </div>
+          </div>
+        </div>
       </div>
-    </section>
-    <section class="hero" id="inicio">
-      <div class="container hero-grid">
-        <div class="hero-copy">
-          <span class="eyebrow">CHI RHO • CASA, FAMÍLIA E FÉ</span>
-          <h1><span>Tudo para sua</span><em>casa, sua família</em><span>e sua fé.</span></h1>
-          <p>Ofertas para sua casa e sua fé. Frete grátis para todo o Brasil a partir de R$ 100 em produtos após descontos.</p>
-
-          <div class="hero-actions">
-            <a href="#ofertas" class="btn btn-primary">Comprar ofertas →</a>
-            <a href="#universos" class="btn btn-outline">Explorar catálogos</a>
-          </div>
-
-          <div class="hero-benefits">
-            <span>💳 Opções de pagamento</span>
-            <span>◈ Condições no PIX</span>
-            <span>🔒 Site seguro</span>
-          </div>
+      <div class="home-carousel-controls" aria-label="Controles dos destaques" hidden>
+        <button type="button" class="home-carousel-arrow" data-carousel-prev aria-label="Banner anterior">‹</button>
+        <div class="home-carousel-dots" aria-label="Escolher banner">
+          <button type="button" class="home-carousel-dot" data-carousel-slide="0" aria-label="Mostrar banner Frete Grátis Brasil" aria-controls="home-slide-shipping" aria-pressed="true"></button>
+          <button type="button" class="home-carousel-dot" data-carousel-slide="1" aria-label="Mostrar banner Casa, família e fé" aria-controls="home-slide-brand" aria-pressed="false"></button>
         </div>
-
-        <div class="hero-media">
-          <picture>
-            <source media="(max-width: 700px)" srcset="assets/banner-home-mobile.webp" type="image/webp" />
-            <source srcset="assets/banner-home.webp" type="image/webp" />
-            <img src="assets/banner-home.png" alt="Casa, família e fé" width="1717" height="916" fetchpriority="high" />
-          </picture>
-        </div>
+        <button type="button" class="home-carousel-arrow" data-carousel-next aria-label="Próximo banner">›</button>
+        <button type="button" class="home-carousel-pause" data-carousel-pause>Pausar alternância</button>
       </div>
     </section>
 
@@ -406,6 +419,7 @@
     </div>
   </footer>
 
+  <script src="home-carousel.js" defer></script>
   <script src="script.js"></script>
   <script type="module" src="seo.js"></script>
   <script type="module" src="cpad-catalog.mjs"></script>
