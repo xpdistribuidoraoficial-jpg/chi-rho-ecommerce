@@ -7,8 +7,8 @@
 .shipping-promo-caption p{margin:0;color:#385362;font-size:14px;line-height:1.5}
 .shipping-promo-caption .btn{flex-shrink:0;min-height:44px}
 @media(max-width:700px){
-  .shipping-promo-caption{display:grid;gap:12px;padding:18px}
-  .shipping-promo-caption h2{position:static;width:auto;height:auto;padding:0;margin:0 0 6px;overflow:visible;clip-path:none;white-space:normal;color:#07384b;font-size:21px;line-height:1.2}
+  .shipping-promo{justify-content:flex-start;background:#fff}
+  .shipping-promo-caption{display:grid;gap:10px;padding:14px 16px}
   .shipping-promo-caption p{font-size:13px}
   .shipping-promo-caption .btn{width:100%;text-align:center}
 }
@@ -35,8 +35,16 @@
 @media(max-width:700px){
   .home-carousel{margin-top:16px;scroll-margin-top:170px}
   .home-carousel-stage{border-radius:12px}
-  .home-carousel .hero-copy{width:100%}
+  .home-carousel .hero-grid{width:100%;padding:0}
+  .home-carousel .hero-copy{width:100%;min-height:0;padding:22px 20px}
   .home-carousel .hero h1{font-size:clamp(25px,7.4vw,32px)}
+  .home-carousel .hero h1,.home-carousel .hero p{max-width:100%}
+  .home-carousel .hero p{font-size:14px;margin:12px 0 0}
+  .home-carousel .hero-actions{width:100%;display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+  .home-carousel .hero-actions .btn{width:auto;flex:1 1 135px;min-height:44px;font-size:12px}
+  .home-carousel .hero-benefits{display:none}
+  .home-carousel .hero-media{position:absolute;inset:0;width:100%;height:100%;border-radius:0;opacity:.24}
+  .home-carousel .hero-media::after{background:linear-gradient(90deg,#f3fbfa,rgba(243,251,250,.35))}
   .home-carousel-controls{gap:4px;min-height:60px;flex-wrap:wrap}
   .home-carousel-pause{padding:0 8px;font-size:12px}
 }

@@ -1582,7 +1582,7 @@ const catalogProducts = [
     imagem: "assets/products/brinquedo-trator-pa-carregadeira.webp",
     imagens: [
       "assets/products/brinquedo-trator-pa-carregadeira.webp",
-      "assets/products/brinquedo-pa-carregadeira-831-oficial.png"
+      "assets/products/brinquedo-pa-carregadeira-831-oficial.webp"
     ],
     descricao: "Trator articulado com pá carregadeira para criar obras, terrenos e novas aventuras.",
     perfil: "Construção e movimento",
@@ -1759,11 +1759,11 @@ const catalogProducts = [
     nome: "Carregador USB-C KAPBOM 30W + Cabo Lightning — KA-5005-5G",
     categoria: "Utilidades Domésticas",
     categoriaSlug: "utilidades-domesticas",
-    imagem: "assets/products/kapbom-ka-5005-5g-30w-conjunto.png",
+    imagem: "assets/products/kapbom-ka-5005-5g-30w-conjunto.webp",
     imagens: [
-      "assets/products/kapbom-ka-5005-5g-30w-conjunto.png",
-      "assets/products/kapbom-ka-5005-5g-30w-embalagem.png",
-      "assets/products/kapbom-ka-5005-5g-30w-foto-original.png"
+      "assets/products/kapbom-ka-5005-5g-30w-conjunto.webp",
+      "assets/products/kapbom-ka-5005-5g-30w-embalagem.webp",
+      "assets/products/kapbom-ka-5005-5g-30w-foto-original.webp"
     ],
     descricao: "Carregador branco com saída USB-C e cabo USB-C para Lightning incluído. Modelo KAPBOM KA-5005-5G, com potência de 30W informada na embalagem. O cabo atende iPhones com entrada Lightning; para aparelhos Samsung e outros dispositivos com entrada USB-C, utilize um cabo compatível vendido separadamente. A potência efetiva depende do aparelho, do cabo e dos protocolos suportados. Imagens de estúdio ilustrativas baseadas na embalagem; foto original disponível na galeria.",
     perfil: "Carregador + cabo Lightning",
@@ -1785,11 +1785,11 @@ const catalogProducts = [
     nome: "Fone Bluetooth com Estojo e Visor de Bateria — Preto",
     categoria: "Utilidades Domésticas",
     categoriaSlug: "utilidades-domesticas",
-    imagem: "assets/products/fone-bluetooth-visor-produto.png",
+    imagem: "assets/products/fone-bluetooth-visor-produto.webp",
     imagens: [
-      "assets/products/fone-bluetooth-visor-produto.png",
-      "assets/products/fone-bluetooth-visor-recursos.png",
-      "assets/products/fone-bluetooth-visor-compatibilidade.png"
+      "assets/products/fone-bluetooth-visor-produto.webp",
+      "assets/products/fone-bluetooth-visor-recursos.webp",
+      "assets/products/fone-bluetooth-visor-compatibilidade.webp"
     ],
     descricao: "Fone sem fio com estojo de carregamento, visor digital de bateria, microfone integrado e controle por toque para músicas e chamadas. Conexão Bluetooth 5.3 e carregamento USB-C, conforme o material do fornecedor. Compatível com dispositivos que ofereçam conexão de áudio Bluetooth. Cor preta com detalhes luminosos.",
     perfil: "Barato e Bom!",

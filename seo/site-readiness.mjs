@@ -2,6 +2,7 @@ import './analytics-consent.mjs';
 import './attribution.mjs';
 import './ecommerce.mjs';
 import { COMPANY, COMPANY_ADDRESS_DISPLAY } from './company.mjs';
+import { PICKUP_INSTRUCTIONS } from '../data/pickup.mjs';
 
 const LEGAL_LINKS = [
   ['Política de Privacidade', '/politica-de-privacidade.html'],
@@ -66,7 +67,7 @@ const enhanceMenuAccessibility = () => {
 
 const enhanceImages = () => {
   document.querySelectorAll('main img').forEach((image) => {
-    if (image.closest('.hero,.catalog-hero')) return;
+    if (image.closest('.hero,.catalog-hero,.home-carousel')) return;
     if (!image.hasAttribute('loading')) image.loading = 'lazy';
     if (!image.hasAttribute('decoding')) image.decoding = 'async';
   });
@@ -208,7 +209,8 @@ const ensureCompanyIdentity = () => {
       ['Razão social', COMPANY.legalName],
       ['CNPJ', COMPANY.cnpj],
       ['Responsável', COMPANY.responsible],
-      ['Endereço', COMPANY_ADDRESS_DISPLAY],
+      ['Endereço cadastral', COMPANY_ADDRESS_DISPLAY],
+      ['Retirada de pedidos', PICKUP_INSTRUCTIONS],
       ['Atendimento', COMPANY.phoneDisplay]
     ].forEach(([label, value]) => {
       const paragraph = document.createElement('p');
@@ -228,8 +230,27 @@ const ensureCompanyIdentity = () => {
   if (!footer || !grid || footer.querySelector('.footer-company-identity')) return;
   const companyLine = document.createElement('div');
   companyLine.className = 'footer-company-identity';
-  companyLine.textContent = `${COMPANY.legalName} • CNPJ ${COMPANY.cnpj} • ${COMPANY_ADDRESS_DISPLAY} • Atendimento ${COMPANY.phoneDisplay}`;
+  const identity = document.createElement('p');
+  identity.textContent = `${COMPANY.legalName} • CNPJ ${COMPANY.cnpj} • Atendimento ${COMPANY.phoneDisplay}`;
+  const registeredAddress = document.createElement('p');
+  registeredAddress.textContent = `Endereço cadastral: ${COMPANY_ADDRESS_DISPLAY}`;
+  const pickupAddress = document.createElement('p');
+  pickupAddress.textContent = `Retirada de pedidos: ${PICKUP_INSTRUCTIONS}`;
+  companyLine.append(identity, registeredAddress, pickupAddress);
   grid.insertAdjacentElement('afterend', companyLine);
+};
+
+const ensureWhatsApp = () => {
+  if (!document.querySelector('.footer') || document.querySelector('.whatsapp-float')) return;
+  const link = document.createElement('a');
+  link.className = 'whatsapp-float';
+  link.href = `https://wa.me/${COMPANY.phone.replace(/\D/g, '')}`;
+  link.target = '_blank';
+  link.rel = 'noopener noreferrer';
+  link.setAttribute('aria-label', 'Falar com a CHI RHO pelo WhatsApp (abre em nova aba)');
+  link.title = 'Precisa de ajuda? Fale com a CHI RHO';
+  link.innerHTML = '<svg viewBox="0 0 32 32" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M27 15.5a11 11 0 0 1-16.1 9.7L5 27l1.8-5.8A11 11 0 1 1 27 15.5Z"/><path d="m12 10-1.6 2c.2 4.2 3.5 7.5 7.7 7.8l2-1.6-3-2-1.2 1a8.5 8.5 0 0 1-3.1-3.1l1-1.2Z"/></svg><span>Fale conosco</span>';
+  document.body.appendChild(link);
 };
 
 const removeRetiredProducts = () => {
@@ -264,6 +285,7 @@ const run = () => {
   ensureHeaderUtilities();
   ensureFooterLayout();
   ensureCompanyIdentity();
+  ensureWhatsApp();
   removeRetiredProducts();
 };
 
