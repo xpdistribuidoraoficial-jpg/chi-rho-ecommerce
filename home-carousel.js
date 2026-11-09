@@ -9,15 +9,13 @@
   const stage = carousel.querySelector('.home-carousel-stage');
   if (slides.length < 2 || !controls || !pauseButton || !stage) return;
 
-  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   let current = 0;
-  let paused = reducedMotion.matches;
-  let hovering = false;
+  let paused = false;
   let timer;
 
   function schedule() {
     window.clearTimeout(timer);
-    if (paused || hovering || document.hidden || carousel.contains(document.activeElement)) return;
+    if (paused || document.hidden || stage.contains(document.activeElement)) return;
     timer = window.setTimeout(() => show(current + 1), 3000);
   }
 
@@ -46,14 +44,10 @@
     paused = !paused;
     updatePause();
   });
-  carousel.addEventListener('mouseenter', () => { hovering = true; schedule(); });
-  carousel.addEventListener('mouseleave', () => { hovering = false; schedule(); });
-  carousel.addEventListener('focusin', schedule);
-  carousel.addEventListener('focusout', () => window.setTimeout(schedule, 0));
+  // Keyboard focus on a banner link stays stable; controls can resume playback.
+  stage.addEventListener('focusin', schedule);
+  stage.addEventListener('focusout', () => window.setTimeout(schedule, 0));
   document.addEventListener('visibilitychange', schedule);
-  reducedMotion.addEventListener('change', (event) => {
-    if (event.matches) { paused = true; updatePause(); }
-  });
 
   controls.hidden = false;
   show(0);
