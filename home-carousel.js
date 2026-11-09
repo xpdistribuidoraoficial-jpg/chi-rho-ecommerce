@@ -16,7 +16,7 @@
   function schedule() {
     window.clearTimeout(timer);
     if (paused || document.hidden || stage.contains(document.activeElement)) return;
-    timer = window.setTimeout(() => show(current + 1), 3000);
+    timer = window.setTimeout(() => show(current + 1), 5000);
   }
 
   function show(index) {
