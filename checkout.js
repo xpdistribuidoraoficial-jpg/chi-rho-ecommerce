@@ -248,7 +248,7 @@ if (cart.length === 0 || !shipping || !cartPricing) {
   if (!isPickup && shipping.service.freeShipping === true) {
     deliveryLabel.textContent = "🚚 FRETE GRÁTIS BRASIL";
     const description = document.createElement("small");
-    description.textContent = "Compre a partir de R$ 100,00 em produtos, após os descontos, e receba com frete grátis na entrega econômica. Informe seu CEP para consultar a disponibilidade e o prazo de entrega.";
+    description.textContent = "Compre acima de R$ 100,00 em produtos, após os descontos, e receba com frete grátis na entrega econômica. Informe seu CEP para consultar a disponibilidade e o prazo de entrega.";
     delivery.append(description);
   }
   const checkoutForm = document.querySelector("#checkout-form");

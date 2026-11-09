@@ -3075,7 +3075,7 @@ const renderShippingServices = (container, services, { selectable = false, onSel
     copy.append(title);
     if (service.freeShipping === true) {
       const description = document.createElement("small");
-      description.textContent = "Compre a partir de R$ 100,00 em produtos, após os descontos, e receba com frete grátis na entrega econômica. Informe seu CEP para consultar a disponibilidade e o prazo de entrega.";
+      description.textContent = "Compre acima de R$ 100,00 em produtos, após os descontos, e receba com frete grátis na entrega econômica. Informe seu CEP para consultar a disponibilidade e o prazo de entrega.";
       copy.append(description);
     }
     copy.append(deadline);
@@ -3440,7 +3440,7 @@ testCartDialog.innerHTML = `
     </header>
     <div class="test-cart-items" aria-live="polite"></div>
     <footer class="test-cart-footer">
-      <p class="cart-shipping-offer" data-cart-shipping-offer aria-live="polite">Frete grátis Brasil a partir de R$ 100,00 em produtos após descontos.</p>
+      <p class="cart-shipping-offer" data-cart-shipping-offer aria-live="polite">Frete grátis Brasil acima de R$ 100,00 em produtos após descontos.</p>
       <section class="test-cart-shipping" aria-labelledby="test-cart-shipping-title">
         <label id="test-cart-shipping-title" for="test-cart-postcode">Entrega ou retirada</label>
         <div class="test-cart-shipping-field">

@@ -6,11 +6,11 @@ import {inventory} from './inventory-fixture.mjs';
 import {initialKits} from '../data/cpad-kits.mjs';
 import quoteEndpoint from '../api/frete.js';
 import orderEndpoint from '../api/create-cpad-order.js';
-import {qualifiesForFreeShipping,applyShippingOffer,shippingWithOffer,merchantPaysShipping} from '../supabase/functions/_shared/shipping-offer.mjs';
+import {qualifiesForFreeShipping,applyShippingOffer,shippingWithOffer,merchantPaysShipping,remainingForFreeShipping} from '../supabase/functions/_shared/shipping-offer.mjs';
 
 const origin='https://www.chirho.com.br',key='sb_publishable_ipNBmuf0pUOZRzzlpU8kWw_Md1Y5FuE';
 const slug='casa-carregador-kapbom-ka-5005';
-function fixture(t,price=100){
+function fixture(t,price=100.01){
  const env={...process.env},oldFetch=globalThis.fetch,calls={quotes:[],signed:[]};
  Object.assign(process.env,{FRENET_TOKEN:'fixture',FRENET_SELLER_CEP:'21210250',CPAD_CHECKOUT_SIGNING_SECRET:'fixture-secret',MERCADO_PAGO_ACCESS_TOKEN:'fixture',MERCADO_PAGO_PUBLIC_KEY:'fixture',MERCADO_PAGO_TEST_MODE:'true',VERCEL_ENV:'preview'});
  globalThis.fetch=async(url,opts={})=>{
@@ -40,20 +40,20 @@ const orderBody=(items,shippingPrice=0)=>({clientRequestId:'11111111-1111-4111-8
 const order=body=>orderEndpoint.fetch(new Request(origin+'/api/create-cpad-order',{method:'POST',headers:{origin,apikey:key,'Content-Type':'application/json'},body:JSON.stringify(body)}));
 
 test('limite usa centavos após descontos e somente uma entrega econômica é grátis',()=>{
- assert.equal(qualifiesForFreeShipping(99.99),false);assert.equal(qualifiesForFreeShipping(100),true);assert.equal(qualifiesForFreeShipping(NaN),false);
- const services=applyShippingOffer([{carrierCode:'A',price:30,description:'Expresso'},{carrierCode:'B',price:10,description:'Normal'}],100);
+ assert.equal(qualifiesForFreeShipping(99.99),false);assert.equal(qualifiesForFreeShipping(100),false);assert.equal(qualifiesForFreeShipping(100.01),true);assert.equal(qualifiesForFreeShipping(NaN),false);
+ const services=applyShippingOffer([{carrierCode:'A',price:30,description:'Expresso'},{carrierCode:'B',price:10,description:'Normal'}],100.01);
  assert.equal(services[0].price,0);assert.equal(services[0].originalPrice,10);assert.equal(services[1].price,30);
- assert.equal(shippingWithOffer(services[0],99.99).price,10);assert.equal(shippingWithOffer(services[0],100).price,0);
+ assert.equal(shippingWithOffer(services[0],99.99).price,10);assert.equal(shippingWithOffer(services[0],100).price,10);assert.equal(shippingWithOffer(services[0],100.01).price,0);
  assert.equal(merchantPaysShipping({subtotal:100,discount:0,shipping_price:0,shipping_service:'Frete grátis • Normal',shipping_carrier_code:'B'}),true);
  assert.equal(merchantPaysShipping({subtotal:100,discount:0.01,shipping_price:0,shipping_service:'Frete grátis • Normal',shipping_carrier_code:'B'}),false);
 });
-test('cotação em CEPs de diferentes regiões concede frete a R$100 sem confiar em preço do cliente',async t=>{
- const calls=fixture(t,100);
+test('cotação em diferentes regiões concede frete acima de R$100 sem confiar no cliente',async t=>{
+ const calls=fixture(t,100.01);
  for(const cep of ['20040002','01001000','69005010','69900058','90010001']){
   const r=await quote([{slug,quantity:1,price:0.01}],cep);assert.equal(r.status,200);const d=await r.json();
   assert.equal(d.services.length,2);assert.equal(d.services[0].price,0);assert.match(d.services[0].description,/^Frete grátis/);assert.equal(d.services[1].price,30);
  }
- assert.ok(calls.quotes.every(q=>q.ShipmentInvoiceValue===100));
+ assert.ok(calls.quotes.every(q=>q.ShipmentInvoiceValue===100.01));
 });
 test('R$99,99 e carrinho com descontos de kits inferior a R$100 mantêm frete pago',async t=>{
  const calls=fixture(t,99.99);
@@ -65,11 +65,38 @@ test('R$99,99 e carrinho com descontos de kits inferior a R$100 mantêm frete pa
  const r=await quote(mixed);const body=await r.json();assert.equal(body.productsTotal,97.95);assert.equal(body.services[0].price,19.9);assert.equal(calls.quotes.at(-1).ShipmentInvoiceValue,97.95);
 });
 test('pedido recalcula a cotação assinada e grava frete zero para um produto avulso',async t=>{
- const calls=fixture(t,100);const r=await order(orderBody([{slug,quantity:1,price:0.01}]));
- assert.equal(r.status,201);assert.equal((await r.json()).order.total,100);
- const p=calls.signed.find(p=>p.action==='order');assert.equal(p.shipping.price,0);assert.equal(p.shipping.service,'Frete grátis • Econômico');assert.equal(p.subtotal,100);
+ const calls=fixture(t,100.01);const r=await order(orderBody([{slug,quantity:1,price:0.01}]));
+ assert.equal(r.status,201);assert.equal((await r.json()).order.total,100.01);
+ const p=calls.signed.find(p=>p.action==='order');assert.equal(p.shipping.price,0);assert.equal(p.shipping.service,'Frete grátis • Econômico');assert.equal(p.subtotal,100.01);
 });
 test('frete zero forjado abaixo do limite é rejeitado antes da reserva',async t=>{
  const calls=fixture(t,99.99);const r=await order(orderBody([{slug,quantity:1,price:99999}]));
  assert.equal(r.status,503);assert.equal(calls.signed.length,0);assert.match((await r.json()).error,/frete mudou/);
+});
+
+
+test('R$100 exatos mantêm frete pago e não aceitam frete zero forjado',async t=>{
+ const calls=fixture(t,100);
+ const d=await (await quote([{slug,quantity:1}])).json();
+ assert.equal(d.productsTotal,100);assert.equal(d.services[0].price,19.9);
+ assert.equal(remainingForFreeShipping(100),0.01);
+ assert.equal(remainingForFreeShipping(100.01),0);
+ assert.equal(remainingForFreeShipping(99.99),0.02);
+ const r=await order(orderBody([{slug,quantity:1}]));
+ assert.equal(r.status,503);assert.equal(calls.signed.length,0);
+});
+
+test('pedido a R$100 aceita o frete pago recalculado e mantém a conciliação',async t=>{
+ const calls=fixture(t,100);
+ const r=await order(orderBody([{slug,quantity:1}],19.9));
+ assert.equal(r.status,201);assert.equal((await r.json()).order.total,119.9);
+ const p=calls.signed.find(p=>p.action==='order');
+ assert.equal(p.shipping.price,19.9);assert.equal(p.subtotal,100);
+});
+
+test('retirada é grátis abaixo do limite e pedido antigo de R$100 preserva o benefício confirmado',()=>{
+ assert.equal(shippingWithOffer({carrierCode:'PICKUP_VENDOR',price:0},50).price,0);
+ assert.equal(merchantPaysShipping({subtotal:100,discount:0,shipping_price:0,shipping_service:'Frete grátis • Normal',shipping_carrier_code:'B'}),true);
+ assert.equal(qualifiesForFreeShipping(101-1),false);
+ assert.equal(qualifiesForFreeShipping(101-0.99),true);
 });
