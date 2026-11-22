@@ -435,6 +435,9 @@ document.querySelector("#checkout-form")?.addEventListener("submit", async (even
           })),
           subtotal: cartPricing.referenceSubtotal,
           discount: cartPricing.referenceDiscount,
+          // The checkout's final price includes a payment-specific Pix discount.
+          // The Analytics tracker uses this amount only after server-confirmed payment.
+          paymentDiscount: Number(cartPricing.pixDiscount || 0),
           kits: cartPricing.kits,
           shippingPrice: Number(shipping.service.price),
           total: Number(result.order.total),
