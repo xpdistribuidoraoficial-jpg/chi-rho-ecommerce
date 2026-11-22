@@ -15,7 +15,15 @@ export default {
     if (!Object.hasOwn(templates, file)) return new Response('Página não encontrada', { status: 404, headers: { 'X-Robots-Tag': 'noindex' } });
     let products = activeProducts;
     if (url.searchParams.has('produto')) {
-      const { products: live } = await loadShippingCatalog();
+      const { products: live, inventoryAvailable } = await loadShippingCatalog();
+      if (!inventoryAvailable) {
+        // A transient inventory outage must never turn indexed product URLs into
+        // false 404s or publish unverified prices/availability to Google.
+        return new Response(request.method === 'HEAD' ? null : 'Catálogo temporariamente indisponível.', {
+          status: 503,
+          headers: { 'Cache-Control': 'no-store', 'Retry-After': '120' }
+        });
+      }
       products = activeProducts.map(product => ({ ...product, preco: live[product.slug]?.price ?? null,
         estoque: live[product.slug]?.stock ?? null,
         estoqueConfirmado: Number.isInteger(live[product.slug]?.stock) && live[product.slug].stock > 0 })).filter(product => product.estoque !== 0);
