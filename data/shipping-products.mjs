@@ -11,6 +11,9 @@ export async function loadShippingCatalog() {
     fetch(KITS_ENDPOINT, { headers, signal: AbortSignal.timeout(8000) }).then(async response => response.ok ? await response.json() : [])
   ]);
   const inventory = inventoryResult.status === 'fulfilled' && Array.isArray(inventoryResult.value) ? inventoryResult.value : [];
+  // Distinguish a temporary backend outage from an actual out-of-stock item.
+  // On an outage, the product-page SSR layer must not publish misleading HTML.
+  const inventoryAvailable = inventory.length > 0;
   const cpadKits = kitResult.status === 'fulfilled' && Array.isArray(kitResult.value) ? kitResult.value : [];
   const kits = [...cpadKits.map(kit=>({...kit,...(kit.discount_percent===0?{pricing_mode:'sum_current_prices'}:{})})), ...casaKits];
   const products = Object.fromEntries(inventory.filter(item => typeof item.slug === 'string' && typeof item.name === 'string'
@@ -27,7 +30,7 @@ export async function loadShippingCatalog() {
         description:kit.description };
     } catch { /* Incomplete drafts remain unavailable for checkout. */ }
   }
-  return { products, baseProducts, kits };
+  return { products, baseProducts, kits, inventoryAvailable };
 }
 const catalog = await loadShippingCatalog();
 export const shippingProducts = Object.freeze(catalog.products);
