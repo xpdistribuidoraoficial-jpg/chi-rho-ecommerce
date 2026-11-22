@@ -31,6 +31,21 @@ test('produto zerado deixa de ser anunciado no HTML e volta após reposição', 
   assert.match(restockedHtml, /https:\/\/schema.org\/InStock/);
 });
 
+test('indisponibilidade do inventário retorna 503 sem desindexar páginas de produtos', async t => {
+  const originalFetch = globalThis.fetch;
+  t.after(() => { globalThis.fetch = originalFetch; });
+  globalThis.fetch = (url, options) => String(url).includes('/functions/v1/inventory-status')
+    ? Promise.resolve(new Response('Falha temporária', { status: 503 }))
+    : originalFetch(url, options);
+  const request = new Request('https://www.chirho.com.br/api/seo-page?__seo_page=catalogo-biblias.html&produto=biblia-estudo-cronologica');
+  const response = await endpoint.fetch(request);
+  assert.equal(response.status, 503);
+  assert.equal(response.headers.get('Cache-Control'), 'no-store');
+  assert.equal(response.headers.get('Retry-After'), '120');
+  assert.equal(response.headers.get('X-Robots-Tag'), null);
+  assert.doesNotMatch(await response.text(), /<title>|<meta name="robots"/);
+});
+
 const read = (file) => fs.readFileSync(new URL(`../${file}`, import.meta.url), 'utf8');
 const paths = sitemapUrls(activeProducts, categories);
 
