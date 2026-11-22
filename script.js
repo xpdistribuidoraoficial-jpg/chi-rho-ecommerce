@@ -2752,6 +2752,17 @@ const getProductCardCartMarkup = (product) => {
   `;
 };
 
+// Product-card links expose the same canonical destinations used by the sitemap.
+// Keep existing "Ver produto" dialogs for browsing, while allowing organic
+// crawlers and visitors to reach a dedicated product URL from its title.
+const productCardUrl = (product) => {
+  const page = product.casa ? 'catalogo-casa.html'
+    : product.kitComponents ? 'catalogo-cpad.html'
+    : (product.infantil || product.brinquedo) ? 'catalogo-infantil.html'
+    : 'catalogo-biblias.html';
+  return `/${page}?produto=${encodeURIComponent(product.slug)}`;
+};
+
 const createProductCard = (product) => `
   <article class="catalog-product-card" id="${product.slug}" data-category="${product.categoriaSlug}">
     <div class="catalog-product-image">
@@ -2763,7 +2774,7 @@ const createProductCard = (product) => `
     </div>
     <div class="catalog-product-content">
       <small>${product.categoria}</small>
-      <h3>${product.nome}</h3>
+      <h3><a class="seo-product-link" href="${productCardUrl(product)}">${product.nome}</a></h3>
       ${getProductMeta(product) ? `<span class="catalog-product-meta">${getProductMeta(product)}</span>` : ""}
       <p>${product.descricao}</p>
       <div class="catalog-product-price" aria-label="Preço">${getProductPriceMarkup(product)}${product.kitComponents && typeof product.preco === "number" && product.precoOriginal > product.preco ? `<small class="cpad-kit-saving">${product.kitPricingMode === 'sum_current_prices' ? 'Economia adicional no kit' : 'Economia sobre o preço cheio'}: ${formatProductPrice(product.precoOriginal-product.preco)}</small>` : ""}</div>

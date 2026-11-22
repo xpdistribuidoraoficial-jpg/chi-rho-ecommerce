@@ -2,6 +2,7 @@ import './inventory-fixture.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import vm from 'node:vm';
 import { activeProducts } from '../seo/catalog.mjs';
 import { SITE, pages, categories, getMetadata, productSchema, productPath, validGtin } from '../seo/metadata.mjs';
 import { renderPage, sitemapUrls } from '../seo/render.mjs';
@@ -48,6 +49,30 @@ test('indisponibilidade do inventário retorna 503 sem desindexar páginas de pr
 
 const read = (file) => fs.readFileSync(new URL(`../${file}`, import.meta.url), 'utf8');
 const paths = sitemapUrls(activeProducts, categories);
+
+test('cards apresentam links reais para as URLs canonicas dos produtos', () => {
+  const source = read('script.js');
+  const start = source.indexOf('const productCardUrl =');
+  const end = source.indexOf('const renderProducts =', start);
+  assert.ok(start >= 0 && end > start, 'renderer e helper devem existir');
+  const makeCard = vm.runInNewContext(`${source.slice(start, end)}; createProductCard`, {
+    catalogProducts: [], getProductMeta: () => '', getProductPriceMarkup: () => '',
+    getProductCardCartMarkup: () => '', formatProductPrice: () => ''
+  }, { timeout: 1000 });
+  const examples = [
+    { slug: 'biblia-exemplo', nome: 'Bíblia Exemplo', categoriaSlug: 'biblias-de-estudo' },
+    { slug: 'casa-exemplo', nome: 'Casa Exemplo', casa: true, categoriaSlug: 'utilidades-domesticas' },
+    { slug: 'brinquedo-exemplo', nome: 'Brinquedo Exemplo', brinquedo: true, categoriaSlug: 'brinquedos-infantis' },
+    { slug: 'kit-exemplo', nome: 'Kit Exemplo', kitComponents: [{ slug: 'biblia-exemplo', quantity: 1 }], categoriaSlug: 'cpad-kits' }
+  ];
+  examples.forEach(product => {
+    const html = makeCard({ imagem: 'assets/products/exemplo.webp', descricao: 'Descrição', perfil: 'Geral', categoria: 'Produtos', ...product });
+    assert.ok(html.includes(`href="${productPath(product)}"`), `link canonical ausente em ${product.slug}`);
+    assert.ok(html.includes(`class="seo-product-link"`), product.slug);
+    assert.ok(html.includes(`data-product-slug="${product.slug}"`), "modal de compra deve permanecer disponível");
+  });
+});
+
 
 test('sitemap cobre exatamente as páginas públicas, categorias e 57 produtos publicados', () => {
   const xml = read('sitemap.xml');
