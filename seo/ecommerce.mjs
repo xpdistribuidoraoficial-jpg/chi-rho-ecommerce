@@ -28,6 +28,44 @@ export function trackCommerce(name, rows, extra) {
   return payload.items.length > 0 && trackAnalyticsEvent(name, payload);
 }
 
+// The checkout snapshot may contain an order-level Pix discount. GA4 requires
+// discounted item prices (discount is informational, not subtracted by GA4).
+// Distribute cent-exact discounts across lines and split at most twice per SKU
+// if quantities would otherwise cause a rounding discrepancy.
+export function discountPurchaseItems(items, paymentDiscount = 0) {
+  if (!Number.isFinite(paymentDiscount) || paymentDiscount < 0) return null;
+  const discountCents = cents(paymentDiscount);
+  if (discountCents === 0) return items;
+  const originalCents = items.map(item => cents(item.price) * item.quantity);
+  const totalCents = originalCents.reduce((sum, amount) => sum + amount, 0);
+  if (!totalCents || discountCents >= totalCents) return null;
+  const allocated = originalCents.map((amount, index) => ({
+    index,
+    discount: Math.floor(amount * discountCents / totalCents),
+    remainder: (amount * discountCents) % totalCents
+  }));
+  const leftover = discountCents - allocated.reduce((sum, item) => sum + item.discount, 0);
+  [...allocated].sort((a, b) => b.remainder - a.remainder || a.index - b.index)
+    .slice(0, leftover).forEach(item => item.discount++);
+  const result = [];
+  for (const { index, discount } of allocated) {
+    const item = items[index];
+    const unitOriginal = cents(item.price);
+    const perUnitDiscount = Math.floor(discount / item.quantity);
+    const remainderUnits = discount % item.quantity;
+    for (const [quantity, unitDiscount] of [
+      [item.quantity - remainderUnits, perUnitDiscount],
+      [remainderUnits, perUnitDiscount + 1]
+    ]) {
+      if (!quantity) continue;
+      if (unitOriginal <= unitDiscount) return null;
+      result.push({ ...item, quantity, price: (unitOriginal - unitDiscount) / 100,
+        discount: unitDiscount / 100 });
+    }
+  }
+  return result;
+}
+
 export function createPurchaseTracker({ emit, storage }) {
   const sent = new Set();
   return (order, snapshot) => {
@@ -36,11 +74,13 @@ export function createPurchaseTracker({ emit, storage }) {
     const items = commerceItems(snapshot?.items);
     const total = Number(snapshot?.total), shipping = Number(snapshot?.shippingPrice || 0);
     if (!items.length || !Number.isFinite(total) || total <= 0 || !Number.isFinite(shipping) || shipping < 0) return false;
-    const value = items.reduce((sum, item) => sum + cents(item.price) * item.quantity, 0) / 100;
+    const discountedItems = discountPurchaseItems(items, Number(snapshot?.paymentDiscount ?? 0));
+    if (!discountedItems) return false;
+    const value = discountedItems.reduce((sum, item) => sum + cents(item.price) * item.quantity, 0) / 100;
     if (Math.abs(cents(total - shipping) - cents(value)) > 1) return false;
     const key = `chi-rho-analytics-purchase:${order.code}`;
     try { if (sent.has(key) || storage?.getItem(key)) return false; } catch {}
-    if (!emit('purchase', { transaction_id: order.code, currency: 'BRL', value, shipping, items })) return false;
+    if (!emit('purchase', { transaction_id: order.code, currency: 'BRL', value, shipping, items: discountedItems })) return false;
     sent.add(key);
     try { storage?.setItem(key, '1'); } catch {}
     return true;
