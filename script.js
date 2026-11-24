@@ -3551,7 +3551,7 @@ const openProductDialog = (slug, { syncUrl = true } = {}) => {
   const image = productDialogElement.querySelector("#product-dialog-image");
   const isChristianBook = product.categoriaSlug === "livros-cristaos";
   const isBible = product.categoriaSlug.startsWith("biblias");
-  const usesFullDialog = isChristianBook || isBible || product.brinquedo || product.casa || Boolean(product.kitComponents);
+  const usesFullDialog = isChristianBook || isBible || product.categoriaSlug === "acessorios-ministeriais" || product.brinquedo || product.casa || Boolean(product.kitComponents);
   productDialogElement.dataset.category = product.categoriaSlug;
   productDialogElement.dataset.productSlug = product.slug;
   setProductDialogGallery(product);
